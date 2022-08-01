@@ -1,4 +1,34 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<p align="center">
+  <img src="https://avatars.githubusercontent.com/u/106340941">
+</p>
+
+<h1 align="center">Frontend Website Himti</h1>
+<p align="center">
+  <a href="https://github.com/Litbang-HIMTI/Frontend-Website-Himti/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/Litbang-HIMTI/Frontend-Website-Himti"></a>
+  <a href="https://github.com/Litbang-HIMTI/Frontend-Website-Himti/pulls"><img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/Litbang-HIMTI/Frontend-Website-Himti"></a>
+  <br />
+  <a href="https://github.com/Litbang-HIMTI/Frontend-Website-Himti/stargazers"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/Litbang-HIMTI/Frontend-Website-Himti?style=social"></a>
+  <a href="https://github.com/Litbang-HIMTI/Frontend-Website-Himti/network/members"><img alt="GitHub forks" src="https://img.shields.io/github/forks/Litbang-HIMTI/Frontend-Website-Himti?style=social"></a>
+</p>
+
+Frontend tech stack:
+Next.js + Mantine.ui
+
+# Table of Contents
+
+- [Table of Contents](#table-of-contents)
+- [Getting started](#getting-started)
+  - [Getting Started](#getting-started-1)
+  - [Learn More](#learn-more)
+  - [Deploy on Vercel](#deploy-on-vercel)
+
+# Getting started
+
+Before contributing please consider reading some of the [docs](docs):
+
+- [CONTRIBUTING.md](docs/CONTRIBUTING.md)
+
+This project is bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app). To start developing, first make sure that you have node installed. After that do `npm install` or `npm ci` to install all the dependencies.
 
 ## Getting Started
 
