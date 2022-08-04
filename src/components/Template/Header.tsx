@@ -2,14 +2,13 @@ import type { NextPage } from "next";
 import Link from "next/link";
 
 export const Header: NextPage = (props) => {
-	console.log(props);
 	return (
 		<header>
 			<hr className="top-hr" />
 			<div className="top-header">
 				<h1>HIMTI UIN Jakarta</h1>
 				<div className="header-icon">
-					<Link href="#">
+					<Link href="/auth/login">
 						<a>
 							<picture>
 								<img className="logo" src="/assets/img/logo-himti.png" alt="logo-himti" />

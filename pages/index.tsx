@@ -1,6 +1,5 @@
 import type { GetServerSideProps, NextPage } from "next";
 import { Home } from "../src/components/Home/Home";
-import { server } from "../src/utils/constants";
 
 const index: NextPage = (props) => {
 	return <Home {...props} />;
