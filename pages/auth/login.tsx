@@ -1,21 +1,27 @@
 import { GetServerSideProps, NextPage } from "next";
-import { server } from "../../src/utils/constants";
+import { ___serverV1___ } from "../../src/utils/constants";
 
 const indexLogin: NextPage = (props) => {
 	return <h1>Test</h1>;
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-	const checkLoggedIn = await fetch(`${server}/v1/auth`, {
+	const checkLoggedIn = await fetch(`${___serverV1___}/auth`, {
 		method: "GET",
 		headers: {
 			"Content-Type": "application/json",
-			// "x-auth-token": context.req.headers.cookie.split("=")[1],
 		},
 	});
 
 	// redirect to dashboard if logged in
-	if (checkLoggedIn.status === 200) context.res.writeHead(302, { Location: "/admin" });
+	if (checkLoggedIn.status === 200)
+		return {
+			redirect: {
+				permanent: false,
+				destination: "/admin",
+			},
+			props: {},
+		};
 
 	return {
 		props: {},

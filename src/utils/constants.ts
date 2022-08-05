@@ -5,4 +5,5 @@
 /**
  * server
  */
-export const server = ___prod___ ? "https://api.himtiuinjkt.or.id/" : "http://localhost:42069";
+export const ___server___ = ___prod___ ? "https://api.himtiuinjkt.or.id" : "http://localhost:42069";
+export const ___serverV1___ = ___server___ + "/v1";

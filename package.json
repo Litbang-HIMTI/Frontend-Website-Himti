@@ -22,8 +22,10 @@
 		"@mantine/prism": "^5.0.2",
 		"@mantine/rte": "^5.0.2",
 		"@radix-ui/react-icons": "^1.1.1",
+		"axios": "^0.27.2",
 		"cookies-next": "^2.1.1",
 		"dayjs": "^1.11.4",
+		"extract-site-metadata": "^1.3.1",
 		"next": "12.2.3",
 		"react": "18.2.0",
 		"react-dom": "18.2.0"
