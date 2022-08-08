@@ -1,5 +1,7 @@
 .dashboard.login-logo {
 	width: 100px;
 	pointer-events: none;
+	-moz-user-select: none;
+	-webkit-user-select: none;
 	user-select: none;
 }
