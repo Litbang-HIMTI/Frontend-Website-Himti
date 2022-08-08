@@ -59,9 +59,7 @@ const PageNotFound: NextPage = (props) => {
 				</Text>
 				<Group position="center">
 					<Link href="/">
-						<Button variant="subtle" size="md">
-							Take me back to home page
-						</Button>
+						<Button size="md">Take me back to home page</Button>
 					</Link>
 				</Group>
 			</Container>
