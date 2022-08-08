@@ -1,16 +1,17 @@
 import { GetServerSideProps, NextPage } from "next";
 import { Login } from "../../src/components/admin/Login";
-import { ___serverV1___ } from "../../src/utils/constants";
+import { SERVER_V1 } from "../../src/utils/constants";
 
 const indexLogin: NextPage = (props) => {
 	return <Login {...props} />;
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-	const checkLoggedIn = await fetch(`${___serverV1___}/auth`, {
+	const checkLoggedIn = await fetch(`${SERVER_V1}/auth`, {
 		method: "GET",
 		headers: {
 			"Content-Type": "application/json",
+			Cookie: "connect.sid=" + context.req.cookies["connect.sid"],
 		},
 	});
 

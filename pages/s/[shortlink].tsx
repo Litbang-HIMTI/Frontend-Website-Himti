@@ -2,7 +2,7 @@ import { GetServerSideProps, NextPage } from "next";
 import axios from "axios";
 import Head from "next/head";
 import { I_Shortlink } from "../../src/interfaces/Shortlink";
-import { ___serverV1___ } from "../../src/utils/constants";
+import { SERVER_V1 } from "../../src/utils/constants";
 import extractSiteMetadata, { PageData } from "extract-site-metadata";
 
 const indexShortlink: NextPage<PageData> = (props) => {
@@ -58,7 +58,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 	const { shortlink } = context.params!;
 	if (!shortlink || shortlink === "") return { notFound: true };
 
-	const checkShortLink = await fetch(`${___serverV1___}/shortlink/${shortlink}?updateClick=1`, {
+	const checkShortLink = await fetch(`${SERVER_V1}/shortlink/${shortlink}?updateClick=1`, {
 		method: "GET",
 		headers: {
 			"Content-Type": "application/json",
