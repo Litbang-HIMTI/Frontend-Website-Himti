@@ -1,14 +1,16 @@
+import { useState, useEffect } from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { IconArrowLeft } from "@tabler/icons";
-import { TextInput, PasswordInput, Center, Anchor, Paper, Container, Group, Button } from "@mantine/core";
+import { useRouter } from "next/router";
+import { IconArrowLeft, IconAlertCircle } from "@tabler/icons";
+import { TextInput, PasswordInput, Center, Anchor, Paper, Container, Group, Button, Alert } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
-import { useRouter } from "next/router";
 import { SERVER_LOCAL_V1 } from "../../utils/constants";
 
 export const Login: NextPage = (props) => {
+	const [alertShown, setAlertShown] = useState<Boolean>(false);
 	const router = useRouter();
 	const form = useForm({
 		initialValues: {
@@ -50,9 +52,9 @@ export const Login: NextPage = (props) => {
 					autoClose: 3000,
 				});
 
-				// setTimeout(() => {
-				// 	router.push("/admin");
-				// }, 2000);
+				setTimeout(() => {
+					router.push("/admin");
+				}, 3000);
 			} else {
 				const { message } = await loginFetch.json();
 
@@ -74,6 +76,11 @@ export const Login: NextPage = (props) => {
 		}
 	};
 
+	useEffect(() => {
+		// check query params
+		if (router.query.loggedout === "true") setAlertShown(true);
+	}, []);
+
 	return (
 		<>
 			<Head>
@@ -84,13 +91,30 @@ export const Login: NextPage = (props) => {
 			</Head>
 
 			<Container size={420} my={40}>
-				<Center>
+				<Center sx={{ display: "flex", flexDirection: "column" }}>
 					<picture>
 						<img className="dashboard login-logo" src="/assets/img/logo-himti.png" alt="logo-himti" />
 					</picture>
+
+					{alertShown && (
+						<Alert
+							mt="1rem"
+							icon={<IconAlertCircle size={16} />}
+							title="Logged out!"
+							withCloseButton
+							closeButtonLabel="Close alert"
+							variant="outline"
+							onClose={() => {
+								setAlertShown((prev) => !prev);
+								router.replace("/auth/login");
+							}}
+						>
+							You have been logged out successfully
+						</Alert>
+					)}
 				</Center>
 
-				<Paper withBorder shadow="md" p={30} mt={30} radius="md">
+				<Paper withBorder shadow="md" p={30} mt={20} radius="md">
 					<form onSubmit={form.onSubmit(submitForm)}>
 						<TextInput label="Username or Email address" placeholder="Johnsmith2000" required {...form.getInputProps("username")} />
 						<PasswordInput label="Password" placeholder="Your password" required mt="md" {...form.getInputProps("password")} />

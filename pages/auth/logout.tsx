@@ -1,0 +1,32 @@
+import { GetServerSideProps, NextPage } from "next";
+import { SERVER_V1 } from "../../src/utils/constants";
+
+const indexShortlink: NextPage = (props) => {
+	return <p>Logging out...</p>;
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+	const checkLogOut = await fetch(`${SERVER_V1}/auth`, {
+		method: "DELETE",
+		credentials: "include",
+		headers: {
+			"Content-Type": "application/json",
+		},
+	});
+
+	if (checkLogOut.status !== 200) return { notFound: true };
+	else {
+		// remove cookie
+		context.res.setHeader("Set-Cookie", "connect.sid=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT;");
+
+		return {
+			redirect: {
+				permanent: false,
+				destination: "/auth/login?loggedout=true",
+			},
+			props: {},
+		};
+	}
+};
+
+export default indexShortlink;
