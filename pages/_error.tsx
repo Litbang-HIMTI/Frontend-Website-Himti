@@ -60,6 +60,9 @@ const Error: NextPage<Props> = ({ statusCode }) => {
 				<Title className={classes.title}>Something bad just happened...</Title>
 				<Text size="lg" align="center" className={classes.description}>
 					Our servers could not handle your request. It might be down for a moment. Try refreshing the page.
+					<Text size="xs" align="center" mt="1rem">
+						(Check browser console for more details)
+					</Text>
 				</Text>
 				<Group position="center">
 					<Button size="md" onClick={btnClick}>
