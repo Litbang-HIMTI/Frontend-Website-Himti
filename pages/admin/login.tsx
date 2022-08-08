@@ -1,7 +1,8 @@
 import { GetServerSideProps, NextPage } from "next";
+import { Login } from "../../src/components/admin/Login";
 
 const dashboardHome: NextPage = (props) => {
-	return <h1 {...props}>Test</h1>;
+	return <Login {...props} />;
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

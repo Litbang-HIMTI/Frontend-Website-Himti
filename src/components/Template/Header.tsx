@@ -8,7 +8,7 @@ export const Header: NextPage = (props) => {
 			<div className="top-header">
 				<h1>HIMTI UIN Jakarta</h1>
 				<div className="header-icon">
-					<Link href="/auth/login">
+					<Link href="/">
 						<a>
 							<picture>
 								<img className="logo" src="/assets/img/logo-himti.png" alt="logo-himti" />

@@ -1,4 +1,5 @@
 import "../styles/globals.css";
+import "../styles/dashboard.css";
 import { GetServerSidePropsContext } from "next";
 import { useState } from "react";
 import { AppProps } from "next/app";
