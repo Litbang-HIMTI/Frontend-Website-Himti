@@ -14,7 +14,7 @@ export const Home: NextPage = (props) => {
 				<title>Himti UIN Jakarta</title>
 			</Head>
 
-			<Link href="/admin/login">
+			<Link href="/auth/login">
 				<a>test </a>
 			</Link>
 
