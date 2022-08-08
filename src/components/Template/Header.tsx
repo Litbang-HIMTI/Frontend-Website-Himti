@@ -1,7 +1,10 @@
+import { useMantineColorScheme } from "@mantine/core";
 import type { NextPage } from "next";
 import Link from "next/link";
 
 export const Header: NextPage = (props) => {
+	const { colorScheme } = useMantineColorScheme();
+
 	return (
 		<header>
 			<hr className="top-hr" />
@@ -18,7 +21,7 @@ export const Header: NextPage = (props) => {
 					<Link href="#">
 						<a>
 							<picture>
-								<img className="menu" src="/assets/icons/menu.svg" alt="menu" />
+								<img className="menu" src={`/assets/icons/menu_${colorScheme}.svg`} alt="menu" />
 							</picture>
 						</a>
 					</Link>
