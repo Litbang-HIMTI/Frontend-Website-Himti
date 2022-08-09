@@ -79,7 +79,7 @@ export const Login: NextPage = (props) => {
 	useEffect(() => {
 		// check query params
 		if (router.query.loggedout === "true") setAlertShown(true);
-	}, []);
+	}, [router.query.loggedout]);
 
 	return (
 		<>
