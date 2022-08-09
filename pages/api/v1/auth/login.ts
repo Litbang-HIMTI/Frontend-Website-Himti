@@ -35,6 +35,4 @@ export default async function handler(req: ExtendedNextApiRequest, res: NextApiR
 
 	const loginData = await loginFetch.json();
 	return res.status(loginFetch.status).json(loginData);
-
-	// res.status(200).json(await loginFetch.json());
 }
