@@ -1,22 +1,23 @@
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
-import { Event } from "../../src/components/Admin/Event";
-import { DashboardNav } from "../../src/components/Admin/Nav/DashboardNav";
-import { SERVER_V1 } from "../../src/utils/constants";
+import { Note } from "../../../src/components/Admin/Note";
+import { DashboardNav } from "../../../src/components/Admin/Nav/DashboardNav";
+import { SERVER_V1 } from "../../../src/utils/constants";
+import { validateStaff } from "../../../src/utils/helper";
 
-const event: NextPage = (props) => {
+const note: NextPage = (props) => {
 	return (
 		<>
 			<Head>
 				<meta charSet="UTF-8" />
 				<meta httpEquiv="X-UA-Compatible" content="IE=edge" />
 				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-				<title>Event Dashboard | Himti UIN Jakarta</title>
+				<title>Note Dashboard | Himti UIN Jakarta</title>
 			</Head>
 			<main className="dashboard nav-wrap">
 				<DashboardNav {...props} />
 				<div className="dashboard content-wrap">
-					<Event {...props} />
+					<Note {...props} />
 				</div>
 			</main>
 		</>
@@ -35,12 +36,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 	// 404 if not logged in
 	if (checkLoggedIn.status !== 200) return { notFound: true };
 
+	// validate role
+	const parsed = await checkLoggedIn.json();
+	if (!validateStaff(parsed.data)) return { notFound: true };
+
 	return {
 		props: {
 			pathname: context.resolvedUrl,
-			user: (await checkLoggedIn.json()).data,
+			user: parsed.data,
 		},
 	};
 };
 
-export default event;
+export default note;

@@ -1,9 +1,9 @@
 import { NextPage } from "next";
 import Link from "next/link";
-import { Menu, Group, Text, useMantineTheme, ActionIcon } from "@mantine/core";
-import { IconLogout, IconNotebook, IconCalendarEvent, IconMessage, IconSettings, IconMessages, IconChevronRight, IconDots, IconUser } from "@tabler/icons";
+import { Menu, Group, Text, ActionIcon, useMantineTheme } from "@mantine/core";
+import { IconLogout, IconSettings, IconChevronRight, IconDots, IconUser, IconNotebook, IconCalendarEvent, IconMessage, IconMessages } from "@tabler/icons";
 import { IUser } from "../../../interfaces/User";
-import { validateEditor, validateForumMod } from "../../../utils/helper";
+import { validateEditor, validateForumMod, validateAdmin } from "../../../utils/helper";
 
 interface navProps {
 	pathname?: string;
@@ -22,24 +22,44 @@ export const UserPopout: NextPage<navProps> = (props) => {
 					</ActionIcon>
 				</Menu.Target>
 				<Menu.Dropdown>
-					<Menu.Item rightSection={<IconChevronRight size={14} stroke={1.5} />}>
-						<Group>
-							<div>
-								<Text weight={500}>{props.user?.username!}</Text>
-								<Text size="xs" component="span">
-									({props.user?.first_name!} {props.user?.last_name!})
-								</Text>
-								<Text mt="xs" size="xs" color="dimmed">
-									{props.user?.role!.join(", ")} ‒ {props.user?.email!}
-								</Text>
-							</div>
-						</Group>
-					</Menu.Item>
+					{validateAdmin(props.user!) ? (
+						<Link href={`/admin/user/${props.user?.username}`}>
+							<a>
+								<Menu.Item rightSection={<IconChevronRight size={14} stroke={1.5} />}>
+									<Group>
+										<div>
+											<Text weight={500}>{props.user?.username!}</Text>
+											<Text size="xs" component="span">
+												({props.user?.first_name!} {props.user?.last_name!})
+											</Text>
+											<Text mt="xs" size="xs" color="dimmed">
+												{props.user?.role!.join(", ")} ‒ {props.user?.email!}
+											</Text>
+										</div>
+									</Group>
+								</Menu.Item>
+							</a>
+						</Link>
+					) : (
+						<Menu.Item rightSection={<IconChevronRight size={14} stroke={1.5} />}>
+							<Group>
+								<div>
+									<Text weight={500}>{props.user?.username!}</Text>
+									<Text size="xs" component="span">
+										({props.user?.first_name!} {props.user?.last_name!})
+									</Text>
+									<Text mt="xs" size="xs" color="dimmed">
+										{props.user?.role!.join(", ")} ‒ {props.user?.email!}
+									</Text>
+								</div>
+							</Group>
+						</Menu.Item>
+					)}
 
 					<Menu.Divider />
 
-					{/* MIGHT AND COULD BE IMPLEMENTED. NOT A PRIORITY */}
-					{/* {validateEditor(props.user!) && (
+					{/* NOT A PRIORITY */}
+					{validateEditor(props.user!) && (
 						<>
 							<Link href={`/admin/blog?user=${props.user?.username}`}>
 								<a>
@@ -68,7 +88,7 @@ export const UserPopout: NextPage<navProps> = (props) => {
 						<a>
 							<Menu.Item icon={<IconMessages size={14} stroke={1.5} color={theme.colors.blue[6]} />}>Your comments</Menu.Item>
 						</a>
-					</Link> */}
+					</Link>
 
 					<Menu.Label>Settings</Menu.Label>
 					<Link href={`/admin/user/${props.user?.username}`}>

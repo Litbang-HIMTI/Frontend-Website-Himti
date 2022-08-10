@@ -84,17 +84,16 @@ export const DashboardNav: NextPage<navProps> = (props) => {
 	const [active, setActive] = useState(mockdata.findIndex((data) => data.path === props.pathname));
 	const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
-	const links = mockdata.map((link, index) => (
-		<>
-			{link.validate(props.user!) && (
+	const links = mockdata.map((link, index) => {
+		if (link.validate(props.user!))
+			return (
 				<Link href={link.path} key={link.label}>
 					<a>
 						<NavbarLink onClick={() => setActive(index)} {...link} key={link.label} active={index === active} />
 					</a>
 				</Link>
-			)}
-		</>
-	));
+			);
+	});
 
 	return (
 		<Navbar width={{ base: 80 }} p="md">

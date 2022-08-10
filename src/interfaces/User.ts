@@ -1,6 +1,6 @@
 import { IGroup } from "./Group";
 
-type TRoles = "admin" | "editor" | "forum_moderator" | "shortlink_moderator" | "user";
+export type TRoles = "admin" | "editor" | "forum_moderator" | "shortlink_moderator" | "user";
 export interface IUser {
 	_id: number;
 	__v: number;
