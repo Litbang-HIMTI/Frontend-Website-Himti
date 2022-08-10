@@ -1,16 +1,25 @@
 import type { GetServerSideProps, NextPage } from "next";
+import Head from "next/head";
 import { Group } from "../../src/components/Admin/Group";
 import { DashboardNav } from "../../src/components/Admin/Nav/DashboardNav";
 import { SERVER_V1 } from "../../src/utils/constants";
 
 const group: NextPage = (props) => {
 	return (
-		<main className="dashboard nav-wrap">
-			<DashboardNav {...props} />
-			<div className="dashboard content-wrap">
-				<Group {...props} />
-			</div>
-		</main>
+		<>
+			<Head>
+				<meta charSet="UTF-8" />
+				<meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+				<title>Group Dashboard | Himti UIN Jakarta</title>
+			</Head>
+			<main className="dashboard nav-wrap">
+				<DashboardNav {...props} />
+				<div className="dashboard content-wrap">
+					<Group {...props} />
+				</div>
+			</main>
+		</>
 	);
 };
 
@@ -29,6 +38,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 	return {
 		props: {
 			pathname: context.resolvedUrl,
+			user: (await checkLoggedIn.json()).data,
 		},
 	};
 };

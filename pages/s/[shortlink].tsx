@@ -1,7 +1,7 @@
 import { GetServerSideProps, NextPage } from "next";
 import axios from "axios";
 import Head from "next/head";
-import { I_Shortlink } from "../../src/interfaces/Shortlink";
+import { IShortlink } from "../../src/interfaces/Shortlink";
 import { SERVER_V1 } from "../../src/utils/constants";
 import extractSiteMetadata, { PageData } from "extract-site-metadata";
 
@@ -68,7 +68,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 	if (checkShortLink.status !== 200) return { notFound: true };
 
 	const shortlinkData = await checkShortLink.json();
-	const { data }: { data: I_Shortlink } = shortlinkData;
+	const { data }: { data: IShortlink } = shortlinkData;
 
 	const siteData = await processSite(data.url);
 	const siteMetadata = extractSiteMetadata(siteData?.body, data.url);

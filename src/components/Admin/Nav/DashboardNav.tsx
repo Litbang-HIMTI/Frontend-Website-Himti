@@ -14,10 +14,12 @@ import {
 	IconNote,
 	IconLogout,
 	IconMessage,
-	IconMessage2,
+	IconMessages,
 	IconDashboard,
 } from "@tabler/icons";
 import Link from "next/link";
+import { IUser } from "../../../interfaces/User";
+import { UserPopout } from "./Userpopout";
 
 const useStyles = createStyles((theme) => ({
 	link: {
@@ -64,8 +66,8 @@ const mockdata = [
 	{ icon: IconDashboard, label: "Dashboard Home", path: "/admin" },
 	{ icon: IconNotebook, label: "Blog", path: "/admin/blog" },
 	{ icon: IconCalendarEvent, label: "Event", path: "/admin/event" },
-	{ icon: IconMessage2, label: "Forum", path: "/admin/forum" },
-	{ icon: IconMessage, label: "Comment", path: "/admin/comment" },
+	{ icon: IconMessage, label: "Forum", path: "/admin/forum" },
+	{ icon: IconMessages, label: "Comment", path: "/admin/comment" },
 	{ icon: IconLink, label: "Shortlink", path: "/admin/shortlink" },
 	{ icon: IconNote, label: "Note", path: "/admin/note" },
 	{ icon: IconUser, label: "User", path: "/admin/user" },
@@ -74,6 +76,7 @@ const mockdata = [
 
 interface navProps {
 	pathname?: string;
+	user?: IUser;
 }
 
 export const DashboardNav: NextPage<navProps> = (props) => {
@@ -91,7 +94,7 @@ export const DashboardNav: NextPage<navProps> = (props) => {
 	return (
 		<Navbar width={{ base: 80 }} p="md">
 			<Center>
-				<IconUser size={30} type="mark" />
+				<UserPopout {...props} />
 			</Center>
 			<Navbar.Section grow mt={50}>
 				<Stack justify="center" spacing={0}>
@@ -106,7 +109,7 @@ export const DashboardNav: NextPage<navProps> = (props) => {
 						label={`Switch theme to ${colorScheme === "dark" ? "light" : "dark"} mode`}
 					/>
 					<Link href="/auth/logout">
-						<a>
+						<a id="logout-nav">
 							<NavbarLink icon={IconLogout} label="Logout" />
 						</a>
 					</Link>
