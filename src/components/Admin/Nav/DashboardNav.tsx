@@ -100,7 +100,11 @@ export const DashboardNav: NextPage<navProps> = (props) => {
 			</Navbar.Section>
 			<Navbar.Section>
 				<Stack justify="center" spacing={0}>
-					<NavbarLink onClick={() => toggleColorScheme()} icon={colorScheme === "dark" ? IconSun : IconMoonStars} label="Logout" />
+					<NavbarLink
+						onClick={() => toggleColorScheme()}
+						icon={colorScheme === "dark" ? IconSun : IconMoonStars}
+						label={`Switch theme to ${colorScheme === "dark" ? "light" : "dark"} mode`}
+					/>
 					<Link href="/auth/logout">
 						<a>
 							<NavbarLink icon={IconLogout} label="Logout" />
