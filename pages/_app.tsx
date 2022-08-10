@@ -6,7 +6,7 @@ import { AppProps } from "next/app";
 import { getCookie, setCookie } from "cookies-next";
 import { MantineProvider, ColorScheme, ColorSchemeProvider } from "@mantine/core";
 import { NotificationsProvider } from "@mantine/notifications";
-import { RouterTransition } from "../src/components/utils/RouterTransition";
+import { RouterTransition } from "../src/components/Utils/RouterTransition";
 
 export default function App(props: AppProps & { colorScheme: ColorScheme }) {
 	const { Component, pageProps } = props;

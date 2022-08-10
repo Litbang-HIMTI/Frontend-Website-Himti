@@ -1,5 +1,5 @@
 import type { GetServerSideProps, NextPage } from "next";
-import { AdminHome } from "../../src/components/Admin/Home";
+import { User } from "../../src/components/Admin/User";
 import { DashboardNav } from "../../src/components/Admin/Nav/DashboardNav";
 import { SERVER_V1 } from "../../src/utils/constants";
 
@@ -8,7 +8,7 @@ const dashboardHome: NextPage = (props) => {
 		<main className="dashboard nav-wrap">
 			<DashboardNav {...props} />
 			<div className="dashboard content-wrap">
-				<AdminHome {...props} />
+				<User {...props} />
 			</div>
 		</main>
 	);

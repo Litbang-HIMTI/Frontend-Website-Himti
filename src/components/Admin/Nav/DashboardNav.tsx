@@ -1,0 +1,118 @@
+import type { NextPage } from "next";
+import { useState } from "react";
+import { Navbar, Center, Tooltip, UnstyledButton, createStyles, Stack, useMantineColorScheme } from "@mantine/core";
+import {
+	IconSun,
+	IconMoonStars,
+	TablerIcon,
+	IconHome2,
+	IconNotebook,
+	IconLink,
+	IconCalendarEvent,
+	IconUser,
+	IconUsers,
+	IconNote,
+	IconLogout,
+	IconMessage,
+	IconMessage2,
+	IconDashboard,
+} from "@tabler/icons";
+import Link from "next/link";
+
+const useStyles = createStyles((theme) => ({
+	link: {
+		width: 50,
+		height: 50,
+		borderRadius: theme.radius.md,
+		display: "flex",
+		alignItems: "center",
+		justifyContent: "center",
+		color: theme.colorScheme === "dark" ? theme.colors.dark[0] : theme.colors.gray[7],
+
+		"&:hover": {
+			backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[5] : theme.colors.gray[0],
+		},
+	},
+
+	active: {
+		"&, &:hover": {
+			backgroundColor: theme.fn.variant({ variant: "light", color: theme.primaryColor }).background,
+			color: theme.fn.variant({ variant: "light", color: theme.primaryColor }).color,
+		},
+	},
+}));
+
+interface NavbarLinkProps {
+	icon: TablerIcon;
+	label: string;
+	active?: boolean;
+	onClick?(): void;
+}
+
+function NavbarLink({ icon: Icon, label, active, onClick }: NavbarLinkProps) {
+	const { classes, cx } = useStyles();
+	return (
+		<Tooltip label={label} position="right" transitionDuration={0}>
+			<UnstyledButton onClick={onClick} className={cx(classes.link, { [classes.active]: active })}>
+				<Icon stroke={1.5} />
+			</UnstyledButton>
+		</Tooltip>
+	);
+}
+
+const mockdata = [
+	{ icon: IconDashboard, label: "Dashboard Home", path: "/admin" },
+	{ icon: IconNotebook, label: "Blog", path: "/admin/blog" },
+	{ icon: IconCalendarEvent, label: "Event", path: "/admin/event" },
+	{ icon: IconMessage2, label: "Forum", path: "/admin/forum" },
+	{ icon: IconMessage, label: "Comment", path: "/admin/comment" },
+	{ icon: IconLink, label: "Shortlink", path: "/admin/shortlink" },
+	{ icon: IconNote, label: "Note", path: "/admin/note" },
+	{ icon: IconUser, label: "User", path: "/admin/user" },
+	{ icon: IconUsers, label: "Group", path: "/admin/group" },
+];
+
+interface navProps {
+	pathname?: string;
+}
+
+export const DashboardNav: NextPage<navProps> = (props) => {
+	const [active, setActive] = useState(mockdata.findIndex((data) => data.path === props.pathname));
+	const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+
+	const links = mockdata.map((link, index) => (
+		<Link href={link.path} key={link.label}>
+			<a>
+				<NavbarLink onClick={() => setActive(index)} {...link} key={link.label} active={index === active} />
+			</a>
+		</Link>
+	));
+
+	return (
+		<Navbar width={{ base: 80 }} p="md">
+			<Center>
+				<IconUser size={30} type="mark" />
+			</Center>
+			<Navbar.Section grow mt={50}>
+				<Stack justify="center" spacing={0}>
+					{links}
+				</Stack>
+			</Navbar.Section>
+			<Navbar.Section>
+				<Stack justify="center" spacing={0}>
+					<NavbarLink onClick={() => toggleColorScheme()} icon={colorScheme === "dark" ? IconSun : IconMoonStars} label="Logout" />
+					<Link href="/auth/logout">
+						<a>
+							<NavbarLink icon={IconLogout} label="Logout" />
+						</a>
+					</Link>
+					<Link href="/">
+						<a>
+							<NavbarLink icon={IconHome2} label="Go to home page" />
+						</a>
+					</Link>
+				</Stack>
+			</Navbar.Section>
+		</Navbar>
+	);
+};

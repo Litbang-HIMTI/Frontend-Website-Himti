@@ -1,5 +1,5 @@
 import { GetServerSideProps, NextPage } from "next";
-import { Login } from "../../src/components/admin/Login";
+import { Login } from "../../src/components/Auth/Login";
 import { SERVER_V1 } from "../../src/utils/constants";
 
 const indexLogin: NextPage = (props) => {

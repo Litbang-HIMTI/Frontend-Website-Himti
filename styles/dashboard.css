@@ -5,3 +5,16 @@
 	-webkit-user-select: none;
 	user-select: none;
 }
+
+.dashboard.nav-wrap {
+	display: flex;
+	flex-direction: row;
+}
+
+.dashboard.content-wrap {
+	padding: 1rem;
+}
+
+button svg.icon-tabler-logout {
+	margin-left: 5px;
+}

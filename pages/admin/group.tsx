@@ -1,14 +1,14 @@
 import type { GetServerSideProps, NextPage } from "next";
-import { AdminHome } from "../../src/components/Admin/Home";
+import { Group } from "../../src/components/Admin/Group";
 import { DashboardNav } from "../../src/components/Admin/Nav/DashboardNav";
 import { SERVER_V1 } from "../../src/utils/constants";
 
-const dashboardHome: NextPage = (props) => {
+const group: NextPage = (props) => {
 	return (
 		<main className="dashboard nav-wrap">
 			<DashboardNav {...props} />
 			<div className="dashboard content-wrap">
-				<AdminHome {...props} />
+				<Group {...props} />
 			</div>
 		</main>
 	);
@@ -33,4 +33,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 	};
 };
 
-export default dashboardHome;
+export default group;

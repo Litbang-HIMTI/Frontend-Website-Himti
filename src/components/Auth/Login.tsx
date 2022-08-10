@@ -11,6 +11,7 @@ import { SERVER_LOCAL_V1 } from "../../utils/constants";
 
 export const Login: NextPage = (props) => {
 	const [alertShown, setAlertShown] = useState<Boolean>(false);
+	const [submitted, setSubmitted] = useState<Boolean>(false);
 	const router = useRouter();
 	const form = useForm({
 		initialValues: {
@@ -29,6 +30,7 @@ export const Login: NextPage = (props) => {
 	});
 
 	const submitForm = async () => {
+		if (submitted) return;
 		const { username, password } = form.values;
 		// fetch local api server to get around CORS
 		try {
@@ -45,16 +47,17 @@ export const Login: NextPage = (props) => {
 			});
 
 			if (loginFetch.status === 200) {
+				setSubmitted(true);
 				showNotification({
 					title: "Success",
 					message: "You have logged in successfully. Redirecting...",
 					disallowClose: true,
-					autoClose: 3000,
+					autoClose: 1500,
 				});
 
 				setTimeout(() => {
 					router.push("/admin");
-				}, 3000);
+				}, 1000);
 			} else {
 				const { message } = await loginFetch.json();
 
