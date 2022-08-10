@@ -20,6 +20,7 @@ import {
 import Link from "next/link";
 import { IUser } from "../../../interfaces/User";
 import { UserPopout } from "./Userpopout";
+import { validateAdmin, validateEditor, validateForumMod, validateShortlinkMod, validateStaff } from "../../../utils/helper";
 
 const useStyles = createStyles((theme) => ({
 	link: {
@@ -63,15 +64,15 @@ function NavbarLink({ icon: Icon, label, active, onClick }: NavbarLinkProps) {
 }
 
 const mockdata = [
-	{ icon: IconDashboard, label: "Dashboard Home", path: "/admin" },
-	{ icon: IconNotebook, label: "Blog", path: "/admin/blog" },
-	{ icon: IconCalendarEvent, label: "Event", path: "/admin/event" },
-	{ icon: IconMessage, label: "Forum", path: "/admin/forum" },
-	{ icon: IconMessages, label: "Comment", path: "/admin/comment" },
-	{ icon: IconLink, label: "Shortlink", path: "/admin/shortlink" },
-	{ icon: IconNote, label: "Note", path: "/admin/note" },
-	{ icon: IconUser, label: "User", path: "/admin/user" },
-	{ icon: IconUsers, label: "Group", path: "/admin/group" },
+	{ icon: IconDashboard, label: "Dashboard Home", path: "/admin", validate: validateStaff },
+	{ icon: IconNotebook, label: "Blog", path: "/admin/blog", validate: validateEditor },
+	{ icon: IconCalendarEvent, label: "Event", path: "/admin/event", validate: validateEditor },
+	{ icon: IconMessage, label: "Forum", path: "/admin/forum", validate: validateForumMod },
+	{ icon: IconMessages, label: "Comment", path: "/admin/comment", validate: validateForumMod },
+	{ icon: IconLink, label: "Shortlink", path: "/admin/shortlink", validate: validateShortlinkMod },
+	{ icon: IconNote, label: "Note", path: "/admin/note", validate: validateStaff },
+	{ icon: IconUser, label: "User", path: "/admin/user", validate: validateAdmin },
+	{ icon: IconUsers, label: "Group", path: "/admin/group", validate: validateAdmin },
 ];
 
 interface navProps {
@@ -84,11 +85,15 @@ export const DashboardNav: NextPage<navProps> = (props) => {
 	const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
 	const links = mockdata.map((link, index) => (
-		<Link href={link.path} key={link.label}>
-			<a>
-				<NavbarLink onClick={() => setActive(index)} {...link} key={link.label} active={index === active} />
-			</a>
-		</Link>
+		<>
+			{link.validate(props.user!) && (
+				<Link href={link.path} key={link.label}>
+					<a>
+						<NavbarLink onClick={() => setActive(index)} {...link} key={link.label} active={index === active} />
+					</a>
+				</Link>
+			)}
+		</>
 	));
 
 	return (

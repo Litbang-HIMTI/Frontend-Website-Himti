@@ -1,7 +1,9 @@
+import { NextPage } from "next";
+import Link from "next/link";
 import { Menu, Group, Text, useMantineTheme, ActionIcon } from "@mantine/core";
 import { IconLogout, IconNotebook, IconCalendarEvent, IconMessage, IconSettings, IconMessages, IconChevronRight, IconDots, IconUser } from "@tabler/icons";
-import { NextPage } from "next";
 import { IUser } from "../../../interfaces/User";
+import { validateEditor, validateForumMod } from "../../../utils/helper";
 
 interface navProps {
 	pathname?: string;
@@ -12,8 +14,7 @@ export const UserPopout: NextPage<navProps> = (props) => {
 	const theme = useMantineTheme();
 	return (
 		<Group position="center">
-			<Menu withArrow width={300} position="right" transition="pop">
-				{/*  trigger="hover" */}
+			<Menu withArrow width={300} position="right" transition="pop" trigger="hover">
 				<Menu.Target>
 					<ActionIcon size={50} sx={{ display: "flex", flexDirection: "column" }}>
 						<IconUser size={30} type="mark" />
@@ -37,14 +38,49 @@ export const UserPopout: NextPage<navProps> = (props) => {
 
 					<Menu.Divider />
 
-					<Menu.Item icon={<IconNotebook size={14} stroke={1.5} color={theme.colors.red[6]} />}>Your Blog Posts</Menu.Item>
-					<Menu.Item icon={<IconCalendarEvent size={14} stroke={1.5} color={theme.colors.yellow[6]} />}>Your Events</Menu.Item>
-					<Menu.Item icon={<IconMessage size={14} stroke={1.5} color={theme.colors.blue[6]} />}>Your Forum Posts</Menu.Item>
-					<Menu.Item icon={<IconMessages size={14} stroke={1.5} color={theme.colors.blue[6]} />}>Your comments</Menu.Item>
+					{/* MIGHT AND COULD BE IMPLEMENTED. NOT A PRIORITY */}
+					{/* {validateEditor(props.user!) && (
+						<>
+							<Link href={`/admin/blog?user=${props.user?.username}`}>
+								<a>
+									<Menu.Item icon={<IconNotebook size={14} stroke={1.5} color={theme.colors.red[6]} />}>Your Blog Posts</Menu.Item>
+								</a>
+							</Link>
+							<Link href={`/admin/user/event?user=${props.user?.username}`}>
+								<a>
+									<Menu.Item icon={<IconCalendarEvent size={14} stroke={1.5} color={theme.colors.yellow[6]} />}>Your Event Posts</Menu.Item>
+								</a>
+							</Link>
+						</>
+					)}
+
+					{validateForumMod(props.user!) && (
+						<>
+							<Link href={`/admin/user/forum?user=${props.user?.username}`}>
+								<a>
+									<Menu.Item icon={<IconMessage size={14} stroke={1.5} color={theme.colors.blue[6]} />}>Your Forum Posts</Menu.Item>
+								</a>
+							</Link>
+						</>
+					)}
+
+					<Link href={`/admin/user/forum?user=${props.user?.username}`}>
+						<a>
+							<Menu.Item icon={<IconMessages size={14} stroke={1.5} color={theme.colors.blue[6]} />}>Your comments</Menu.Item>
+						</a>
+					</Link> */}
 
 					<Menu.Label>Settings</Menu.Label>
-					<Menu.Item icon={<IconSettings size={14} stroke={1.5} />}>Account settings</Menu.Item>
-					<Menu.Item icon={<IconLogout size={14} stroke={1.5} />}>Logout</Menu.Item>
+					<Link href={`/admin/user/${props.user?.username}`}>
+						<a>
+							<Menu.Item icon={<IconSettings size={14} stroke={1.5} />}>Account settings</Menu.Item>
+						</a>
+					</Link>
+					<Link href="/auth/logout">
+						<a id="logout-popout">
+							<Menu.Item icon={<IconLogout size={14} stroke={1.5} />}>Logout</Menu.Item>
+						</a>
+					</Link>
 				</Menu.Dropdown>
 			</Menu>
 		</Group>
