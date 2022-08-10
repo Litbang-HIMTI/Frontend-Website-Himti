@@ -1,20 +1,21 @@
 import { NextPage } from "next";
 import Link from "next/link";
-import { Menu, Group, Text, ActionIcon, useMantineTheme } from "@mantine/core";
+import { Menu, Group, Text, ActionIcon, useMantineTheme, MantineTheme } from "@mantine/core";
 import { IconLogout, IconSettings, IconChevronRight, IconDots, IconUser, IconNotebook, IconCalendarEvent, IconMessage, IconMessages } from "@tabler/icons";
 import { IUser } from "../../../interfaces/User";
 import { validateEditor, validateForumMod, validateAdmin } from "../../../utils/helper";
 
 interface navProps {
 	pathname?: string;
+	theme: MantineTheme;
 	user?: IUser;
 }
 
 export const UserPopout: NextPage<navProps> = (props) => {
-	const theme = useMantineTheme();
+	const { theme } = props;
 	return (
 		<Group position="center">
-			<Menu withArrow width={300} position="right" transition="pop" trigger="hover">
+			<Menu width={300} position="right" transition="pop" trigger="hover">
 				<Menu.Target>
 					<ActionIcon size={50} sx={{ display: "flex", flexDirection: "column" }}>
 						<IconUser size={30} type="mark" />
@@ -41,7 +42,7 @@ export const UserPopout: NextPage<navProps> = (props) => {
 							</a>
 						</Link>
 					) : (
-						<Menu.Item rightSection={<IconChevronRight size={14} stroke={1.5} />}>
+						<Menu.Item>
 							<Group>
 								<div>
 									<Text weight={500}>{props.user?.username!}</Text>
