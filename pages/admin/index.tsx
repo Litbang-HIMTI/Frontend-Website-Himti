@@ -1,6 +1,6 @@
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
-import { AdminHome } from "../../src/components/Admin/Home";
+import { DashboardHome } from "../../src/components/Admin/Home";
 import { DashboardNav } from "../../src/components/Admin/Nav/DashboardNav";
 import { SERVER_V1 } from "../../src/utils/constants";
 import { validateStaff } from "../../src/utils/helper";
@@ -17,7 +17,7 @@ const dashboardHome: NextPage = (props) => {
 			<main className="dashboard nav-wrap">
 				<DashboardNav {...props} />
 				<div className="dashboard content-wrap">
-					<AdminHome {...props} />
+					<DashboardHome {...props} />
 				</div>
 			</main>
 		</>

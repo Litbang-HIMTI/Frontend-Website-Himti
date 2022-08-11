@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
-import { useState } from "react";
-import { Navbar, Center, Tooltip, UnstyledButton, createStyles, Stack, useMantineColorScheme, Menu, ActionIcon, useMantineTheme, MantineTheme } from "@mantine/core";
+import { useEffect, useState } from "react";
+import { Navbar, Center, Tooltip, UnstyledButton, createStyles, Stack, useMantineColorScheme, Menu, ActionIcon, useMantineTheme, MantineTheme, LoadingOverlay } from "@mantine/core";
 import {
 	IconSun,
 	IconMoonStars,
@@ -179,27 +179,33 @@ const navData = [
 ];
 
 export const DashboardNav: NextPage<navProps> = (props) => {
-	const [active, setActive] = useState(navData.findIndex((data) => data.path === props.pathname));
 	const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 	const theme = useMantineTheme();
+	const [active, setActive] = useState(navData.findIndex((data) => data.path === props.pathname));
+	const [links, setLinks] = useState<JSX.Element[] | null>(null);
 
-	const links = navData.map((link, index) => {
-		if (link.validate(props.user!))
-			return (
-				<Link href={link.path} key={link.path}>
-					<a>
-						<Menu width={300} position="right" transition="pop" trigger="hover">
-							<Menu.Target>
-								<ActionIcon size={50} sx={{ display: "flex", flexDirection: "column" }}>
-									<NavbarLink onClick={() => setActive(index)} {...link} key={link.path} active={index === active} />
-								</ActionIcon>
-							</Menu.Target>
-							{link.menuItem ? link.menuItem(props, theme, link.label) : null}
-						</Menu>
-					</a>
-				</Link>
-			);
-	});
+	useEffect(() => {
+		setLinks(
+			navData.map((link, index) => {
+				if (link.validate(props.user!))
+					return (
+						<Link href={link.path} key={link.path}>
+							<a>
+								<Menu width={300} position="right" transition="pop" trigger="hover">
+									<Menu.Target>
+										<ActionIcon size={50} sx={{ display: "flex", flexDirection: "column" }}>
+											<NavbarLink onClick={() => setActive(index)} {...link} key={link.path} active={index === active} />
+										</ActionIcon>
+									</Menu.Target>
+									{link.menuItem ? link.menuItem(props, theme, link.label) : null}
+								</Menu>
+							</a>
+						</Link>
+					);
+				else return <></>;
+			})
+		);
+	}, [props.user, theme]);
 
 	return (
 		<Navbar width={{ base: 80 }} p="md">
@@ -208,7 +214,7 @@ export const DashboardNav: NextPage<navProps> = (props) => {
 			</Center>
 			<Navbar.Section grow mt={50}>
 				<Stack justify="center" spacing={0}>
-					{links}
+					{links ? links : <LoadingOverlay overlayBlur={2} visible={true} />}
 				</Stack>
 			</Navbar.Section>
 			<Navbar.Section>

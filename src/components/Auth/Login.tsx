@@ -4,14 +4,19 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { IconArrowLeft, IconAlertCircle } from "@tabler/icons";
-import { TextInput, PasswordInput, Center, Anchor, Paper, Container, Group, Button, Alert } from "@mantine/core";
+import { TextInput, PasswordInput, Center, Anchor, Paper, Container, Group, Button, Alert, LoadingOverlay } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { SERVER_LOCAL_V1 } from "../../utils/constants";
 
-export const Login: NextPage = (props) => {
-	const [alertShown, setAlertShown] = useState<Boolean>(false);
-	const [submitted, setSubmitted] = useState<Boolean>(false);
+interface loginProps {
+	query?: any;
+}
+
+export const Login: NextPage<loginProps> = (props) => {
+	const [alertShown, setAlertShown] = useState<boolean>(false);
+	const [submitted, setSubmitted] = useState<boolean>(false);
+	const [loading, setLoading] = useState<boolean>(false);
 	const router = useRouter();
 	const form = useForm({
 		initialValues: {
@@ -30,6 +35,7 @@ export const Login: NextPage = (props) => {
 	});
 
 	const submitForm = async () => {
+		setLoading(true);
 		if (submitted) return;
 		const { username, password } = form.values;
 		// fetch local api server to get around CORS
@@ -59,21 +65,23 @@ export const Login: NextPage = (props) => {
 					router.push("/admin");
 				}, 1000);
 			} else {
+				setLoading(false);
 				const { message } = await loginFetch.json();
 
 				showNotification({
 					title: "Error",
 					message,
 					disallowClose: false,
-					autoClose: 3000,
+					autoClose: 4000,
 					color: "red",
 				});
 			}
 		} catch (error: any) {
+			setLoading(false);
 			showNotification({
 				title: "Error",
 				message: error.message,
-				autoClose: 3000,
+				autoClose: 4000,
 				color: "red",
 			});
 		}
@@ -81,8 +89,8 @@ export const Login: NextPage = (props) => {
 
 	useEffect(() => {
 		// check query params
-		if (router.query.loggedout === "true") setAlertShown(true);
-	}, [router.query.loggedout]);
+		if (props.query.loggedout === "true") setAlertShown(true);
+	}, [props.query.loggedout]);
 
 	return (
 		<>
@@ -118,6 +126,7 @@ export const Login: NextPage = (props) => {
 				</Center>
 
 				<Paper withBorder shadow="md" p={30} mt={20} radius="md">
+					<LoadingOverlay visible={loading} overlayBlur={2} />
 					<form onSubmit={form.onSubmit(submitForm)}>
 						<TextInput label="Username or Email address" placeholder="Johnsmith2000" required {...form.getInputProps("username")} />
 						<PasswordInput label="Password" placeholder="Your password" required mt="md" {...form.getInputProps("password")} />
