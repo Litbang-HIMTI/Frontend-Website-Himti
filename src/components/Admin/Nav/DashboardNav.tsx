@@ -62,9 +62,9 @@ const NavbarLink = ({ icon: Icon, label, active, disabled, onClick }: NavbarLink
 	const { classes, cx } = useStyles();
 	return (
 		<Tooltip label={label} position="right" transitionDuration={0} disabled={disabled || false}>
-			<UnstyledButton onClick={onClick} className={cx(classes.link, { [classes.active]: active })}>
+			<div onClick={onClick} className={cx(classes.link, { [classes.active]: active })}>
 				<Icon stroke={1.5} />
-			</UnstyledButton>
+			</div>
 		</Tooltip>
 	);
 };
@@ -189,18 +189,18 @@ export const DashboardNav: NextPage<navProps> = (props) => {
 			navData.map((link, index) => {
 				if (link.validate(props.user!))
 					return (
-						<Link href={link.path} key={link.path}>
-							<a>
-								<Menu width={300} position="right" transition="pop" trigger="hover">
+						<Menu width={300} position="right" transition="pop" trigger="hover" key={link.path}>
+							<Link href={link.path}>
+								<a>
 									<Menu.Target>
 										<ActionIcon size={50} sx={{ display: "flex", flexDirection: "column" }}>
-											<NavbarLink onClick={() => setActive(index)} {...link} key={link.path} active={index === active} />
+											<NavbarLink onClick={() => setActive(index)} {...link} active={index === active} />
 										</ActionIcon>
 									</Menu.Target>
-									{link.menuItem ? link.menuItem(props, theme, link.label) : null}
-								</Menu>
-							</a>
-						</Link>
+								</a>
+							</Link>
+							{link.menuItem ? link.menuItem(props, theme, link.label) : null}
+						</Menu>
 					);
 				else return <></>;
 			})

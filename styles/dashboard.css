@@ -15,7 +15,7 @@
 	padding: 1rem;
 }
 
-#logout-nav button svg.icon-tabler-logout {
+#logout-nav div svg.icon-tabler-logout {
 	margin-left: 4.75px;
 }
 
