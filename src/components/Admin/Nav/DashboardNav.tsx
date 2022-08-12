@@ -212,7 +212,7 @@ export const DashboardNav: NextPage<navProps> = (props) => {
 			<Center>
 				<UserPopout {...props} theme={theme} />
 			</Center>
-			<Navbar.Section grow mt={50}>
+			<Navbar.Section grow mt={50} sx={{ position: "relative" }}>
 				<Stack justify="center" spacing={0}>
 					{links ? links : <LoadingOverlay overlayBlur={2} visible={true} />}
 				</Stack>

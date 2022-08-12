@@ -125,7 +125,7 @@ export const Login: NextPage<loginProps> = (props) => {
 					)}
 				</Center>
 
-				<Paper withBorder shadow="md" p={30} mt={20} radius="md">
+				<Paper withBorder shadow="md" p={30} mt={20} radius="md" sx={{ position: "relative" }}>
 					<LoadingOverlay visible={loading} overlayBlur={2} />
 					<form onSubmit={form.onSubmit(submitForm)}>
 						<TextInput label="Username or Email address" placeholder="Johnsmith2000" required {...form.getInputProps("username")} />
