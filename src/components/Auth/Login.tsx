@@ -7,7 +7,7 @@ import { IconArrowLeft, IconAlertCircle } from "@tabler/icons";
 import { TextInput, PasswordInput, Center, Anchor, Paper, Container, Group, Button, Alert, LoadingOverlay } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
-import { SERVER_LOCAL_V1 } from "../../utils/constants";
+import { SERVER_LOCAL_V1, SERVER_V1 } from "../../utils/constants";
 
 interface loginProps {
 	query?: any;
@@ -40,7 +40,7 @@ export const Login: NextPage<loginProps> = (props) => {
 		const { username, password } = form.values;
 		// fetch local api server to get around CORS
 		try {
-			const loginFetch = await fetch(`${SERVER_LOCAL_V1}/auth/login`, {
+			const loginFetch = await fetch(`${SERVER_V1}/auth`, {
 				method: "POST",
 				credentials: "include",
 				headers: {

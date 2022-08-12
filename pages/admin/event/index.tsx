@@ -2,10 +2,11 @@ import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import { Event } from "../../../src/components/Admin/Event";
 import { DashboardNav } from "../../../src/components/Admin/Nav/DashboardNav";
+import { IDashboardProps } from "../../../src/interfaces/props/Dashboard";
 import { SERVER_V1 } from "../../../src/utils/constants";
 import { validateEditor } from "../../../src/utils/helper";
 
-const event: NextPage = (props) => {
+const event: NextPage<IDashboardProps> = (props) => {
 	return (
 		<>
 			<Head>
@@ -44,6 +45,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 		props: {
 			pathname: context.resolvedUrl,
 			user: parsed.data,
+			token: context.req.cookies["connect.sid"],
 		},
 	};
 };

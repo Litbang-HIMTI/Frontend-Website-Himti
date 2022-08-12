@@ -44,3 +44,34 @@ export interface IStats {
 	/** The scale value used by the command. */
 	scaleFactor: number;
 }
+export interface IstatsExtended extends IStats {
+	loading: boolean;
+	loadFail: boolean;
+}
+
+export const emptyStats: IstatsExtended = {
+	ns: "",
+	count: 0,
+	size: 1232,
+	avgObjSize: 0,
+	storageSize: 0,
+	numExtents: 0,
+	nindexes: 0,
+	lastExtentSize: 0,
+	paddingFactor: 0,
+	totalIndexSize: 0,
+	indexSizes: {
+		_id_: 0,
+	},
+	capped: false,
+	max: 0,
+	maxSize: 0,
+	indexDetails: {},
+	ok: 0,
+	freeStorageSize: 0,
+	indexBuilds: 0,
+	totalSize: 0,
+	scaleFactor: 0,
+	loading: true,
+	loadFail: false,
+};

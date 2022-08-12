@@ -11,13 +11,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 		credentials: "include",
 		headers: {
 			"Content-Type": "application/json",
+			Cookie: "connect.sid=" + context.req.cookies["connect.sid"],
 		},
 	});
 
 	if (checkLogOut.status !== 200) return { notFound: true };
 	else {
 		// remove cookie
-		context.res.setHeader("Set-Cookie", "connect.sid=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT;");
+		context.res.setHeader("Set-Cookie", "connect.sid=; Path=/; Expires=Thu, 01 Jan 1986 00:00:00 GMT;");
 
 		return {
 			redirect: {

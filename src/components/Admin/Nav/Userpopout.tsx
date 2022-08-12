@@ -1,8 +1,8 @@
 import { NextPage } from "next";
 import Link from "next/link";
-import { Menu, Group, Text, ActionIcon, useMantineTheme, MantineTheme } from "@mantine/core";
+import { Menu, Group, Text, ActionIcon, MantineTheme } from "@mantine/core";
 import { IconLogout, IconSettings, IconChevronRight, IconDots, IconUser, IconNotebook, IconCalendarEvent, IconMessage, IconMessages } from "@tabler/icons";
-import { IUser } from "../../../interfaces/User";
+import { IUser } from "../../../interfaces/db/User";
 import { validateEditor, validateForumMod, validateAdmin } from "../../../utils/helper";
 
 interface navProps {
@@ -59,7 +59,6 @@ export const UserPopout: NextPage<navProps> = (props) => {
 
 					<Menu.Divider />
 
-					{/* NOT A PRIORITY */}
 					{validateEditor(props.user!) && (
 						<>
 							<Link href={`/admin/blog?user=${props.user?.username}`}>

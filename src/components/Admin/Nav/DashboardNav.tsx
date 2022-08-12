@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import { useEffect, useState } from "react";
-import { Navbar, Center, Tooltip, UnstyledButton, createStyles, Stack, useMantineColorScheme, Menu, ActionIcon, useMantineTheme, MantineTheme, LoadingOverlay } from "@mantine/core";
+import { Navbar, Center, Tooltip, createStyles, Stack, useMantineColorScheme, Menu, ActionIcon, useMantineTheme, MantineTheme, LoadingOverlay } from "@mantine/core";
 import {
 	IconSun,
 	IconMoonStars,
@@ -21,9 +21,10 @@ import {
 	IconList,
 	IconAffiliate,
 	IconId,
+	IconHistory,
 } from "@tabler/icons";
 import Link from "next/link";
-import { IUser } from "../../../interfaces/User";
+import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { UserPopout } from "./Userpopout";
 import { validateAdmin, validateEditor, validateForumMod, validateShortlinkMod, validateStaff } from "../../../utils/helper";
 
@@ -36,6 +37,7 @@ const useStyles = createStyles((theme) => ({
 		alignItems: "center",
 		justifyContent: "center",
 		color: theme.colorScheme === "dark" ? theme.colors.dark[0] : theme.colors.gray[7],
+		cursor: "pointer",
 
 		"&:hover": {
 			backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[5] : theme.colors.gray[0],
@@ -69,12 +71,7 @@ const NavbarLink = ({ icon: Icon, label, active, disabled, onClick }: NavbarLink
 	);
 };
 
-interface navProps {
-	pathname?: string;
-	user?: IUser;
-}
-
-const blogMenu = (_props: navProps, theme: MantineTheme, _type: string) => {
+const blogMenu = (_props: IDashboardProps, theme: MantineTheme, _type: string) => {
 	return (
 		<Menu.Dropdown>
 			<Menu.Label>Blog</Menu.Label>
@@ -88,6 +85,11 @@ const blogMenu = (_props: navProps, theme: MantineTheme, _type: string) => {
 					<Menu.Item icon={<IconCirclePlus size={14} stroke={1.5} color={theme.colors.red[6]} />}>Create new post</Menu.Item>
 				</a>
 			</Link>
+			<Link href={`/admin/blog/revision`}>
+				<a>
+					<Menu.Item icon={<IconHistory size={14} stroke={1.5} color={theme.colors.grape[6]} />}>Revisions</Menu.Item>
+				</a>
+			</Link>
 			<Link href={`/admin/blog/tags`}>
 				<a>
 					<Menu.Item icon={<IconTags size={14} stroke={1.5} color={theme.colors.yellow[6]} />}>Tags</Menu.Item>
@@ -97,7 +99,7 @@ const blogMenu = (_props: navProps, theme: MantineTheme, _type: string) => {
 	);
 };
 
-const eventMenu = (_props: navProps, theme: MantineTheme, _type: string) => {
+const eventMenu = (_props: IDashboardProps, theme: MantineTheme, _type: string) => {
 	return (
 		<Menu.Dropdown>
 			<Menu.Label>Event</Menu.Label>
@@ -109,6 +111,11 @@ const eventMenu = (_props: navProps, theme: MantineTheme, _type: string) => {
 			<Link href={`/admin/event/create`}>
 				<a>
 					<Menu.Item icon={<IconCirclePlus size={14} stroke={1.5} color={theme.colors.red[6]} />}>Create new Event</Menu.Item>
+				</a>
+			</Link>
+			<Link href={`/admin/event/revision`}>
+				<a>
+					<Menu.Item icon={<IconHistory size={14} stroke={1.5} color={theme.colors.grape[6]} />}>Revisions</Menu.Item>
 				</a>
 			</Link>
 			<Link href={`/admin/event/tags`}>
@@ -125,7 +132,7 @@ const eventMenu = (_props: navProps, theme: MantineTheme, _type: string) => {
 	);
 };
 
-const forumMenu = (_props: navProps, theme: MantineTheme, _type: string) => {
+const forumMenu = (_props: IDashboardProps, theme: MantineTheme, _type: string) => {
 	return (
 		<Menu.Dropdown>
 			<Menu.Label>Forum</Menu.Label>
@@ -148,7 +155,7 @@ const forumMenu = (_props: navProps, theme: MantineTheme, _type: string) => {
 	);
 };
 
-const genericMenu = (_props: navProps, theme: MantineTheme, type: string) => {
+const genericMenu = (_props: IDashboardProps, theme: MantineTheme, type: string) => {
 	return (
 		<Menu.Dropdown>
 			<Menu.Label>{type}</Menu.Label>
@@ -178,7 +185,7 @@ const navData = [
 	{ icon: IconUsers, label: "Group", path: "/admin/group", validate: validateAdmin, menuItem: genericMenu, disabled: true },
 ];
 
-export const DashboardNav: NextPage<navProps> = (props) => {
+export const DashboardNav: NextPage<IDashboardProps> = (props) => {
 	const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 	const theme = useMantineTheme();
 	const [active, setActive] = useState(navData.findIndex((data) => data.path === props.pathname));
