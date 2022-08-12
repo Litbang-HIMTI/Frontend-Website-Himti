@@ -7,6 +7,7 @@
   - [Videos](#videos)
 - [Note](#note)
   - [Next.js](#nextjs)
+  - [CORS](#cors)
   - [Error Handling](#error-handling)
   - [Authentication](#authentication)
 
@@ -37,6 +38,13 @@
 - [link](https://nextjs.org/learn/basics/navigate-between-pages/link-component)
 - [no img element](https://nextjs.org/docs/messages/no-img-element)
 - [get initial props](https://nextjs.org/docs/api-reference/data-fetching/get-initial-props)
+
+## CORS
+
+- [CORS with Postman](https://stackoverflow.com/questions/36250615/cors-with-postman)
+- [Express Session Cookie Not Being Set when using React Axios POST Request](https://stackoverflow.com/questions/63251837/express-session-cookie-not-being-set-when-using-react-axios-post-request)
+- [Using CORS in Express](https://medium.com/zero-equals-false/using-cors-in-express-cac7e29b005b)
+- [Why doesn't adding CORS headers to an OPTIONS route allow browsers to access my API?](https://stackoverflow.com/questions/7067966/why-doesnt-adding-cors-headers-to-an-options-route-allow-browsers-to-access-my)
 
 ## Error Handling
 
