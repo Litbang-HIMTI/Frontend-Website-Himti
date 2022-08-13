@@ -166,7 +166,7 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 
 		// fill data by looping
 		for (let i = 0; i < datas.length; i++) if (datas[i].loading) fetchDataFunc(i);
-	}, [datas]);
+	}, [datas, classes.diff, classes.icon, classes.title, classes.value]);
 
 	return (
 		<>

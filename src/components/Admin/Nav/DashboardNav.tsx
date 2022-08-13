@@ -71,7 +71,7 @@ const NavbarLink = ({ icon: Icon, label, active, disabled, onClick }: NavbarLink
 	);
 };
 
-const blogMenu = (_props: IDashboardProps, theme: MantineTheme, _type: string) => {
+const blogMenu = (theme: MantineTheme, _type: string) => {
 	return (
 		<Menu.Dropdown>
 			<Menu.Label>Blog</Menu.Label>
@@ -99,7 +99,7 @@ const blogMenu = (_props: IDashboardProps, theme: MantineTheme, _type: string) =
 	);
 };
 
-const eventMenu = (_props: IDashboardProps, theme: MantineTheme, _type: string) => {
+const eventMenu = (theme: MantineTheme, _type: string) => {
 	return (
 		<Menu.Dropdown>
 			<Menu.Label>Event</Menu.Label>
@@ -132,7 +132,7 @@ const eventMenu = (_props: IDashboardProps, theme: MantineTheme, _type: string) 
 	);
 };
 
-const forumMenu = (_props: IDashboardProps, theme: MantineTheme, _type: string) => {
+const forumMenu = (theme: MantineTheme, _type: string) => {
 	return (
 		<Menu.Dropdown>
 			<Menu.Label>Forum</Menu.Label>
@@ -155,7 +155,7 @@ const forumMenu = (_props: IDashboardProps, theme: MantineTheme, _type: string) 
 	);
 };
 
-const genericMenu = (_props: IDashboardProps, theme: MantineTheme, type: string) => {
+const genericMenu = (theme: MantineTheme, type: string) => {
 	return (
 		<Menu.Dropdown>
 			<Menu.Label>{type}</Menu.Label>
@@ -206,13 +206,13 @@ export const DashboardNav: NextPage<IDashboardProps> = (props) => {
 									</Menu.Target>
 								</a>
 							</Link>
-							{link.menuItem ? link.menuItem(props, theme, link.label) : null}
+							{link.menuItem ? link.menuItem(theme, link.label) : null}
 						</Menu>
 					);
 				else return <></>;
 			})
 		);
-	}, [props.user, theme]);
+	}, [props.user, theme, active]);
 
 	return (
 		<Navbar width={{ base: 80 }} p="md">

@@ -18,7 +18,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 	if (checkLogOut.status !== 200) return { notFound: true };
 	else {
 		// remove cookie
-		context.res.setHeader("Set-Cookie", "connect.sid=; Path=/; Expires=Thu, 01 Jan 1986 00:00:00 GMT;");
+		context.res.setHeader("Set-Cookie", "connect.sid=; Path=/; Expires=Thu, 01 Jan 1984 00:00:00 GMT;");
 
 		return {
 			redirect: {
