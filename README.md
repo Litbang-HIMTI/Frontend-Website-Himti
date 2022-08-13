@@ -28,7 +28,7 @@ Before contributing please consider reading some of the [docs](docs):
 
 - [CONTRIBUTING.md](docs/CONTRIBUTING.md)
 
-This project is bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app). To start developing, first make sure that you have node installed. After that do `npm install` or `npm ci` to install all the dependencies.
+This project is bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app). **IMPORTANT**, you need to use yarn to install or adding dependencies to avoid depndency conflicts. To start developing, first make sure that you have node and yarn installed. After that do `yarn install` to install all the dependencies. If you want to add new packages to the project, do `yarn add <package>`.
 
 ## Getting Started
 
@@ -43,8 +43,6 @@ yarn dev
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
-
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
 
 The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
 

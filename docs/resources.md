@@ -24,6 +24,8 @@
 
 - [Next.js](https://nextjs.org/docs)
 - [Typescript](https://www.typescriptlang.org/docs/)
+- [Mantine UI](https://mantine.dev/)
+- [Tabler Icons](https://tablericons.com/)
 
 ## Videos
 

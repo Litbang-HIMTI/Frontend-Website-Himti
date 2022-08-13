@@ -12,6 +12,7 @@
 	},
 	"dependencies": {
 		"@emotion/react": "^11.10.0",
+		"@emotion/server": "^11.10.0",
 		"@mantine/core": "^5.0.2",
 		"@mantine/dates": "^5.0.2",
 		"@mantine/dropzone": "^5.0.2",
@@ -24,6 +25,7 @@
 		"@mantine/prism": "^5.0.2",
 		"@mantine/rte": "^5.0.2",
 		"@radix-ui/react-icons": "^1.1.1",
+		"@types/react-beautiful-dnd": "^13.1.2",
 		"axios": "^0.27.2",
 		"cookies-next": "^2.1.1",
 		"dayjs": "^1.11.4",
