@@ -1,6 +1,6 @@
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
-import { DashboardHome } from "../../src/components/Admin/Home";
+import { DashboardHome } from "../../src/components/Admin/Home/Home";
 import { DashboardNav } from "../../src/components/Admin/Nav/DashboardNav";
 import { IDashboardProps } from "../../src/interfaces/props/Dashboard";
 import { SERVER_V1 } from "../../src/utils/constants";

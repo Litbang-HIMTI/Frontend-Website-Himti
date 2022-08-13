@@ -1,10 +1,11 @@
 import type { NextPage } from "next";
-import { Button, Center, createStyles, Group, LoadingOverlay, Paper, SimpleGrid, Text, Tooltip } from "@mantine/core";
-import { IconNotebook, IconHistory, IconCalendarEvent, IconMessage, IconMessages, IconLink, IconRefresh } from "@tabler/icons";
+import Link from "next/link";
+import { Button, Center, createStyles, Divider, Group, LoadingOverlay, Paper, SimpleGrid, Text, Tooltip } from "@mantine/core";
+import { IconNotebook, IconHistory, IconCalendarEvent, IconMessage, IconMessages, IconLink, IconRefresh, IconChartPie, IconExternalLink } from "@tabler/icons";
 import { useEffect, useState } from "react";
-import { emptyStats, IstatsExtended } from "../../interfaces/db/Stats";
-import { IDashboardProps } from "../../interfaces/props/Dashboard";
-import { SERVER_V1 } from "../../utils/constants";
+import { emptyStats, IstatsExtended } from "../../../interfaces/db/Stats";
+import { IDashboardProps } from "../../../interfaces/props/Dashboard";
+import { SERVER_V1 } from "../../../utils/constants";
 
 const useStyles = createStyles((theme) => ({
 	root: {
@@ -184,7 +185,34 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 						]}
 					>
 						{stats && stats.length > 0 ? stats : null}
+
+						<Paper withBorder p="md" radius="md">
+							<Group position="apart">
+								<Text size="xs" color="dimmed" className={classes.title}>
+									{/* {dataElProps[i].name.replaceAll("_", " ")} */}
+									Web analytics
+								</Text>
+								<IconChartPie className={classes.icon} size={22} stroke={1.5} />
+							</Group>
+
+							<div style={{ position: "relative" }}>
+								<Group align="flex-end" spacing="xs" mt={25}>
+									<Text className={classes.value}>Provided by Umami</Text>
+									<Text color={"teal"} size="sm" weight={500} className={classes.diff}>
+										<span>Visitor Insights, Realtime Data, etc.</span>
+									</Text>
+								</Group>
+
+								<Link href={"#"} target={"_blank"}>
+									<Button mt={24} fullWidth leftIcon={<IconExternalLink />} compact>
+										Visit
+									</Button>
+								</Link>
+							</div>
+						</Paper>
 					</SimpleGrid>
+
+					<Divider mt={16} />
 				</div>
 			</Center>
 		</>
