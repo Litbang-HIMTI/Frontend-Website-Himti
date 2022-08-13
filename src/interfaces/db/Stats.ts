@@ -47,6 +47,7 @@ export interface IStats {
 export interface IstatsExtended extends IStats {
 	loading: boolean;
 	loadFail: boolean;
+	extraData?: string;
 }
 
 export const emptyStats: IstatsExtended = {

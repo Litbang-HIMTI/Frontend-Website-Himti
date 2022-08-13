@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { emptyStats, IstatsExtended } from "../../../interfaces/db/Stats";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { SERVER_V1 } from "../../../utils/constants";
+import { NoteDragDrop } from "./NoteDragDrop";
 
 const useStyles = createStyles((theme) => ({
 	root: {
@@ -63,14 +64,13 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 	const [stats, setStats] = useState<JSX.Element[] | null>(null);
 
 	const fetchDataFunc = async (index: number) => {
-		if (index === 1 || index === 3) return; // dupe
+		if (index === 1 || index === 3) return; // dupe. blog_revision and event_revision is returned in the same route. Index Refer to dataElProps
 
 		try {
 			const fetched = await fetch(SERVER_V1 + dataElProps[index].fetchLink, {
 				method: "GET",
 				headers: {
 					"Content-Type": "application/json",
-					// Cookie: "connect.sid=" + props.token,
 				},
 				credentials: "include",
 			});
@@ -86,6 +86,8 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 			const { data } = await fetched.json();
 			setDatas((prev) => {
 				const newData = [...prev];
+
+				// check dupe. blog_revision and event_revision is returned in the same route as array. Index Refer to dataElProps
 				if (index === 0 || index === 2) {
 					newData[index] = data[0] as IstatsExtended;
 					newData[index].loading = false;
@@ -99,6 +101,31 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 
 				return newData;
 			});
+
+			// *Shortlink get click counts
+			// ! THIS IS NOT REALLY A GOOD METHOD TO DO IT.
+			// For example, we can add an extra callback methods in the dataElProps, but since there is only 1 here and it is not really a problem, I will leave it like this.
+			// if for future expand or improvement, you should add extra callback methods in the dataElProps.
+			if (dataElProps[index].name === "shortlink") {
+				const extraData = await fetch(SERVER_V1 + dataElProps[index].fetchLink.replace("stats", "clickCounts"), {
+					method: "GET",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					credentials: "include",
+				});
+
+				if (extraData.status === 200) {
+					const extraJson = await extraData.json();
+
+					// index 6 shortlink
+					setDatas((prev) => {
+						const newData = [...prev];
+						newData[index].extraData = "Total click : " + extraJson.data.clickCount;
+						return newData;
+					});
+				}
+			}
 		} catch (err) {
 			return setDatas((prev) => {
 				const newDatas = [...prev];
@@ -138,6 +165,8 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 									</Tooltip>
 									<br />
 									Average: {data.avgObjSize ? formatBytes(data.avgObjSize) : "0 Bytes"}
+									<br />
+									{data.extraData ? data.extraData : null}
 								</Text>
 							</>
 						) : (
@@ -212,7 +241,9 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 						</Paper>
 					</SimpleGrid>
 
-					<Divider mt={16} />
+					<Divider mt={16} mb={16} />
+
+					<NoteDragDrop {...props} />
 				</div>
 			</Center>
 		</>
