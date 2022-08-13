@@ -97,6 +97,8 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 				} else {
 					newData[index] = data as IstatsExtended;
 					newData[index].loading = false;
+
+					if (dataElProps[index].name === "shortlink") newData[index].extraData = "Total click : loading...";
 				}
 
 				return newData;
@@ -121,6 +123,7 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 					// index 6 shortlink
 					setDatas((prev) => {
 						const newData = [...prev];
+						newData[index].loading = false;
 						newData[index].extraData = "Total click : " + extraJson.data.clickCount;
 						return newData;
 					});
