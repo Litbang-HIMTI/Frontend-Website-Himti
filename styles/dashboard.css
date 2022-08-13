@@ -22,3 +22,13 @@
 #logout-popout button svg.icon-tabler-logout {
 	margin-left: 1.5px;
 }
+
+.dash-flex {
+	display: flex;
+	flex-direction: row;
+}
+
+.dash-flex-column {
+	display: flex;
+	flex-direction: column;
+}

@@ -5,3 +5,7 @@ export interface IDashboardProps {
 	user?: IUser;
 	token: string;
 }
+
+export interface IDashboardHomeProps extends IDashboardProps {
+	notes: any;
+}

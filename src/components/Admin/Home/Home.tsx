@@ -127,7 +127,7 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 				}
 			}
 		} catch (err) {
-			return setDatas((prev) => {
+			setDatas((prev) => {
 				const newDatas = [...prev];
 				newDatas[index].loading = false;
 				newDatas[index].loadFail = true;

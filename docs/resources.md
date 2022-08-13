@@ -8,6 +8,7 @@
 - [Note](#note)
   - [Next.js](#nextjs)
   - [CORS](#cors)
+  - [React Beautiful dnd](#react-beautiful-dnd)
   - [Error Handling](#error-handling)
   - [Authentication](#authentication)
 
@@ -47,6 +48,14 @@
 - [Express Session Cookie Not Being Set when using React Axios POST Request](https://stackoverflow.com/questions/63251837/express-session-cookie-not-being-set-when-using-react-axios-post-request)
 - [Using CORS in Express](https://medium.com/zero-equals-false/using-cors-in-express-cac7e29b005b)
 - [Why doesn't adding CORS headers to an OPTIONS route allow browsers to access my API?](https://stackoverflow.com/questions/7067966/why-doesnt-adding-cors-headers-to-an-options-route-allow-browsers-to-access-my)
+
+## React Beautiful dnd
+
+- https://stackoverflow.com/questions/64242578/how-to-fix-data-rbd-draggable-context-id-did-not-match-server-1-client-0
+- https://github.com/atlassian/react-beautiful-dnd/issues/1756
+- https://stackoverflow.com/questions/71080180/invariant-failed-draggableid-13-unable-to-find-drag-handle
+- https://github.com/atlassian/react-beautiful-dnd/issues/1756
+- https://github.com/atlassian/react-beautiful-dnd/issues/1673#issuecomment-571293508
 
 ## Error Handling
 

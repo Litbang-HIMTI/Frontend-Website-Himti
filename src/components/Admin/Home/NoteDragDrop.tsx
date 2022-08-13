@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
 import { NextPage } from "next";
-import { createStyles, Text } from "@mantine/core";
-import { useListState } from "@mantine/hooks";
+import { useEffect, useState } from "react";
+import { ActionIcon, createStyles, LoadingOverlay, Text } from "@mantine/core";
+import { useId, useListState } from "@mantine/hooks";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { IconGripVertical } from "@tabler/icons";
+import { IconGripVertical, IconEdit, IconPlus } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
+import { SERVER_V1 } from "../../../utils/constants";
+import { INote } from "../../../interfaces/db/Note";
+import { showNotification } from "@mantine/notifications";
+import Link from "next/link";
 
 const useStyles = createStyles((theme) => ({
 	item: {
@@ -18,14 +22,23 @@ const useStyles = createStyles((theme) => ({
 		marginBottom: theme.spacing.sm,
 	},
 
-	itemDragging: {
-		boxShadow: theme.shadows.sm,
+	relativeDiv: {
+		position: "relative",
 	},
 
-	symbol: {
-		fontSize: 30,
-		fontWeight: 700,
-		width: 60,
+	editIcon: {
+		position: "absolute",
+		right: "10px",
+	},
+
+	iconHover: {
+		"&:hover": {
+			backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[5] : theme.colors.gray[0],
+		},
+	},
+
+	itemDragging: {
+		boxShadow: theme.shadows.sm,
 	},
 
 	dragHandle: {
@@ -40,84 +53,151 @@ const useStyles = createStyles((theme) => ({
 	},
 }));
 
-interface DndListHandleProps {
-	position: number;
-	mass: number;
-	symbol: string;
-	name: string;
-}
-
 export const NoteDragDrop: NextPage<IDashboardProps> = (props) => {
-	const data: DndListHandleProps[] = [
-		{
-			position: 6,
-			mass: 12.011,
-			symbol: "C",
-			name: "Carbon",
-		},
-		{
-			position: 7,
-			mass: 14.007,
-			symbol: "N",
-			name: "Nitrogen",
-		},
-		{
-			position: 39,
-			mass: 88.906,
-			symbol: "Y",
-			name: "Yttrium",
-		},
-		{
-			position: 56,
-			mass: 137.33,
-			symbol: "B",
-			name: "Barium",
-		},
-		{
-			position: 58,
-			mass: 140.12,
-			symbol: "Z",
-			name: "Cerium",
-		},
-	];
-
 	const { classes, cx } = useStyles();
-	const [state, handlers] = useListState(data);
-	const [items, setItems] = useState<JSX.Element[] | null>(null);
+	const [state, setState_List] = useListState<INote>();
+	const [localState, setLocalState] = useState<INote[]>([]);
+	const [loading, setLoading] = useState(true);
+	const randId = useId();
+
+	const fillData = async () => {
+		try {
+			const fetchData = await fetch(SERVER_V1 + "/note?byPosition=true", {
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				credentials: "include",
+			});
+
+			if (fetchData.status !== 200) return setState_List.setState([]);
+
+			const { data }: { data: INote[] } = await fetchData.json();
+			setState_List.setState(data);
+			setLocalState(data);
+			setLoading(false);
+		} catch (error) {
+			setState_List.setState([]);
+			setLoading(false);
+		}
+	};
+
+	const updatePosToDB = async (pos: number, _id: string) => {
+		try {
+			const fetchData = await fetch(SERVER_V1 + `/note/${_id}`, {
+				method: "PUT",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				credentials: "include",
+				body: JSON.stringify({
+					position: pos,
+				}),
+			});
+
+			if (fetchData.status !== 200) return;
+		} catch (error) {
+			showNotification({
+				title: "Error",
+				message: `Could not update note position to DB\nReason${error}`,
+				color: "red",
+			});
+		}
+	};
 
 	useEffect(() => {
-		const itemList = state.map((item, index) => (
-			<Draggable index={index} draggableId={item.symbol} key={item.symbol}>
-				{(provided, snapshot) => (
-					<div className={cx(classes.item, { [classes.itemDragging]: snapshot.isDragging })} ref={provided.innerRef} {...provided.draggableProps}>
-						<div {...provided.dragHandleProps} className={classes.dragHandle}>
-							<IconGripVertical size={18} stroke={1.5} />
-						</div>
-						<Text className={classes.symbol}>{item.symbol}</Text>
-						<div>
-							<Text>{item.name}</Text>
-							<Text color="dimmed" size="sm">
-								Position: {item.position} • Mass: {item.mass}
-							</Text>
-						</div>
-					</div>
-				)}
-			</Draggable>
-		));
-
-		setItems(itemList);
+		fillData();
 	}, []);
 
 	return (
-		<DragDropContext onDragEnd={({ destination, source }) => handlers.reorder({ from: source.index, to: destination?.index || 0 })}>
-			<Droppable droppableId="dnd-list" direction="vertical">
-				{(provided) => (
-					<div {...provided.droppableProps} ref={provided.innerRef}>
-						{items ? items : <Text>No items</Text>}
-						{provided.placeholder}
-					</div>
-				)}
-			</Droppable>
-		</DragDropContext>
+		<div className={classes.relativeDiv}>
+			<div className="dash-flex" style={{ marginBottom: "1rem" }}>
+				<h1>Notes</h1>
+
+				<span style={{ marginLeft: ".5rem", marginTop: ".5rem" }} className={classes.iconHover}>
+					<Link href={"/admin/note/create"}>
+						<ActionIcon variant="outline">
+							<IconPlus size={30} />
+						</ActionIcon>
+					</Link>
+				</span>
+			</div>
+
+			<DragDropContext
+				onDragEnd={({ destination, source }) => {
+					// await reorderAsync(source.index, destination ? destination.index : 0);
+					setState_List.reorder({ from: source.index, to: destination?.index || 0 });
+
+					setLocalState((prev) => {
+						const newState = [...prev];
+						newState.splice(source.index, 1);
+						newState.splice(destination?.index || 0, 0, prev[source.index]);
+						newState.forEach((note, index) => {
+							newState[index].position = index;
+							updatePosToDB(index, note._id);
+						});
+
+						return newState;
+					});
+				}}
+			>
+				<Droppable droppableId="dnd-list" direction="vertical">
+					{(provided) => (
+						<div {...provided.droppableProps} ref={provided.innerRef}>
+							{state.length > 0 ? (
+								state.map((item, index) => (
+									<Draggable index={index} draggableId={item._id} key={item._id}>
+										{(provided, snapshot) => (
+											<>
+												<div className={cx(classes.item, { [classes.itemDragging]: snapshot.isDragging })} ref={provided.innerRef} {...provided.draggableProps}>
+													<div {...provided.dragHandleProps} className={classes.dragHandle}>
+														<IconGripVertical size={18} stroke={1.5} />
+													</div>
+													<div>
+														<Text>{item.title}</Text>
+														<Text color="dimmed" size="sm">
+															{item.content}
+														</Text>
+													</div>
+
+													<div className={classes.editIcon}>
+														<Link href={`/admin/note/${item._id}`}>
+															<ActionIcon>
+																<IconEdit />
+															</ActionIcon>
+														</Link>
+													</div>
+												</div>
+											</>
+										)}
+									</Draggable>
+								))
+							) : (
+								<>
+									<LoadingOverlay overlayBlur={4} visible={loading} zIndex={1} />
+									<Draggable index={0} draggableId={randId} key={randId}>
+										{(provided, snapshot) => (
+											<div className={cx(classes.item, { [classes.itemDragging]: snapshot.isDragging })} ref={provided.innerRef} {...provided.draggableProps}>
+												<div {...provided.dragHandleProps} className={classes.dragHandle}>
+													<IconGripVertical size={18} stroke={1.5} />
+												</div>
+												<div>
+													<Text>Note is empty</Text>
+													<Text color="dimmed" size="sm">
+														Add notes to get started
+													</Text>
+												</div>
+											</div>
+										)}
+									</Draggable>
+								</>
+							)}
+
+							{provided.placeholder}
+						</div>
+					)}
+				</Droppable>
+			</DragDropContext>
+		</div>
 	);
 };
