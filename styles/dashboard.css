@@ -1,3 +1,4 @@
+/* outer */
 .dashboard.login-logo {
 	width: 100px;
 	pointer-events: none;
@@ -24,6 +25,7 @@
 	margin-left: 1.5px;
 }
 
+/* components use */
 .dash-flex {
 	display: flex;
 	flex-direction: row;
@@ -32,4 +34,12 @@
 .dash-flex-column {
 	display: flex;
 	flex-direction: column;
+}
+
+.dash-relative {
+	position: relative;
+}
+
+#dash-add-new div span {
+	margin-right: 4px;
 }

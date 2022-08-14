@@ -1,8 +1,7 @@
 import type { NextPage } from "next";
 import { useEffect, useState } from "react";
-import { createStyles, Table, ScrollArea, UnstyledButton, Group, Text, Center, TextInput, Tooltip, ActionIcon } from "@mantine/core";
-import { keys } from "@mantine/utils";
-import { IconSelector, IconChevronDown, IconChevronUp, IconSearch, IconEdit, IconTrash } from "@tabler/icons";
+import { createStyles, Table, ScrollArea, UnstyledButton, Group, Text, Center, TextInput, Tooltip, ActionIcon, Tabs, Button, LoadingOverlay } from "@mantine/core";
+import { IconSelector, IconChevronDown, IconChevronUp, IconSearch, IconEdit, IconTrash, IconFilePlus } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { INote } from "../../../interfaces/db";
 import { showNotification } from "@mantine/notifications";
@@ -28,12 +27,6 @@ const useStyles = createStyles((theme) => ({
 		borderRadius: 21,
 	},
 }));
-
-interface RowData {
-	name: string;
-	email: string;
-	company: string;
-}
 
 interface ThProps {
 	classes: Record<string, string>;
@@ -62,46 +55,38 @@ function Th({ classes, children, reversed, sorted, onSort, width }: ThProps) {
 	);
 }
 
-function filterData(data: RowData[], search: string) {
-	const query = search.toLowerCase().trim();
-	return data.filter((item) => keys(data[0]).some((key) => item[key].toLowerCase().includes(query)));
-}
-
-// function sortData(data: RowData[], payload: { sortBy: keyof RowData | null; reversed: boolean; search: string }) {
-function sortData(data: any[], payload: any) {
-	const { sortBy } = payload;
-
-	if (!sortBy) {
-		return filterData(data, payload.search);
-	}
-
-	return filterData(
-		[...data].sort((a, b) => {
-			if (payload.reversed) {
-				return b[sortBy].localeCompare(a[sortBy]);
-			}
-
-			return a[sortBy].localeCompare(b[sortBy]);
-		}),
-		payload.search
-	);
+type validSort = "title" | "content" | "author" | "createdAt";
+interface sortI {
+	title: (a: INote, b: INote) => number;
+	content: (a: INote, b: INote) => number;
+	author: (a: INote, b: INote) => number;
+	createdAt: (a: INote, b: INote) => number;
 }
 
 export const Note: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useStyles();
 	const [search, setSearch] = useState("");
-	const [sortedData, setSortedData] = useState<INote[] | null>(null);
-	const [sortBy, setSortBy] = useState<any>(null);
+	const [notesData, setNotesData] = useState<INote[]>([]);
+	const [sortBy, setSortBy] = useState<validSort | null>(null);
 	const [reverseSortDirection, setReverseSortDirection] = useState(false);
-	const [loading, setLoading] = useState(false);
+	const [loading, setLoading] = useState(true);
 	const [tz, setTz] = useState("UTC");
 
-	// const setSorting = (field: keyof RowData) => {
-	const setSorting = (field: any) => {
-		const reversed = field === sortBy ? !reverseSortDirection : false;
-		setReverseSortDirection(reversed);
-		setSortBy(field);
-		// setSortedData(sortData(data, { sortBy: field, reversed, search }));
+	const sortData = (type: validSort | null, data: INote[]) => {
+		if (!type) return data;
+
+		const sortMap: sortI = {
+			title: (a: INote, b: INote) => a.title.localeCompare(b.title),
+			content: (a: INote, b: INote) => a.content.localeCompare(b.content),
+			author: (a: INote, b: INote) => a.author[0].username.localeCompare(b.author[0].username),
+			createdAt: (a: INote, b: INote) => a.createdAt.valueOf() - b.createdAt.valueOf(),
+		};
+
+		// sort
+		const sortedData = data.sort(sortMap[type]);
+		if (reverseSortDirection) sortedData.reverse();
+
+		return sortedData;
 	};
 
 	const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,10 +110,10 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 				credentials: "include",
 			});
 
-			if (fetchData.status !== 200) return;
+			const { data, message }: { data: INote[]; message: string } = await fetchData.json();
+			if (fetchData.status !== 200) return showNotification({ title: "Error", message, color: "red" });
 
-			const { data }: { data: INote[] } = await fetchData.json();
-			setSortedData(data);
+			setNotesData(data);
 			setLoading(false);
 		} catch (error) {
 			setLoading(false);
@@ -148,80 +133,162 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 	return (
 		<>
-			<h1>Dashboard Note</h1>
-			<ScrollArea mt={30}>
-				<TextInput placeholder="Search by any field" mb="md" icon={<IconSearch size={14} stroke={1.5} />} value={search} onChange={handleSearchChange} />
-				<Table horizontalSpacing="md" verticalSpacing="xs" sx={{ tableLayout: "fixed", minWidth: 600 }} highlightOnHover>
-					{/* <Table horizontalSpacing="md" verticalSpacing="xs" sx={{ width: "100%" }} highlightOnHover> */}
-					<thead>
-						<tr>
-							<Th classes={classes} sorted={sortBy === "title"} reversed={reverseSortDirection} onSort={() => setSorting("title")} width="20%">
-								Title
-							</Th>
-							<Th classes={classes} sorted={sortBy === "content"} reversed={reverseSortDirection} onSort={() => setSorting("content")} width="40%">
-								Content
-							</Th>
-							<Th classes={classes} sorted={sortBy === "author"} reversed={reverseSortDirection} onSort={() => setSorting("author")} width="15%">
-								Author
-							</Th>
-							<Th classes={classes} sorted={sortBy === "createdAt"} reversed={reverseSortDirection} onSort={() => setSorting("createdAt")} width="15%">
-								Created At
-							</Th>
-							<th className={classes.th} style={{ width: "10%" }}>
-								<UnstyledButton className={classes.control}>
-									<Group position="apart">
-										<Text weight={500} size="sm">
-											Action
-										</Text>
-									</Group>
-								</UnstyledButton>
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{sortedData && sortedData.length > 0 ? (
-							sortedData!.map((row) => (
-								<tr key={row._id}>
-									<td>{row.title}</td>
-									<td>{row.content}</td>
-									<td>
-										{row.editedBy ? (
-											<>
-												<Tooltip label={`Last edited by: ${row.editedBy[0].username}`}>
-													<span>{row.author[0].username}</span>
-												</Tooltip>
-											</>
-										) : (
-											row.author[0].username
-										)}
-									</td>
-									<td>
-										{formatDate(row.createdAt)} - {new Date(row.createdAt).toLocaleTimeString("en-us", { timeZone: tz })}
-									</td>
-									<td>
-										<div className="dash-flex">
-											<ActionIcon>
-												<IconEdit size={14} stroke={1.5} />
-											</ActionIcon>
-											<ActionIcon>
-												<IconTrash size={14} stroke={1.5} />
-											</ActionIcon>
-										</div>
-									</td>
-								</tr>
-							))
-						) : (
+			<div className="dash-flex">
+				<h1>Dashboard Note</h1>
+				<Button id="dash-add-new" ml={16} mt="auto" size="xs" compact leftIcon={<IconFilePlus size={20} />}>
+					Add new
+				</Button>
+			</div>
+			<div style={{ marginTop: "1.5rem" }}>
+				<Tabs defaultValue="first">
+					<Tabs.List>
+						<Tabs.Tab value="first" color="green">
+							Search
+						</Tabs.Tab>
+						<Tabs.Tab value="second" color="lime">
+							Advanced Search
+						</Tabs.Tab>
+						<Tabs.Tab value="third" color="blue">
+							Setting
+						</Tabs.Tab>
+					</Tabs.List>
+
+					<Tabs.Panel value="first" pt="xs">
+						<TextInput placeholder="Search by any field" mb="md" icon={<IconSearch size={14} stroke={1.5} />} value={search} onChange={handleSearchChange} />
+					</Tabs.Panel>
+
+					<Tabs.Panel value="second" pt="xs">
+						Multiple search input
+					</Tabs.Panel>
+
+					<Tabs.Panel value="third" pt="xs">
+						Setting
+					</Tabs.Panel>
+				</Tabs>
+			</div>
+
+			<div className="dash-relative">
+				<LoadingOverlay visible={loading} overlayBlur={3} />
+				<ScrollArea mt={30}>
+					<Table horizontalSpacing="md" verticalSpacing="xs" sx={{ tableLayout: "fixed", minWidth: 600 }} highlightOnHover>
+						<thead>
 							<tr>
-								<td colSpan={4}>
-									<Text weight={500} align="center">
-										Nothing found
-									</Text>
-								</td>
+								<Th
+									classes={classes}
+									sorted={sortBy === "title"}
+									reversed={reverseSortDirection}
+									onSort={() => {
+										if (sortBy === "title") setReverseSortDirection(!reverseSortDirection);
+										setSortBy("title");
+									}}
+									width="20%"
+								>
+									Title
+								</Th>
+								<Th
+									classes={classes}
+									sorted={sortBy === "content"}
+									reversed={reverseSortDirection}
+									onSort={() => {
+										if (sortBy === "content") setReverseSortDirection(!reverseSortDirection);
+										setSortBy("content");
+									}}
+									width="40%"
+								>
+									Content
+								</Th>
+								<Th
+									classes={classes}
+									sorted={sortBy === "author"}
+									reversed={reverseSortDirection}
+									onSort={() => {
+										if (sortBy === "author") setReverseSortDirection(!reverseSortDirection);
+										setSortBy("author");
+									}}
+									width="15%"
+								>
+									Author
+								</Th>
+								<Th
+									classes={classes}
+									sorted={sortBy === "createdAt"}
+									reversed={reverseSortDirection}
+									onSort={() => {
+										if (sortBy === "createdAt") setReverseSortDirection(!reverseSortDirection);
+										setSortBy("createdAt");
+									}}
+									width="15%"
+								>
+									Created At
+								</Th>
+								<th className={classes.th} style={{ width: "10%" }}>
+									<UnstyledButton className={classes.control}>
+										<Group position="apart">
+											<Text weight={500} size="sm">
+												Action
+											</Text>
+										</Group>
+									</UnstyledButton>
+								</th>
 							</tr>
-						)}
-					</tbody>
-				</Table>
-			</ScrollArea>
+						</thead>
+						<tbody>
+							{notesData && notesData.length > 0 ? (
+								sortData(sortBy, notesData).map((row) => (
+									<tr key={row._id}>
+										<td>{row.title}</td>
+										<td>{row.content}</td>
+										<td>
+											{row.editedBy ? (
+												<>
+													<Tooltip label={`Last edited by: ${row.editedBy[0].username}`}>
+														<span>{row.author[0].username}</span>
+													</Tooltip>
+												</>
+											) : (
+												row.author[0].username
+											)}
+										</td>
+										<td>
+											{row.editedBy ? (
+												<Tooltip label={`Last edited at: ${formatDate(row.updatedAt)} - ${new Date(row.updatedAt).toLocaleTimeString("en-us", { timeZone: tz })}`}>
+													<span>
+														{formatDate(row.createdAt)} - {new Date(row.createdAt).toLocaleTimeString("en-us", { timeZone: tz })}
+													</span>
+												</Tooltip>
+											) : (
+												<>
+													{formatDate(row.createdAt)} - {new Date(row.createdAt).toLocaleTimeString("en-us", { timeZone: tz })}
+												</>
+											)}
+										</td>
+										<td>
+											<div className="dash-flex">
+												<ActionIcon>
+													<IconEdit size={14} stroke={1.5} />
+												</ActionIcon>
+												<ActionIcon>
+													<IconTrash size={14} stroke={1.5} />
+												</ActionIcon>
+											</div>
+										</td>
+									</tr>
+								))
+							) : (
+								<>
+									<tr>
+										<td colSpan={5}>
+											<Text weight={500} align="center">
+												Nothing found
+											</Text>
+										</td>
+									</tr>
+								</>
+							)}
+						</tbody>
+					</Table>
+				</ScrollArea>
+			</div>
 		</>
 	);
 };
