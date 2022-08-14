@@ -1,8 +1,25 @@
 import type { NextPage } from "next";
 import { useEffect, useState } from "react";
-import { createStyles, Table, ScrollArea, UnstyledButton, Group, Text, Center, TextInput, Tooltip, ActionIcon, Tabs, Button, LoadingOverlay, Divider, Collapse } from "@mantine/core";
+import {
+	createStyles,
+	Table,
+	ScrollArea,
+	UnstyledButton,
+	Group,
+	Text,
+	Center,
+	TextInput,
+	Tooltip,
+	ActionIcon,
+	Tabs,
+	Button,
+	LoadingOverlay,
+	Divider,
+	Collapse,
+	NumberInput,
+} from "@mantine/core";
 import { keys } from "@mantine/utils";
-import { IconSelector, IconChevronDown, IconChevronUp, IconSearch, IconEdit, IconTrash, IconFilePlus, IconLego, IconLetterA, IconLicense, IconDeviceWatch } from "@tabler/icons";
+import { IconSelector, IconChevronDown, IconChevronUp, IconSearch, IconEdit, IconTrash, IconFilePlus, IconLego, IconLetterA, IconLicense, IconDeviceWatch, IconRefresh } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { INote } from "../../../interfaces/db";
 import { showNotification } from "@mantine/notifications";
@@ -72,6 +89,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	const [searchContent, setSearchContent] = useState("");
 	const [searchAuthor, setSearchAuthor] = useState("");
 	const [searchCreatedAt, setSearchCreatedAt] = useState("");
+	const [perPage, setPerPage] = useState(25);
 
 	const [notesData, setNotesData] = useState<INote[]>([]);
 	const [sortBy, setSortBy] = useState<validSort | null>(null);
@@ -133,9 +151,10 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 		return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} - ${d.toLocaleTimeString("en-us", { timeZone: tz })}`;
 	};
 
-	const fillData = async () => {
+	const fillData = async (perPage: number) => {
 		try {
-			const fetchData = await fetch(SERVER_V1 + "/note?perPage=20", {
+			setLoading(true);
+			const fetchData = await fetch(SERVER_V1 + `/note?perPage=${perPage}`, {
 				method: "GET",
 				headers: {
 					"Content-Type": "application/json",
@@ -148,6 +167,9 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 			setNotesData(data);
 			setLoading(false);
+
+			console.log(perPage);
+			console.log(notesData);
 		} catch (error) {
 			setLoading(false);
 			// notify
@@ -161,7 +183,14 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 	useEffect(() => {
 		setTz(Intl.DateTimeFormat().resolvedOptions().timeZone);
-		fillData();
+		// fill data with setting
+		if (localStorage.getItem("perPage-note")) {
+			setPerPage(parseInt(localStorage.getItem("perPage-note") as string));
+			fillData(parseInt(localStorage.getItem("perPage-note")!));
+		} else {
+			localStorage.setItem("perPage-note", perPage.toString());
+			fillData(perPage);
+		}
 	}, []);
 
 	return (
@@ -246,10 +275,38 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 						</Collapse>
 					</Tabs.Panel>
 
-					<Tabs.Panel value="third" pt="xs">
+					<Tabs.Panel value="third" pt="xs" className="dash-textinput-gap">
 						<Collapse in={tabIndex === 2}>
 							<Text color="dimmed">Customize data load setting</Text>
-							Setting
+
+							<NumberInput
+								placeholder="Search by createdAt field"
+								label="Item per page"
+								description="How many item per page in the dashboard (default: 25, min: 5, max: 100)"
+								value={perPage}
+								stepHoldDelay={500}
+								stepHoldInterval={100}
+								min={5}
+								max={50}
+								onChange={(value) => {
+									if (!value) return;
+									setPerPage(value);
+									localStorage.setItem("perPage-note", value.toString());
+								}}
+								mt={8}
+							/>
+
+							{/* button save */}
+							<Button
+								compact
+								leftIcon={<IconRefresh size={20} />}
+								onClick={() => {
+									fillData(perPage);
+								}}
+								mt={16}
+							>
+								Reload the table
+							</Button>
 						</Collapse>
 					</Tabs.Panel>
 				</Tabs>
