@@ -119,11 +119,14 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	};
 
 	const searchData = (data: INote[], query: string) => {
-		if (searchAll !== "") data = data.filter((item) => keys(data[0]).some((key) => searchAllHelper(item, query)));
-		if (searchTitle !== "") data = data.filter((item) => item.title.toLowerCase().includes(searchTitle.toLowerCase()));
-		if (searchContent !== "") data = data.filter((item) => item.content.toLowerCase().includes(searchContent.toLowerCase()));
-		if (searchAuthor !== "") data = data.filter((item) => item.author[0].username.toLowerCase().includes(searchAuthor.toLowerCase()));
-		if (searchCreatedAt !== "") data = data.filter((item) => formatDate(item.createdAt, tz).toLowerCase().includes(searchCreatedAt.toLowerCase()));
+		if (tabIndex === 0) {
+			if (searchAll !== "") data = data.filter((item) => keys(data[0]).some((key) => searchAllHelper(item, query)));
+		} else {
+			if (searchTitle !== "") data = data.filter((item) => item.title.toLowerCase().includes(searchTitle.toLowerCase()));
+			if (searchContent !== "") data = data.filter((item) => item.content.toLowerCase().includes(searchContent.toLowerCase()));
+			if (searchAuthor !== "") data = data.filter((item) => item.author[0].username.toLowerCase().includes(searchAuthor.toLowerCase()));
+			if (searchCreatedAt !== "") data = data.filter((item) => formatDate(item.createdAt, tz).toLowerCase().includes(searchCreatedAt.toLowerCase()));
+		}
 
 		return data;
 	};
@@ -167,9 +170,6 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 			setNotesData(data);
 			setLoading(false);
-
-			console.log(perPage);
-			console.log(notesData);
 		} catch (error) {
 			setLoading(false);
 			// notify
@@ -208,7 +208,6 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 							value="first"
 							color="green"
 							onClick={() => {
-								resetSearch();
 								setTabIndex(0);
 							}}
 						>
@@ -218,7 +217,6 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 							value="second"
 							color="lime"
 							onClick={() => {
-								resetSearch();
 								setTabIndex(1);
 							}}
 						>
@@ -280,8 +278,8 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 							<Text color="dimmed">Customize data load setting</Text>
 
 							<NumberInput
-								placeholder="Search by createdAt field"
 								label="Item per page"
+								placeholder="Item per page"
 								description="How many item per page in the dashboard (default: 25, min: 5, max: 100)"
 								value={perPage}
 								stepHoldDelay={500}
@@ -296,7 +294,6 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 								mt={8}
 							/>
 
-							{/* button save */}
 							<Button
 								compact
 								leftIcon={<IconRefresh size={20} />}
