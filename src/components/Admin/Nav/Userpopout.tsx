@@ -14,7 +14,7 @@ interface navProps {
 export const UserPopout: NextPage<navProps> = (props) => {
 	const { theme } = props;
 	return (
-		<Group position="center">
+		<Group position="center" mt={3}>
 			<Menu width={300} position="right" transition="pop" trigger="hover">
 				<Menu.Target>
 					<ActionIcon size={50} sx={{ display: "flex", flexDirection: "column" }}>

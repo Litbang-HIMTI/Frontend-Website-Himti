@@ -215,7 +215,7 @@ export const DashboardNav: NextPage<IDashboardProps> = (props) => {
 	}, [props.user, theme, active]);
 
 	return (
-		<Navbar width={{ base: 80 }} p="md">
+		<Navbar width={{ base: 80 }} p="md" sx={{ position: "fixed" }}>
 			<Center>
 				<UserPopout {...props} theme={theme} />
 			</Center>

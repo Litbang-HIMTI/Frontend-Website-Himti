@@ -12,7 +12,8 @@
 }
 
 .dashboard.content-wrap {
-	padding: 1rem;
+	padding: 1.5rem 3rem 2rem;
+	margin-left: 5rem;
 }
 
 #logout-nav div svg.icon-tabler-logout {

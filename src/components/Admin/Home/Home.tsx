@@ -9,10 +9,6 @@ import { SERVER_V1 } from "../../../utils/constants";
 import { NoteDragDrop } from "./NoteDragDrop";
 
 const useStyles = createStyles((theme) => ({
-	root: {
-		padding: theme.spacing.xl * 1.5,
-	},
-
 	value: {
 		fontSize: 24,
 		fontWeight: 700,
@@ -203,11 +199,11 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 
 	return (
 		<>
-			<div className={classes.root} style={{ paddingBottom: "1rem" }}>
+			<div style={{ paddingBottom: "2rem" }}>
 				<h1>Welcome {props.user ? props.user.username : null}</h1>
 			</div>
 			<Center>
-				<div className={classes.root}>
+				<div>
 					<SimpleGrid
 						cols={5}
 						breakpoints={[
