@@ -117,7 +117,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 			title: (a: INote, b: INote) => a.title.localeCompare(b.title),
 			content: (a: INote, b: INote) => a.content.localeCompare(b.content),
 			author: (a: INote, b: INote) => a.author[0].username.localeCompare(b.author[0].username),
-			createdAt: (a: INote, b: INote) => a.createdAt.valueOf() - b.createdAt.valueOf(),
+			createdAt: (a: INote, b: INote) => new Date(b.createdAt) - new Date(a.createdAt),
 		};
 
 		// sort
