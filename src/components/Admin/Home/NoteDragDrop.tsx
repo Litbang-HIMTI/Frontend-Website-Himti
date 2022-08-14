@@ -125,20 +125,21 @@ export const NoteDragDrop: NextPage<IDashboardProps> = (props) => {
 
 			<DragDropContext
 				onDragEnd={({ destination, source }) => {
-					// await reorderAsync(source.index, destination ? destination.index : 0);
 					setState_List.reorder({ from: source.index, to: destination?.index || 0 });
 
-					setLocalState((prev) => {
-						const newState = [...prev];
-						newState.splice(source.index, 1);
-						newState.splice(destination?.index || 0, 0, prev[source.index]);
-						newState.forEach((note, index) => {
-							newState[index].position = index;
-							updatePosToDB(index, note._id);
-						});
+					// only update db if data is not empty
+					if (localState.length > 0)
+						setLocalState((prev) => {
+							const newState = [...prev];
+							newState.splice(source.index, 1);
+							newState.splice(destination?.index || 0, 0, prev[source.index]);
+							newState.forEach((note, index) => {
+								newState[index].position = index;
+								updatePosToDB(index, note._id);
+							});
 
-						return newState;
-					});
+							return newState;
+						});
 				}}
 			>
 				<Droppable droppableId="dnd-list" direction="vertical">
