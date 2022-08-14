@@ -8,7 +8,7 @@ export interface IUser {
 	first_name: string;
 	last_name: string;
 	email: string;
-	group?: IGroup;
+	group?: IGroup[];
 	role: TRoles[];
 	salt: string;
 	hash: string;
