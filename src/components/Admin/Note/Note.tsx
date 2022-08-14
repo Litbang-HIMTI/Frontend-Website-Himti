@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import { useEffect, useState } from "react";
-import { createStyles, Table, ScrollArea, UnstyledButton, Group, Text, Center, TextInput, Tooltip, ActionIcon, Tabs, Button, LoadingOverlay, Container, Divider } from "@mantine/core";
+import { createStyles, Table, ScrollArea, UnstyledButton, Group, Text, Center, TextInput, Tooltip, ActionIcon, Tabs, Button, LoadingOverlay, Divider, Collapse } from "@mantine/core";
 import { keys } from "@mantine/utils";
 import { IconSelector, IconChevronDown, IconChevronUp, IconSearch, IconEdit, IconTrash, IconFilePlus, IconLego, IconLetterA, IconLicense, IconDeviceWatch } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
@@ -78,6 +78,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 	const [reverseSortDirection, setReverseSortDirection] = useState(false);
 	const [loading, setLoading] = useState(true);
+	const [tabIndex, setTabIndex] = useState(0);
 
 	const [tz, setTz] = useState("UTC");
 
@@ -166,7 +167,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	return (
 		<>
 			<div className="dash-flex">
-				<h1>Dashboard Note</h1>
+				<h1>Notes</h1>
 				<Button id="dash-add-new" ml={16} mt="auto" size="xs" compact leftIcon={<IconFilePlus size={20} />}>
 					Add new
 				</Button>
@@ -174,62 +175,82 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 			<div style={{ marginTop: "1.5rem" }}>
 				<Tabs defaultValue="first">
 					<Tabs.List>
-						<Tabs.Tab value="first" color="green" onClick={() => resetSearch()}>
+						<Tabs.Tab
+							value="first"
+							color="green"
+							onClick={() => {
+								resetSearch();
+								setTabIndex(0);
+							}}
+						>
 							Search
 						</Tabs.Tab>
-						<Tabs.Tab value="second" color="lime" onClick={() => resetSearch()}>
+						<Tabs.Tab
+							value="second"
+							color="lime"
+							onClick={() => {
+								resetSearch();
+								setTabIndex(1);
+							}}
+						>
 							Advanced Search
 						</Tabs.Tab>
-						<Tabs.Tab value="third" color="blue">
+						<Tabs.Tab value="third" color="blue" onClick={() => setTabIndex(2)}>
 							Setting
 						</Tabs.Tab>
 					</Tabs.List>
 
 					<Tabs.Panel value="first" pt="xs">
-						<Text color="dimmed">Quick search by any field</Text>
-						<TextInput placeholder="Search by any field" mb="md" icon={<IconSearch size={14} stroke={1.5} />} value={searchAll} onChange={(e) => setSearchAll(e.target.value)} mt={16} />
+						<Collapse in={tabIndex === 0}>
+							<Text color="dimmed">Quick search by any field</Text>
+							<TextInput placeholder="Search by any field" mb="md" icon={<IconSearch size={14} stroke={1.5} />} value={searchAll} onChange={(e) => setSearchAll(e.target.value)} mt={16} />
+						</Collapse>
 					</Tabs.Panel>
 
 					<Tabs.Panel value="second" pt="xs" className="dash-textinput-gap">
-						<Text color="dimmed">Search more accurately by searching for each field</Text>
+						<Collapse in={tabIndex === 1}>
+							<Text color="dimmed">Search more accurately by searching for each field</Text>
 
-						<TextInput
-							placeholder="Search by title field"
-							label="Title"
-							icon={<IconLetterA size={14} stroke={1.5} />}
-							value={searchTitle}
-							onChange={(e) => setSearchTitle(e.target.value)}
-							mt={16}
-						/>
-						<TextInput
-							placeholder="Search by content field"
-							label="Content"
-							icon={<IconLicense size={14} stroke={1.5} />}
-							value={searchContent}
-							onChange={(e) => setSearchContent(e.target.value)}
-							mt={8}
-						/>
-						<TextInput
-							placeholder="Search by author field"
-							label="Author"
-							icon={<IconLego size={14} stroke={1.5} />}
-							value={searchAuthor}
-							onChange={(e) => setSearchAuthor(e.target.value)}
-							mt={8}
-						/>
-						<TextInput
-							placeholder="Search by createdAt field"
-							label="Created At"
-							icon={<IconDeviceWatch size={14} stroke={1.5} />}
-							value={searchCreatedAt}
-							onChange={(e) => setSearchCreatedAt(e.target.value)}
-							mt={8}
-						/>
+							<TextInput
+								placeholder="Search by title field"
+								label="Title"
+								icon={<IconLetterA size={14} stroke={1.5} />}
+								value={searchTitle}
+								onChange={(e) => setSearchTitle(e.target.value)}
+								mt={16}
+							/>
+							<TextInput
+								placeholder="Search by content field"
+								label="Content"
+								icon={<IconLicense size={14} stroke={1.5} />}
+								value={searchContent}
+								onChange={(e) => setSearchContent(e.target.value)}
+								mt={8}
+							/>
+							<TextInput
+								placeholder="Search by author field"
+								label="Author"
+								icon={<IconLego size={14} stroke={1.5} />}
+								value={searchAuthor}
+								onChange={(e) => setSearchAuthor(e.target.value)}
+								mt={8}
+							/>
+							<TextInput
+								placeholder="Search by createdAt field"
+								label="Created At"
+								icon={<IconDeviceWatch size={14} stroke={1.5} />}
+								value={searchCreatedAt}
+								onChange={(e) => setSearchCreatedAt(e.target.value)}
+								mt={8}
+							/>
+						</Collapse>
 					</Tabs.Panel>
 
 					<Tabs.Panel value="third" pt="xs">
-						<Text color="dimmed">Customize data load setting</Text>
-						Setting
+						<Collapse in={tabIndex === 2}>
+							<Text color="dimmed">Customize data load setting</Text>
+							Setting
+						</Collapse>
 					</Tabs.Panel>
 				</Tabs>
 			</div>
