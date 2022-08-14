@@ -1,8 +1,8 @@
 import type { NextPage } from "next";
 import { useEffect, useState } from "react";
-import { createStyles, Table, ScrollArea, UnstyledButton, Group, Text, Center, TextInput, Tooltip, ActionIcon, Tabs, Button, LoadingOverlay } from "@mantine/core";
+import { createStyles, Table, ScrollArea, UnstyledButton, Group, Text, Center, TextInput, Tooltip, ActionIcon, Tabs, Button, LoadingOverlay, Container, Divider } from "@mantine/core";
 import { keys } from "@mantine/utils";
-import { IconSelector, IconChevronDown, IconChevronUp, IconSearch, IconEdit, IconTrash, IconFilePlus } from "@tabler/icons";
+import { IconSelector, IconChevronDown, IconChevronUp, IconSearch, IconEdit, IconTrash, IconFilePlus, IconLego, IconLetterA, IconLicense, IconDeviceWatch } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { INote } from "../../../interfaces/db";
 import { showNotification } from "@mantine/notifications";
@@ -68,6 +68,11 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useStyles();
 
 	const [searchAll, setSearchAll] = useState("");
+	const [searchTitle, setSearchTitle] = useState("");
+	const [searchContent, setSearchContent] = useState("");
+	const [searchAuthor, setSearchAuthor] = useState("");
+	const [searchCreatedAt, setSearchCreatedAt] = useState("");
+
 	const [notesData, setNotesData] = useState<INote[]>([]);
 	const [sortBy, setSortBy] = useState<validSort | null>(null);
 
@@ -76,17 +81,30 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 	const [tz, setTz] = useState("UTC");
 
-	const searchAllHelper = (item: INote, index: keyof INote) => {
+	// -----------------------------------------------------------
+	const resetSearch = () => {
+		setSearchAll("");
+		setSearchTitle("");
+		setSearchContent("");
+		setSearchAuthor("");
+		setSearchCreatedAt("");
+	};
+
+	const searchAllHelper = (item: INote, query: string) => {
 		return (
-			item.title.toLowerCase().includes(searchAll.toLowerCase()) ||
-			item.content.toLowerCase().includes(searchAll.toLowerCase()) ||
-			item.author[0].username.toLowerCase().includes(searchAll.toLowerCase()) ||
-			formatDate(item.createdAt, tz).toLowerCase().includes(searchAll.toLowerCase())
+			item.title.toLowerCase().includes(query.toLowerCase()) ||
+			item.content.toLowerCase().includes(query.toLowerCase()) ||
+			item.author[0].username.toLowerCase().includes(query.toLowerCase()) ||
+			formatDate(item.createdAt, tz).toLowerCase().includes(query.toLowerCase())
 		);
 	};
 
 	const searchData = (data: INote[], query: string) => {
-		if (searchAll !== "") data = data.filter((item) => keys(data[0]).some((key, index) => searchAllHelper(item, key)));
+		if (searchAll !== "") data = data.filter((item) => keys(data[0]).some((key) => searchAllHelper(item, query)));
+		if (searchTitle !== "") data = data.filter((item) => item.title.toLowerCase().includes(searchTitle.toLowerCase()));
+		if (searchContent !== "") data = data.filter((item) => item.content.toLowerCase().includes(searchContent.toLowerCase()));
+		if (searchAuthor !== "") data = data.filter((item) => item.author[0].username.toLowerCase().includes(searchAuthor.toLowerCase()));
+		if (searchCreatedAt !== "") data = data.filter((item) => formatDate(item.createdAt, tz).toLowerCase().includes(searchCreatedAt.toLowerCase()));
 
 		return data;
 	};
@@ -156,10 +174,10 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 			<div style={{ marginTop: "1.5rem" }}>
 				<Tabs defaultValue="first">
 					<Tabs.List>
-						<Tabs.Tab value="first" color="green">
+						<Tabs.Tab value="first" color="green" onClick={() => resetSearch()}>
 							Search
 						</Tabs.Tab>
-						<Tabs.Tab value="second" color="lime">
+						<Tabs.Tab value="second" color="lime" onClick={() => resetSearch()}>
 							Advanced Search
 						</Tabs.Tab>
 						<Tabs.Tab value="third" color="blue">
@@ -168,18 +186,55 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 					</Tabs.List>
 
 					<Tabs.Panel value="first" pt="xs">
-						<TextInput placeholder="Search by any field" mb="md" icon={<IconSearch size={14} stroke={1.5} />} value={searchAll} onChange={(e) => setSearchAll(e.target.value)} />
+						<Text color="dimmed">Quick search by any field</Text>
+						<TextInput placeholder="Search by any field" mb="md" icon={<IconSearch size={14} stroke={1.5} />} value={searchAll} onChange={(e) => setSearchAll(e.target.value)} mt={16} />
 					</Tabs.Panel>
 
-					<Tabs.Panel value="second" pt="xs">
-						Multiple search input
+					<Tabs.Panel value="second" pt="xs" className="dash-textinput-gap">
+						<Text color="dimmed">Search more accurately by searching for each field</Text>
+
+						<TextInput
+							placeholder="Search by title field"
+							label="Title"
+							icon={<IconLetterA size={14} stroke={1.5} />}
+							value={searchTitle}
+							onChange={(e) => setSearchTitle(e.target.value)}
+							mt={16}
+						/>
+						<TextInput
+							placeholder="Search by content field"
+							label="Content"
+							icon={<IconLicense size={14} stroke={1.5} />}
+							value={searchContent}
+							onChange={(e) => setSearchContent(e.target.value)}
+							mt={8}
+						/>
+						<TextInput
+							placeholder="Search by author field"
+							label="Author"
+							icon={<IconLego size={14} stroke={1.5} />}
+							value={searchAuthor}
+							onChange={(e) => setSearchAuthor(e.target.value)}
+							mt={8}
+						/>
+						<TextInput
+							placeholder="Search by createdAt field"
+							label="Created At"
+							icon={<IconDeviceWatch size={14} stroke={1.5} />}
+							value={searchCreatedAt}
+							onChange={(e) => setSearchCreatedAt(e.target.value)}
+							mt={8}
+						/>
 					</Tabs.Panel>
 
 					<Tabs.Panel value="third" pt="xs">
+						<Text color="dimmed">Customize data load setting</Text>
 						Setting
 					</Tabs.Panel>
 				</Tabs>
 			</div>
+
+			<Divider mt={16} mb={16} />
 
 			<div className="dash-relative">
 				<LoadingOverlay visible={loading} overlayBlur={3} />

@@ -43,3 +43,7 @@
 #dash-add-new div span {
 	margin-right: 4px;
 }
+
+.dash-textinput-gap div div input {
+	margin-top: 0.25rem;
+}
