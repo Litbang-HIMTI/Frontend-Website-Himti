@@ -1,6 +1,7 @@
 import type { NextPage } from "next";
 import { useEffect, useState } from "react";
 import { createStyles, Table, ScrollArea, UnstyledButton, Group, Text, Center, TextInput, Tooltip, ActionIcon, Tabs, Button, LoadingOverlay } from "@mantine/core";
+import { keys } from "@mantine/utils";
 import { IconSelector, IconChevronDown, IconChevronUp, IconSearch, IconEdit, IconTrash, IconFilePlus } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { INote } from "../../../interfaces/db";
@@ -65,15 +66,33 @@ interface sortI {
 
 export const Note: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useStyles();
-	const [search, setSearch] = useState("");
+
+	const [searchAll, setSearchAll] = useState("");
 	const [notesData, setNotesData] = useState<INote[]>([]);
 	const [sortBy, setSortBy] = useState<validSort | null>(null);
+
 	const [reverseSortDirection, setReverseSortDirection] = useState(false);
 	const [loading, setLoading] = useState(true);
+
 	const [tz, setTz] = useState("UTC");
 
-	const sortData = (type: validSort | null, data: INote[]) => {
-		if (!type) return data;
+	const searchAllHelper = (item: INote, index: keyof INote) => {
+		return (
+			item.title.toLowerCase().includes(searchAll.toLowerCase()) ||
+			item.content.toLowerCase().includes(searchAll.toLowerCase()) ||
+			item.author[0].username.toLowerCase().includes(searchAll.toLowerCase()) ||
+			formatDate(item.createdAt, tz).toLowerCase().includes(searchAll.toLowerCase())
+		);
+	};
+
+	const searchData = (data: INote[], query: string) => {
+		if (searchAll !== "") data = data.filter((item) => keys(data[0]).some((key, index) => searchAllHelper(item, key)));
+
+		return data;
+	};
+
+	const sortData = (type: validSort | null, data: INote[], query: string) => {
+		if (!type) return searchData(data, query);
 
 		const sortMap: sortI = {
 			title: (a: INote, b: INote) => a.title.localeCompare(b.title),
@@ -83,21 +102,16 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 		};
 
 		// sort
-		const sortedData = data.sort(sortMap[type]);
+		let sortedData = data.sort(sortMap[type]);
 		if (reverseSortDirection) sortedData.reverse();
 
-		return sortedData;
+		return searchData(sortedData, query);
 	};
 
-	const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const { value } = event.currentTarget;
-		setSearch(value);
-		// setSortedData(sortData(data, { sortBy, reversed: reverseSortDirection, search: value }));
-	};
-
-	const formatDate = (date: Date) => {
+	const formatDate = (date: Date, tz: string) => {
 		const d = new Date(date);
-		return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+
+		return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} - ${d.toLocaleTimeString("en-us", { timeZone: tz })}`;
 	};
 
 	const fillData = async () => {
@@ -154,7 +168,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 					</Tabs.List>
 
 					<Tabs.Panel value="first" pt="xs">
-						<TextInput placeholder="Search by any field" mb="md" icon={<IconSearch size={14} stroke={1.5} />} value={search} onChange={handleSearchChange} />
+						<TextInput placeholder="Search by any field" mb="md" icon={<IconSearch size={14} stroke={1.5} />} value={searchAll} onChange={(e) => setSearchAll(e.target.value)} />
 					</Tabs.Panel>
 
 					<Tabs.Panel value="second" pt="xs">
@@ -233,8 +247,8 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 							</tr>
 						</thead>
 						<tbody>
-							{notesData && notesData.length > 0 ? (
-								sortData(sortBy, notesData).map((row) => (
+							{notesData && notesData.length > 0 && sortData(sortBy, notesData, searchAll).length > 0 ? (
+								sortData(sortBy, notesData, searchAll).map((row) => (
 									<tr key={row._id}>
 										<td>{row.title}</td>
 										<td>{row.content}</td>
@@ -251,15 +265,11 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 										</td>
 										<td>
 											{row.editedBy ? (
-												<Tooltip label={`Last edited at: ${formatDate(row.updatedAt)} - ${new Date(row.updatedAt).toLocaleTimeString("en-us", { timeZone: tz })}`}>
-													<span>
-														{formatDate(row.createdAt)} - {new Date(row.createdAt).toLocaleTimeString("en-us", { timeZone: tz })}
-													</span>
+												<Tooltip label={`Last edited at: ${formatDate(row.updatedAt, tz)}`}>
+													<span>{formatDate(row.createdAt, tz)}</span>
 												</Tooltip>
 											) : (
-												<>
-													{formatDate(row.createdAt)} - {new Date(row.createdAt).toLocaleTimeString("en-us", { timeZone: tz })}
-												</>
+												<>{formatDate(row.createdAt, tz)}</>
 											)}
 										</td>
 										<td>
