@@ -1,11 +1,10 @@
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import { resetServerContext } from "react-beautiful-dnd";
-import { DashboardHome } from "../../src/components/Admin/Home/Home";
-import { DashboardNav } from "../../src/components/Admin/Nav/DashboardNav";
-import { IDashboardProps } from "../../src/interfaces/props/Dashboard";
-import { SERVER_V1 } from "../../src/utils/constants";
-import { validateStaff } from "../../src/utils/helper";
+import { DashboardHome } from "../../src/components/Admin/Home";
+import { DashboardNav } from "../../src/components/Admin/Nav";
+import { IDashboardProps } from "../../src/interfaces/props";
+import { SERVER_V1, validateStaff } from "../../src/utils";
 
 const dashboardHome: NextPage<IDashboardProps> = (props) => {
 	return (

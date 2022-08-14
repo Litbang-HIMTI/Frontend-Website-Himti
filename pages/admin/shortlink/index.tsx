@@ -1,10 +1,9 @@
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import { Shortlink } from "../../../src/components/Admin/Shortlink";
-import { DashboardNav } from "../../../src/components/Admin/Nav/DashboardNav";
+import { DashboardNav } from "../../../src/components/Admin/Nav";
 import { IDashboardProps } from "../../../src/interfaces/props/Dashboard";
-import { SERVER_V1 } from "../../../src/utils/constants";
-import { validateShortlinkMod } from "../../../src/utils/helper";
+import { SERVER_V1, validateShortlinkMod } from "../../../src/utils";
 
 const shortlink: NextPage<IDashboardProps> = (props) => {
 	return (

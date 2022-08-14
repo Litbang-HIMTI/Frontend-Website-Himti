@@ -1,10 +1,9 @@
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import { Comment } from "../../../src/components/Admin/Comment";
-import { DashboardNav } from "../../../src/components/Admin/Nav/DashboardNav";
+import { DashboardNav } from "../../../src/components/Admin/Nav";
 import { IDashboardProps } from "../../../src/interfaces/props/Dashboard";
-import { SERVER_V1 } from "../../../src/utils/constants";
-import { validateForumMod } from "../../../src/utils/helper";
+import { SERVER_V1, validateForumMod } from "../../../src/utils";
 
 const comment: NextPage<IDashboardProps> = (props) => {
 	return (

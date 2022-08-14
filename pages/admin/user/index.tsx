@@ -1,10 +1,9 @@
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import { User } from "../../../src/components/Admin/User";
-import { DashboardNav } from "../../../src/components/Admin/Nav/DashboardNav";
+import { DashboardNav } from "../../../src/components/Admin/Nav";
 import { IDashboardProps } from "../../../src/interfaces/props/Dashboard";
-import { SERVER_V1 } from "../../../src/utils/constants";
-import { validateAdmin } from "../../../src/utils/helper";
+import { SERVER_V1, validateAdmin } from "../../../src/utils";
 
 const user: NextPage<IDashboardProps> = (props) => {
 	return (
