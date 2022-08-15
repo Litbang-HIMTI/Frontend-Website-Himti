@@ -98,11 +98,13 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	const [searchAuthor, setSearchAuthor] = useState("");
 	const [searchCreatedAt, setSearchCreatedAt] = useState("");
 
+	const [notesDataAll, setNotesDataAll] = useState<INote[]>([]);
 	const [notesData, setNotesData] = useState<INote[]>([]);
 	const [sortBy, setSortBy] = useState<validSort | null>(null);
 
 	const [reverseSortDirection, setReverseSortDirection] = useState(false);
-	const [loading, setLoading] = useState(true);
+	const [loadingDataPage, setLoadingDataPage] = useState(true);
+	const [loadingDataAll, setLoadingDataAll] = useState(true);
 	const [tabIndex, setTabIndex] = useState(0);
 
 	const [tz, setTz] = useState("UTC");
@@ -150,22 +152,31 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 		);
 	};
 
-	const searchData = (data: INote[], query: string) => {
-		if (tabIndex === 0) {
-			if (searchAll !== "") data = data.filter((item) => keys(data[0]).some((key) => searchAllHelper(item, query)));
-		} else {
-			if (searchTitle !== "") data = data.filter((item) => item.title.toLowerCase().includes(searchTitle.toLowerCase()));
-			if (searchContent !== "") data = data.filter((item) => item.content.toLowerCase().includes(searchContent.toLowerCase()));
-			if (searchAuthor !== "") data = data.filter((item) => item.author[0].username.toLowerCase().includes(searchAuthor.toLowerCase()));
-			if (searchCreatedAt !== "") data = data.filter((item) => formatDate(item.createdAt, tz).toLowerCase().includes(searchCreatedAt.toLowerCase()));
-		}
-
-		return data;
+	const isSearching = () => {
+		// not on setting page and is actually searching
+		return tabIndex !== 2 && (searchAll !== "" || searchTitle !== "" || searchContent !== "" || searchAuthor !== "" || searchCreatedAt !== "");
 	};
 
-	const sortSearchData = (type: validSort | null, data: INote[], query: string) => {
-		if (!type) return searchData(data, query);
+	const searchData = (dataPage: INote[], dataAll: INote[]) => {
+		// verify searching
+		if (isSearching()) dataPage = dataAll.length > 0 ? dataAll : dataPage;
 
+		if (tabIndex === 0) {
+			if (searchAll !== "") dataPage = dataPage.filter((item) => keys(dataPage[0]).some((key) => searchAllHelper(item, searchAll)));
+		} else if (tabIndex === 1) {
+			if (searchTitle !== "") dataPage = dataPage.filter((item) => item.title.toLowerCase().includes(searchTitle.toLowerCase()));
+			if (searchContent !== "") dataPage = dataPage.filter((item) => item.content.toLowerCase().includes(searchContent.toLowerCase()));
+			if (searchAuthor !== "") dataPage = dataPage.filter((item) => item.author[0].username.toLowerCase().includes(searchAuthor.toLowerCase()));
+			if (searchCreatedAt !== "") dataPage = dataPage.filter((item) => formatDate(item.createdAt, tz).toLowerCase().includes(searchCreatedAt.toLowerCase()));
+		}
+
+		return dataPage;
+	};
+
+	const sortSearchData = (type: validSort | null, dataPage: INote[], dataAll: INote[]) => {
+		if (!type) return searchData(dataPage, dataAll);
+
+		if (isSearching()) dataPage = dataAll.length > 0 ? dataAll : dataPage;
 		const sortMap: sortI = {
 			title: (a: INote, b: INote) => a.title.localeCompare(b.title),
 			content: (a: INote, b: INote) => a.content.localeCompare(b.content),
@@ -174,10 +185,10 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 		};
 
 		// sort
-		let sortedData = data.sort(sortMap[type]);
+		let sortedData = dataPage.sort(sortMap[type]);
 		if (reverseSortDirection) sortedData.reverse();
 
-		return searchData(sortedData, query);
+		return searchData(sortedData, dataAll);
 	};
 
 	const formatDate = (date: Date, tz: string) => {
@@ -187,9 +198,31 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// fetch
+	const fillDataAll = async () => {
+		try {
+			setLoadingDataAll(true);
+			const fetchData = await fetch(SERVER_V1 + `/note`, {
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				credentials: "include",
+			});
+
+			const { data, message }: { data: INote[]; message: string; page: number; pages: number } = await fetchData.json();
+			if (fetchData.status !== 200) return showNotification({ title: "Error indexing all data for search", message, color: "red" });
+
+			setNotesDataAll(data);
+			setLoadingDataAll(false);
+		} catch (error) {
+			setLoadingDataAll(false);
+			showNotification({ title: "Error indexing all data for search", message: `${error}`, color: "red" });
+		}
+	};
+
 	const fillData = async (perPage: number, curPageQ: number) => {
 		try {
-			setLoading(true);
+			setLoadingDataPage(true);
 			const fetchData = await fetch(SERVER_V1 + `/note?perPage=${perPage}&page=${curPageQ}`, {
 				method: "GET",
 				headers: {
@@ -199,20 +232,15 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 			});
 
 			const { data, message, page, pages }: { data: INote[]; message: string; page: number; pages: number } = await fetchData.json();
-			if (fetchData.status !== 200) return showNotification({ title: "Error", message, color: "red" });
+			if (fetchData.status !== 200) return showNotification({ title: "Error getting data", message, color: "red" });
 
 			setCurPage(page);
 			setPages(pages);
 			setNotesData(data);
-			setLoading(false);
+			setLoadingDataPage(false);
 		} catch (error) {
-			setLoading(false);
-			// notify
-			showNotification({
-				title: "Error",
-				message: `Something went wrong\n${error}`,
-				color: "red",
-			});
+			setLoadingDataPage(false);
+			showNotification({ title: "Error getting data", message: `${error}`, color: "red" });
 		}
 	};
 
@@ -240,6 +268,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 			localStorage.setItem("perPage-note", perPage.toString());
 			fillData(perPage, curPage);
 		}
+		fillDataAll();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -265,64 +294,66 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 						</Tabs.Tab>
 					</Tabs.List>
 
-					<Tabs.Panel value="0" pt="xs">
-						<Collapse in={tabIndex === 0}>
-							<Text color="dimmed">Quick search by any field</Text>
-							<TextInput
-								placeholder="Search by any field"
-								name="qAll"
-								mb="md"
-								icon={<IconSearch size={14} stroke={1.5} />}
-								value={searchAll}
-								onChange={(e) => handleInputQueryChange(e, setSearchAll, e.target.name)}
-								mt={16}
-							/>
-						</Collapse>
-					</Tabs.Panel>
+					<div className="dash-relative">
+						<LoadingOverlay visible={loadingDataAll} overlayBlur={3} />
+						<Tabs.Panel value="0" pt="xs">
+							<Collapse in={tabIndex === 0}>
+								<Text color="dimmed">Quick search by any field</Text>
+								<TextInput
+									placeholder="Search by any field"
+									name="qAll"
+									mb="md"
+									icon={<IconSearch size={14} stroke={1.5} />}
+									value={searchAll}
+									onChange={(e) => handleInputQueryChange(e, setSearchAll, e.target.name)}
+									mt={16}
+								/>
+							</Collapse>
+						</Tabs.Panel>
 
-					<Tabs.Panel value="1" pt="xs" className="dash-textinput-gap">
-						<Collapse in={tabIndex === 1}>
-							<Text color="dimmed">Search more accurately by searching for each field</Text>
+						<Tabs.Panel value="1" pt="xs" className="dash-textinput-gap">
+							<Collapse in={tabIndex === 1}>
+								<Text color="dimmed">Search more accurately by searching for each field</Text>
 
-							<TextInput
-								placeholder="Search by title field"
-								name="title"
-								label="Title"
-								icon={<IconLetterA size={14} stroke={1.5} />}
-								value={searchTitle}
-								onChange={(e) => handleInputQueryChange(e, setSearchTitle, e.target.name)}
-								mt={16}
-							/>
-							<TextInput
-								placeholder="Search by content field"
-								name="content"
-								label="Content"
-								icon={<IconLicense size={14} stroke={1.5} />}
-								value={searchContent}
-								onChange={(e) => handleInputQueryChange(e, setSearchContent, e.target.name)}
-								mt={8}
-							/>
-							<TextInput
-								placeholder="Search by author field"
-								name="author"
-								label="Author"
-								icon={<IconLego size={14} stroke={1.5} />}
-								value={searchAuthor}
-								onChange={(e) => handleInputQueryChange(e, setSearchAuthor, e.target.name)}
-								mt={8}
-							/>
-							<TextInput
-								placeholder="Search by createdAt field"
-								label="Created At"
-								name="createdAt"
-								icon={<IconDeviceWatch size={14} stroke={1.5} />}
-								value={searchCreatedAt}
-								onChange={(e) => handleInputQueryChange(e, setSearchCreatedAt, e.target.name)}
-								mt={8}
-							/>
-						</Collapse>
-					</Tabs.Panel>
-
+								<TextInput
+									placeholder="Search by title field"
+									name="title"
+									label="Title"
+									icon={<IconLetterA size={14} stroke={1.5} />}
+									value={searchTitle}
+									onChange={(e) => handleInputQueryChange(e, setSearchTitle, e.target.name)}
+									mt={16}
+								/>
+								<TextInput
+									placeholder="Search by content field"
+									name="content"
+									label="Content"
+									icon={<IconLicense size={14} stroke={1.5} />}
+									value={searchContent}
+									onChange={(e) => handleInputQueryChange(e, setSearchContent, e.target.name)}
+									mt={8}
+								/>
+								<TextInput
+									placeholder="Search by author field"
+									name="author"
+									label="Author"
+									icon={<IconLego size={14} stroke={1.5} />}
+									value={searchAuthor}
+									onChange={(e) => handleInputQueryChange(e, setSearchAuthor, e.target.name)}
+									mt={8}
+								/>
+								<TextInput
+									placeholder="Search by createdAt field"
+									label="Created At"
+									name="createdAt"
+									icon={<IconDeviceWatch size={14} stroke={1.5} />}
+									value={searchCreatedAt}
+									onChange={(e) => handleInputQueryChange(e, setSearchCreatedAt, e.target.name)}
+									mt={8}
+								/>
+							</Collapse>
+						</Tabs.Panel>
+					</div>
 					<Tabs.Panel value="2" pt="xs" className="dash-textinput-gap">
 						<Collapse in={tabIndex === 2}>
 							<Text color="dimmed">Customize data load setting</Text>
@@ -330,7 +361,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 							<NumberInput
 								label="Item per page"
 								placeholder="Item per page"
-								description="How many item per page in the dashboard (default: 25, min: 5, max: 100)"
+								description="How many item per page in the dashboard (default: 25, min: 5, max: 100). Search is not affected by this setting."
 								value={perPage}
 								stepHoldDelay={500}
 								stepHoldInterval={100}
@@ -344,7 +375,15 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 								mt={8}
 							/>
 
-							<Button compact leftIcon={<IconRefresh size={20} />} onClick={() => fillData(perPage, curPage)} mt={16}>
+							<Button
+								compact
+								leftIcon={<IconRefresh size={20} />}
+								onClick={() => {
+									fillData(perPage, curPage);
+									fillDataAll();
+								}}
+								mt={16}
+							>
 								Reload the table
 							</Button>
 						</Collapse>
@@ -355,7 +394,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 			<Divider mt={16} mb={16} />
 
 			<div className="dash-relative">
-				<LoadingOverlay visible={loading} overlayBlur={3} />
+				<LoadingOverlay visible={loadingDataPage} overlayBlur={3} />
 				<ScrollArea mt={30}>
 					<Table horizontalSpacing="md" verticalSpacing="xs" sx={{ tableLayout: "fixed", width: "100%" }} highlightOnHover>
 						<thead>
@@ -420,8 +459,8 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 							</tr>
 						</thead>
 						<tbody>
-							{notesData && notesData.length > 0 && sortSearchData(sortBy, notesData, searchAll).length > 0 ? (
-								sortSearchData(sortBy, notesData, searchAll).map((row) => (
+							{notesData && notesData.length > 0 && sortSearchData(sortBy, notesData, notesDataAll).length > 0 ? (
+								sortSearchData(sortBy, notesData, notesDataAll).map((row) => (
 									<tr key={row._id}>
 										<td>{row.title}</td>
 										<td>{row.content}</td>
@@ -472,9 +511,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 					</Table>
 				</ScrollArea>
 
-				<Center mt={16}>
-					<Pagination total={pages} page={curPage} onChange={pageChange} />
-				</Center>
+				<Center mt={16}>{!isSearching() ? <Pagination total={pages} page={curPage} onChange={pageChange} /> : <Pagination total={1} page={1} />}</Center>
 			</div>
 		</>
 	);
