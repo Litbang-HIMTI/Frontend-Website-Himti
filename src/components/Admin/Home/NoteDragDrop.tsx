@@ -117,7 +117,7 @@ export const NoteDragDrop: NextPage<IDashboardProps> = (props) => {
 				<h1>Notes</h1>
 
 				<span style={{ marginLeft: ".5rem", marginTop: ".5rem" }} className={classes.iconHover}>
-					<Link href={`/${props.pathname?.split("/")[1]}/note/create?fromDashHome=true`}>
+					<Link href={`${props.pathname?.split("/")[1]}/note/create?fromDashHome=true`}>
 						<ActionIcon variant="outline">
 							<IconPlus size={30} />
 						</ActionIcon>
@@ -162,7 +162,7 @@ export const NoteDragDrop: NextPage<IDashboardProps> = (props) => {
 													</div>
 
 													<div className={classes.editIcon}>
-														<Link href={`/${props.pathname?.split("/")[1]}/note/${item._id}`}>
+														<Link href={`${props.pathname?.split("/")[1]}/note/${item._id}`}>
 															<ActionIcon>
 																<IconEdit />
 															</ActionIcon>

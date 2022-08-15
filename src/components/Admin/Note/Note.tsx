@@ -19,6 +19,7 @@ import {
 	NumberInput,
 	TabsValue,
 	Pagination,
+	Modal,
 } from "@mantine/core";
 import { keys } from "@mantine/utils";
 import { IconSelector, IconChevronDown, IconChevronUp, IconSearch, IconEdit, IconTrash, IconFilePlus, IconLego, IconLetterA, IconLicense, IconDeviceWatch, IconRefresh } from "@tabler/icons";
@@ -88,6 +89,8 @@ interface sortI {
 export const Note: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useStyles();
 	const router = useRouter();
+	const [openModalDelete, setOpenModalDelete] = useState(false);
+	const [idDelete, setIdDelete] = useState("");
 
 	const [curPage, setCurPage] = useState(1);
 	const [pages, setPages] = useState(1);
@@ -198,6 +201,38 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	};
 
 	// -----------------------------------------------------------
+	// delete
+	const deleteNote = async (id: string) => {
+		try {
+			const deleteFetch = await fetch(`${SERVER_V1}/note/${id}`, {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				credentials: "include",
+			});
+
+			const deleteData = await deleteFetch.json();
+			if (deleteFetch.status === 200 && deleteData && deleteData.success) {
+				// slice data
+				setNotesData((prev) => {
+					return prev.filter((item) => item._id !== id);
+				});
+				setNotesDataAll((prev) => {
+					return prev.filter((item) => item._id !== id);
+				});
+
+				showNotification({ title: "Success", message: deleteData.message });
+			} else {
+				showNotification({ title: "Error", message: deleteData.message, color: "red" });
+			}
+			setOpenModalDelete(false);
+		} catch (error: any) {
+			setOpenModalDelete(false);
+			showNotification({ title: "Error", message: error.message, color: "red" });
+		}
+	};
+
 	// fetch
 	const fillDataAll = async () => {
 		try {
@@ -275,6 +310,21 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 	return (
 		<>
+			<Modal opened={openModalDelete} onClose={() => setOpenModalDelete(false)} title="Are you sure?">
+				<Center>
+					<p>This action cannot be undone.</p>
+				</Center>
+
+				<Center>
+					<Button onClick={() => setOpenModalDelete(false)} m={16}>
+						No, Cancel
+					</Button>
+					<Button onClick={() => deleteNote(idDelete)} m={16} color="red">
+						Yes, Delete
+					</Button>
+				</Center>
+			</Modal>
+
 			<div className="dash-flex">
 				<h1>Notes</h1>
 				<Link href={"note/create"}>
@@ -489,12 +539,17 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 										</td>
 										<td style={{ padding: "1rem .5rem" }}>
 											<div className="dash-flex">
-												<Link href={`/${props.pathname}/${row._id}`}>
+												<Link href={`${props.pathname}/${row._id}`}>
 													<ActionIcon>
 														<IconEdit size={14} stroke={1.5} />
 													</ActionIcon>
 												</Link>
-												<ActionIcon>
+												<ActionIcon
+													onClick={() => {
+														setIdDelete(row._id);
+														setOpenModalDelete(true);
+													}}
+												>
 													<IconTrash size={14} stroke={1.5} />
 												</ActionIcon>
 											</div>
