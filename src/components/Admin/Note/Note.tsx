@@ -489,9 +489,11 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 										</td>
 										<td style={{ padding: "1rem .5rem" }}>
 											<div className="dash-flex">
-												<ActionIcon>
-													<IconEdit size={14} stroke={1.5} />
-												</ActionIcon>
+												<Link href={`/${props.pathname}/${row._id}`}>
+													<ActionIcon>
+														<IconEdit size={14} stroke={1.5} />
+													</ActionIcon>
+												</Link>
 												<ActionIcon>
 													<IconTrash size={14} stroke={1.5} />
 												</ActionIcon>

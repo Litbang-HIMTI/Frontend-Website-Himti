@@ -13,7 +13,14 @@ import { useRouter } from "next/router";
 import { Editor } from "@mantine/rte";
 
 const useStyles = createStyles((theme) => ({
-	button: {
+	buttonCancel: {
+		"&:hover": {
+			// yellow
+			backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[5] : theme.colors.gray[0],
+		},
+	},
+
+	buttonSubmit: {
 		"&:hover": {
 			backgroundColor: theme.colorScheme === "dark" ? "rgba(51, 154, 240, 0.25);" : "rgba(51, 154, 240, 0.1);",
 		},
@@ -43,9 +50,17 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 
 	// ------------------------------------------------------------
 	const handleReset = () => {
-		forms.reset();
-		setContent("");
 		setSubmitted(false);
+
+		if (!props.note) {
+			forms.reset();
+			setContent("");
+		} else {
+			forms.setValues({
+				title: props.note.title,
+			});
+			setContent(props.note.content);
+		}
 	};
 
 	const submitForm = async () => {
@@ -74,11 +89,12 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 				}),
 			});
 
-			if (fetchSubmit.status === 201) {
+			const { message } = await fetchSubmit.json();
+			if (fetchSubmit.status === 201 || fetchSubmit.status === 200) {
 				setSubmitted(true);
 				showNotification({
 					title: "Success",
-					message: "You have created a note successfully. Redirecting...",
+					message: message + ". Redirecting...",
 					disallowClose: true,
 				});
 
@@ -88,7 +104,6 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 				}, 1500);
 			} else {
 				setLoading(false);
-				const { message } = await fetchSubmit.json();
 				showNotification({
 					title: "Error",
 					message,
@@ -158,14 +173,18 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 							["bold", "italic", "underline", "link", "blockquote", "codeBlock", "clean"],
 							["unorderedList", "orderedList", "h1", "h2", "h3"],
 							["sup", "sub"],
-							["alignLeft", "alignCenter", "alignRight"],
 						]}
 					/>
 					<Group position="right" mt="md">
 						<Button color="pink" onClick={handleReset}>
 							Reset
 						</Button>
-						<Button variant="outline" className={classes.button} type="submit">
+						{props.note && (
+							<Button color="yellow" variant="outline" className={classes.buttonCancel} onClick={() => router.push("../note")}>
+								Cancel edit
+							</Button>
+						)}
+						<Button variant="outline" className={classes.buttonSubmit} type="submit">
 							Submit
 						</Button>
 					</Group>

@@ -224,7 +224,6 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 						<Paper withBorder p="md" radius="md">
 							<Group position="apart">
 								<Text size="xs" color="dimmed" className={classes.title}>
-									{/* {dataElProps[i].name.replaceAll("_", " ")} */}
 									Web analytics
 								</Text>
 								<IconChartPie className={classes.icon} size={22} stroke={1.5} />
