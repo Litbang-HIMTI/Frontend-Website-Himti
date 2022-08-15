@@ -466,7 +466,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 								sortSearchData(sortBy, notesData, notesDataAll).map((row) => (
 									<tr key={row._id}>
 										<td>{row.title}</td>
-										<td>{row.content}</td>
+										<td dangerouslySetInnerHTML={{ __html: row.content }}></td>
 										<td>
 											{row.editedBy && row.editedBy[0] ? (
 												<>

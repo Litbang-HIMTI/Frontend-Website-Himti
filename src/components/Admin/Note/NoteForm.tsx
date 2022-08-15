@@ -1,14 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { NextPage } from "next";
 import Link from "next/link";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
-import { Box, Button, createStyles, Group, LoadingOverlay, Textarea, TextInput } from "@mantine/core";
+import { Box, Button, createStyles, Group, LoadingOverlay, TextInput, Text } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { SERVER_V1, urlSafeRegex } from "../../../utils";
 import { INote } from "../../../interfaces/db";
+import RichText from "../../Utils/RichText";
 import { useRouter } from "next/router";
+import { Editor } from "@mantine/rte";
 
 const useStyles = createStyles((theme) => ({
 	button: {
@@ -30,26 +32,34 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 	const forms = useForm({
 		initialValues: {
 			title: "",
-			content: "",
 		},
 
 		validate: {
 			title: (value) =>
 				urlSafeRegex.test(value) ? undefined : "Title contains invalid character. Characters allowed are Alpha numeric, underscore, hyphen, space, ', \", comma, and @ regex",
-			content: (value) => (value.length > 0 ? undefined : "Content is required"),
 		},
 	});
+	const [content, setContent] = useState("");
 
 	// ------------------------------------------------------------
 	const handleReset = () => {
 		forms.reset();
+		setContent("");
 		setSubmitted(false);
 	};
 
 	const submitForm = async () => {
 		setLoading(true);
 		if (submitted) return;
-		const { title, content } = forms.values;
+		const { title } = forms.values;
+		const editor = document.getElementsByClassName("ql-editor")[0] as HTMLDivElement;
+
+		if (editor.innerText.length - 1 < 25)
+			showNotification({
+				title: "Error",
+				message: "Note must be at least 25 characters long",
+				color: "red",
+			});
 
 		try {
 			const fetchSubmit = await fetch(`${SERVER_V1}/${props.note ? "note/" + props.note._id : "note"}`, {
@@ -96,11 +106,12 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 	};
 
 	useEffect(() => {
-		if (props.note)
+		if (props.note) {
 			forms.setValues({
 				title: props.note.title,
-				content: props.note.content,
 			});
+			setContent(props.note.content);
+		}
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
@@ -127,8 +138,29 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 						{...forms.getInputProps("title")}
 						description={`Notes title, Characters allowed are Alpha numeric, underscore, hyphen, space, ', ", comma, and @ regex`}
 					/>
-					<Textarea mt="md" required label="Content" placeholder="Content..." {...forms.getInputProps("content")} autosize minRows={2} />
 
+					<Text mt="md" size={"sm"}>
+						Content{" "}
+						<Text color={"red"} component="span">
+							*
+						</Text>
+						<Text color={"dimmed"} size={"xs"}>
+							Must be at least 25 characters long.
+						</Text>
+					</Text>
+					<RichText
+						id="content"
+						placeholder="Content..."
+						value={content}
+						onChange={setContent}
+						mt="xs"
+						controls={[
+							["bold", "italic", "underline", "link", "blockquote", "codeBlock", "clean"],
+							["unorderedList", "orderedList", "h1", "h2", "h3"],
+							["sup", "sub"],
+							["alignLeft", "alignCenter", "alignRight"],
+						]}
+					/>
 					<Group position="right" mt="md">
 						<Button color="pink" onClick={handleReset}>
 							Reset

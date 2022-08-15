@@ -158,9 +158,7 @@ export const NoteDragDrop: NextPage<IDashboardProps> = (props) => {
 													</div>
 													<div>
 														<Text>{item.title}</Text>
-														<Text color="dimmed" size="sm">
-															{item.content}
-														</Text>
+														<Text color="dimmed" size="sm" dangerouslySetInnerHTML={{ __html: item.content }}></Text>
 													</div>
 
 													<div className={classes.editIcon}>
