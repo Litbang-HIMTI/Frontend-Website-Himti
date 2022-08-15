@@ -153,13 +153,13 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	};
 
 	const isSearching = () => {
-		// not on setting page and is actually searching
-		return tabIndex !== 2 && (searchAll !== "" || searchTitle !== "" || searchContent !== "" || searchAuthor !== "" || searchCreatedAt !== "");
+		// not on setting page and is actually searching and data all is fetched
+		return tabIndex !== 2 && notesDataAll.length > 0 && (searchAll !== "" || searchTitle !== "" || searchContent !== "" || searchAuthor !== "" || searchCreatedAt !== "");
 	};
 
 	const searchData = (dataPage: INote[], dataAll: INote[]) => {
 		// verify searching
-		if (isSearching()) dataPage = dataAll.length > 0 ? dataAll : dataPage;
+		if (isSearching()) dataPage = dataAll;
 
 		if (tabIndex === 0) {
 			if (searchAll !== "") dataPage = dataPage.filter((item) => keys(dataPage[0]).some((key) => searchAllHelper(item, searchAll)));
@@ -510,9 +510,8 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 						</tbody>
 					</Table>
 				</ScrollArea>
-
-				<Center mt={16}>{!isSearching() ? <Pagination total={pages} page={curPage} onChange={pageChange} /> : <Pagination total={1} page={1} />}</Center>
 			</div>
+			<Center mt={16}>{!isSearching() ? <Pagination total={pages} page={curPage} onChange={pageChange} /> : <Pagination total={1} page={1} />}</Center>
 		</>
 	);
 };
