@@ -18,7 +18,8 @@ export function RouterTransition() {
 			router.events.off("routeChangeComplete", handleComplete);
 			router.events.off("routeChangeError", handleComplete);
 		};
-	}, [router.asPath, router.events]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [router.asPath]);
 
 	return <NavigationProgress />;
 }
