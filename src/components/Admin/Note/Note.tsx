@@ -18,6 +18,7 @@ import {
 	Collapse,
 	NumberInput,
 	TabsValue,
+	Pagination,
 } from "@mantine/core";
 import { keys } from "@mantine/utils";
 import { IconSelector, IconChevronDown, IconChevronUp, IconSearch, IconEdit, IconTrash, IconFilePlus, IconLego, IconLetterA, IconLicense, IconDeviceWatch, IconRefresh } from "@tabler/icons";
@@ -26,6 +27,7 @@ import { INote } from "../../../interfaces/db";
 import { showNotification } from "@mantine/notifications";
 import { SERVER_V1 } from "../../../utils";
 import { NextRouter, useRouter } from "next/router";
+import { usePagination } from "@mantine/hooks";
 
 const useStyles = createStyles((theme) => ({
 	th: {
@@ -87,12 +89,15 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useStyles();
 	const router = useRouter();
 
+	const [curPage, setCurPage] = useState(1);
+	const [pages, setPages] = useState(1);
+	const [perPage, setPerPage] = useState(25);
+
 	const [searchAll, setSearchAll] = useState("");
 	const [searchTitle, setSearchTitle] = useState("");
 	const [searchContent, setSearchContent] = useState("");
 	const [searchAuthor, setSearchAuthor] = useState("");
 	const [searchCreatedAt, setSearchCreatedAt] = useState("");
-	const [perPage, setPerPage] = useState(25);
 
 	const [notesData, setNotesData] = useState<INote[]>([]);
 	const [sortBy, setSortBy] = useState<validSort | null>(null);
@@ -127,6 +132,12 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	const handleTabChange = (index: TabsValue) => {
 		setTabIndex(index ? parseInt(index) : 0);
 		addQueryParam("tab", index ? index : "0");
+	};
+
+	const pageChange = (page: number) => {
+		setCurPage(page);
+		addQueryParam("page", page.toString());
+		fillData(perPage, page);
 	};
 
 	// -----------------------------------------------------------
@@ -177,10 +188,10 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// fetch
-	const fillData = async (perPage: number) => {
+	const fillData = async (perPage: number, curPageQ: number) => {
 		try {
 			setLoading(true);
-			const fetchData = await fetch(SERVER_V1 + `/note?perPage=${perPage}`, {
+			const fetchData = await fetch(SERVER_V1 + `/note?perPage=${perPage}&page=${curPageQ}`, {
 				method: "GET",
 				headers: {
 					"Content-Type": "application/json",
@@ -188,9 +199,11 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 				credentials: "include",
 			});
 
-			const { data, message }: { data: INote[]; message: string } = await fetchData.json();
+			const { data, message, page, pages }: { data: INote[]; message: string; page: number; pages: number } = await fetchData.json();
 			if (fetchData.status !== 200) return showNotification({ title: "Error", message, color: "red" });
 
+			setCurPage(page);
+			setPages(pages);
 			setNotesData(data);
 			setLoading(false);
 		} catch (error) {
@@ -205,9 +218,10 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	};
 
 	const fetchUrlParams = () => {
-		// set to local state
 		const { query } = router;
 		const params = new URLSearchParams(query as unknown as string);
+		// set to local state
+		setCurPage(params.get("page") ? parseInt(params.get("page") || "1") : 1);
 		setSearchAll(params.get("qAll") || "");
 		setSearchTitle(params.get("title") || "");
 		setSearchContent(params.get("content") || "");
@@ -222,10 +236,10 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 		// fill data with setting
 		if (localStorage.getItem("perPage-note")) {
 			setPerPage(parseInt(localStorage.getItem("perPage-note") as string));
-			fillData(parseInt(localStorage.getItem("perPage-note")!));
+			fillData(parseInt(localStorage.getItem("perPage-note")!), curPage);
 		} else {
 			localStorage.setItem("perPage-note", perPage.toString());
-			fillData(perPage);
+			fillData(perPage, curPage);
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
@@ -321,8 +335,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 								value={perPage}
 								stepHoldDelay={500}
 								stepHoldInterval={100}
-								min={5}
-								max={50}
+								max={100}
 								onChange={(value) => {
 									if (!value) return;
 									setPerPage(value);
@@ -331,14 +344,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 								mt={8}
 							/>
 
-							<Button
-								compact
-								leftIcon={<IconRefresh size={20} />}
-								onClick={() => {
-									fillData(perPage);
-								}}
-								mt={16}
-							>
+							<Button compact leftIcon={<IconRefresh size={20} />} onClick={() => fillData(perPage, curPage)} mt={16}>
 								Reload the table
 							</Button>
 						</Collapse>
@@ -465,6 +471,10 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 						</tbody>
 					</Table>
 				</ScrollArea>
+
+				<Center mt={16}>
+					<Pagination total={pages} page={curPage} onChange={pageChange} />
+				</Center>
 			</div>
 		</>
 	);
