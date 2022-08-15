@@ -26,8 +26,7 @@ import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { INote } from "../../../interfaces/db";
 import { showNotification } from "@mantine/notifications";
 import { SERVER_V1 } from "../../../utils";
-import { NextRouter, useRouter } from "next/router";
-import { usePagination } from "@mantine/hooks";
+import { useRouter } from "next/router";
 
 const useStyles = createStyles((theme) => ({
 	th: {
@@ -62,7 +61,7 @@ interface ThProps {
 function Th({ classes, children, reversed, sorted, onSort, width }: ThProps) {
 	const Icon = sorted ? (reversed ? IconChevronUp : IconChevronDown) : IconSelector;
 	return (
-		<th className={classes.th} style={{ width }}>
+		<th className={classes.th} style={{ width, overflowWrap: "break-word" }}>
 			<UnstyledButton onClick={onSort} className={classes.control}>
 				<Group position="apart">
 					<Text weight={500} size="sm">
@@ -248,7 +247,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 		<>
 			<div className="dash-flex">
 				<h1>Notes</h1>
-				<Button id="dash-add-new" ml={16} mt="auto" size="xs" compact leftIcon={<IconFilePlus size={20} />}>
+				<Button id="dash-add-new" ml={16} size="xs" compact leftIcon={<IconFilePlus size={20} />}>
 					Add new
 				</Button>
 			</div>
@@ -358,7 +357,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 			<div className="dash-relative">
 				<LoadingOverlay visible={loading} overlayBlur={3} />
 				<ScrollArea mt={30}>
-					<Table horizontalSpacing="md" verticalSpacing="xs" sx={{ tableLayout: "fixed", minWidth: 600 }} highlightOnHover>
+					<Table horizontalSpacing="md" verticalSpacing="xs" sx={{ tableLayout: "fixed", width: "100%" }} highlightOnHover>
 						<thead>
 							<tr>
 								<Th
@@ -369,7 +368,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 										if (sortBy === "title") setReverseSortDirection(!reverseSortDirection);
 										setSortBy("title");
 									}}
-									width="20%"
+									width="15%"
 								>
 									Title
 								</Th>
@@ -393,7 +392,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 										if (sortBy === "author") setReverseSortDirection(!reverseSortDirection);
 										setSortBy("author");
 									}}
-									width="15%"
+									width="18%"
 								>
 									Author
 								</Th>
@@ -405,7 +404,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 										if (sortBy === "createdAt") setReverseSortDirection(!reverseSortDirection);
 										setSortBy("createdAt");
 									}}
-									width="15%"
+									width="17%"
 								>
 									Created At
 								</Th>
@@ -446,7 +445,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 												<>{formatDate(row.createdAt, tz)}</>
 											)}
 										</td>
-										<td>
+										<td style={{ padding: "1rem .5rem" }}>
 											<div className="dash-flex">
 												<ActionIcon>
 													<IconEdit size={14} stroke={1.5} />

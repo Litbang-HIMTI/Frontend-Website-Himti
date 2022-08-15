@@ -40,6 +40,10 @@
 	position: relative;
 }
 
+#dash-add-new {
+	margin-top: 0.7rem;
+}
+
 #dash-add-new div span {
 	margin-right: 4px;
 }
