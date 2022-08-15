@@ -7,6 +7,7 @@
   - [Videos](#videos)
 - [Note](#note)
   - [Next.js](#nextjs)
+  - [URL](#url)
   - [CORS](#cors)
   - [React Beautiful dnd](#react-beautiful-dnd)
   - [Error Handling](#error-handling)
