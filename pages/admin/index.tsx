@@ -32,6 +32,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 			"Content-Type": "application/json",
 			Cookie: "connect.sid=" + context.req.cookies["connect.sid"],
 		},
+		credentials: "include",
 	});
 
 	// 404 if not logged in
