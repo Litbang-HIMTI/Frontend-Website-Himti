@@ -1,3 +1,4 @@
+import { AppShell } from "@mantine/core";
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import { Event } from "../../../src/components/Admin/Event";
@@ -14,12 +15,11 @@ const event: NextPage<IDashboardProps> = (props) => {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 				<title>Event Dashboard | Himti UIN Jakarta</title>
 			</Head>
-			<main className="dashboard nav-wrap">
-				<DashboardNav {...props} />
-				<div className="dashboard content-wrap">
+			<AppShell header={<DashboardNav {...props} />}>
+				<main className="dashboard content-wrap">
 					<Event {...props} />
-				</div>
-			</main>
+				</main>
+			</AppShell>
 		</>
 	);
 };

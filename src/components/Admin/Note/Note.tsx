@@ -277,7 +277,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 		<>
 			<div className="dash-flex">
 				<h1>Notes</h1>
-				<Link href={"/note/create"}>
+				<Link href={"note/create"}>
 					<Button id="dash-add-new" ml={16} size="xs" compact leftIcon={<IconFilePlus size={20} />}>
 						Add new
 					</Button>

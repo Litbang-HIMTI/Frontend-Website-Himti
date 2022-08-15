@@ -1,6 +1,7 @@
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import { resetServerContext } from "react-beautiful-dnd";
+import { AppShell } from "@mantine/core";
 import { DashboardHome } from "../../src/components/Admin/Home";
 import { DashboardNav } from "../../src/components/Admin/Nav";
 import { IDashboardProps } from "../../src/interfaces/props";
@@ -15,12 +16,11 @@ const dashboardHome: NextPage<IDashboardProps> = (props) => {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 				<title>Dashboard | Himti UIN Jakarta</title>
 			</Head>
-			<main className="dashboard nav-wrap">
-				<DashboardNav {...props} />
-				<div className="dashboard content-wrap">
+			<AppShell header={<DashboardNav {...props} />}>
+				<main className="dashboard content-wrap">
 					<DashboardHome {...props} />
-				</div>
-			</main>
+				</main>
+			</AppShell>
 		</>
 	);
 };
