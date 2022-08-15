@@ -212,6 +212,7 @@ export const DashboardNav: NextPage<IDashboardProps> = (props) => {
 				else return <></>;
 			})
 		);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (

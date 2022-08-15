@@ -61,12 +61,12 @@ export const UserPopout: NextPage<navProps> = (props) => {
 
 					{validateEditor(props.user!) && (
 						<>
-							<Link href={`/admin/blog?user=${props.user?.username}`}>
+							<Link href={`/admin/blog?author=${props.user?.username}?tab=2`}>
 								<a>
 									<Menu.Item icon={<IconNotebook size={14} stroke={1.5} color={theme.colors.red[6]} />}>Your Blog Posts</Menu.Item>
 								</a>
 							</Link>
-							<Link href={`/admin/user/event?user=${props.user?.username}`}>
+							<Link href={`/admin/event?author=${props.user?.username}?tab=2`}>
 								<a>
 									<Menu.Item icon={<IconCalendarEvent size={14} stroke={1.5} color={theme.colors.yellow[6]} />}>Your Event Posts</Menu.Item>
 								</a>
@@ -76,7 +76,7 @@ export const UserPopout: NextPage<navProps> = (props) => {
 
 					{validateForumMod(props.user!) && (
 						<>
-							<Link href={`/admin/user/forum?user=${props.user?.username}`}>
+							<Link href={`/admin/forum?author=${props.user?.username}?tab=2`}>
 								<a>
 									<Menu.Item icon={<IconMessage size={14} stroke={1.5} color={theme.colors.blue[6]} />}>Your Forum Posts</Menu.Item>
 								</a>
@@ -84,18 +84,20 @@ export const UserPopout: NextPage<navProps> = (props) => {
 						</>
 					)}
 
-					<Link href={`/admin/user/forum?user=${props.user?.username}`}>
+					<Link href={`/admin/comment?author=${props.user?.username}?tab=2`}>
 						<a>
 							<Menu.Item icon={<IconMessages size={14} stroke={1.5} color={theme.colors.blue[6]} />}>Your comments</Menu.Item>
 						</a>
 					</Link>
 
 					<Menu.Label>Settings</Menu.Label>
-					<Link href={`/admin/user/${props.user?.username}`}>
-						<a>
-							<Menu.Item icon={<IconSettings size={14} stroke={1.5} />}>Account settings</Menu.Item>
-						</a>
-					</Link>
+					{validateAdmin(props.user!) && (
+						<Link href={`/admin/user/${props.user?.username}`}>
+							<a>
+								<Menu.Item icon={<IconSettings size={14} stroke={1.5} />}>Account settings</Menu.Item>
+							</a>
+						</Link>
+					)}
 					<Link href="/auth/logout">
 						<a id="logout-popout">
 							<Menu.Item icon={<IconLogout size={14} stroke={1.5} />}>Logout</Menu.Item>

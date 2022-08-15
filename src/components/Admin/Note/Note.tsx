@@ -27,6 +27,7 @@ import { INote } from "../../../interfaces/db";
 import { showNotification } from "@mantine/notifications";
 import { SERVER_V1 } from "../../../utils";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 const useStyles = createStyles((theme) => ({
 	th: {
@@ -276,9 +277,11 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 		<>
 			<div className="dash-flex">
 				<h1>Notes</h1>
-				<Button id="dash-add-new" ml={16} size="xs" compact leftIcon={<IconFilePlus size={20} />}>
-					Add new
-				</Button>
+				<Link href={"/note/create"}>
+					<Button id="dash-add-new" ml={16} size="xs" compact leftIcon={<IconFilePlus size={20} />}>
+						Add new
+					</Button>
+				</Link>
 			</div>
 			<div style={{ marginTop: "1.5rem" }}>
 				<Tabs value={tabIndex.toString() || "0"} onTabChange={handleTabChange}>

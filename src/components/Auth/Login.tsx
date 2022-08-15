@@ -90,7 +90,9 @@ export const Login: NextPage<loginProps> = (props) => {
 	useEffect(() => {
 		// check query params
 		if (props.query.loggedout === "true") setAlertShown(true);
-	}, [props.query.loggedout]);
+
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	return (
 		<>
