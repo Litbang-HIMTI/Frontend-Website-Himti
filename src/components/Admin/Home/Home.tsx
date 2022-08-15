@@ -43,24 +43,56 @@ const formatBytes = (bytes: number, decimals = 2) => {
 	return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 
-const dataElProps = [
-	{ name: "blog", icon: IconNotebook, fetchLink: "/blog/stats" },
-	{ name: "blog_revision", icon: IconHistory, fetchLink: "/blog/stats" },
-	{ name: "event", icon: IconCalendarEvent, fetchLink: "/event/stats" },
-	{ name: "event_revision", icon: IconHistory, fetchLink: "/event/stats" },
-	{ name: "forum", icon: IconMessage, fetchLink: "/forum/stats" },
-	{ name: "comment", icon: IconMessages, fetchLink: "/comment/stats" },
-	{ name: "shortlink", icon: IconLink, fetchLink: "/shortlink/stats" },
-];
-
 export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useStyles();
 
 	const [datas, setDatas] = useState<IstatsExtended[]>([emptyStats, emptyStats, emptyStats, emptyStats, emptyStats, emptyStats, emptyStats]);
 	const [stats, setStats] = useState<JSX.Element[] | null>(null);
 
+	// ---------------------------------------------------------------------------------------------
+	const fetchShortlinkClicks = async (index: number) => {
+		try {
+			const extraData = await fetch(SERVER_V1 + dataElProps[index].fetchLink.replace("stats", "clickCounts"), {
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				credentials: "include",
+			});
+
+			if (extraData.status === 200) {
+				const extraJson = await extraData.json();
+
+				// index 6 shortlink
+				setDatas((prev) => {
+					const newData = [...prev];
+					newData[index].loading = false;
+					newData[index].extraData = "Total click : " + extraJson.data.clickCount;
+					return newData;
+				});
+			}
+		} catch (error) {
+			setDatas((prev) => {
+				const newDatas = [...prev];
+				newDatas[index].loading = false;
+				newDatas[index].extraData = "Total click : fail to load!";
+				return newDatas;
+			});
+		}
+	};
+
+	const dataElProps = [
+		{ name: "blog", icon: IconNotebook, fetchLink: "/blog/stats" },
+		{ name: "blog_revision", icon: IconHistory, skipFetch: true, fetchLink: "/blog/stats" },
+		{ name: "event", icon: IconCalendarEvent, fetchLink: "/event/stats" },
+		{ name: "event_revision", icon: IconHistory, skipFetch: true, fetchLink: "/event/stats" },
+		{ name: "forum", icon: IconMessage, fetchLink: "/forum/stats" },
+		{ name: "comment", icon: IconMessages, fetchLink: "/comment/stats" },
+		{ name: "shortlink", icon: IconLink, fetchLink: "/shortlink/stats", extraFunc: fetchShortlinkClicks },
+	];
+
 	const fetchDataFunc = async (index: number) => {
-		if (index === 1 || index === 3) return; // dupe. blog_revision and event_revision is returned in the same route. Index Refer to dataElProps
+		if (dataElProps[index].skipFetch) return; // skip dupe. blog_revision and event_revision is returned in the same route. Index Refer to dataElProps
 
 		try {
 			const fetched = await fetch(SERVER_V1 + dataElProps[index].fetchLink, {
@@ -83,8 +115,8 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 			setDatas((prev) => {
 				const newData = [...prev];
 
-				// check dupe. blog_revision and event_revision is returned in the same route as array. Index Refer to dataElProps
-				if (index === 0 || index === 2) {
+				// check if next is skipped, skipped because data is returned in the same route as the previous
+				if (dataElProps[index + 1] && dataElProps[index + 1].skipFetch) {
 					newData[index] = data[0] as IstatsExtended;
 					newData[index].loading = false;
 
@@ -92,7 +124,7 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 					newData[index + 1].loading = false;
 				} else {
 					newData[index] = data as IstatsExtended;
-					newData[index].loading = false;
+					if (!dataElProps[index].extraFunc) newData[index].loading = false;
 
 					if (dataElProps[index].name === "shortlink") newData[index].extraData = "Total click : loading...";
 				}
@@ -100,31 +132,9 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 				return newData;
 			});
 
-			// *Shortlink get click counts
-			// ! THIS IS NOT REALLY A GOOD METHOD TO DO IT.
-			// For example, we can add an extra callback methods in the dataElProps, but since there is only 1 here and it is not really a problem, I will leave it like this.
-			// if for future expand or improvement, you should add extra callback methods in the dataElProps.
-			if (dataElProps[index].name === "shortlink") {
-				const extraData = await fetch(SERVER_V1 + dataElProps[index].fetchLink.replace("stats", "clickCounts"), {
-					method: "GET",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					credentials: "include",
-				});
-
-				if (extraData.status === 200) {
-					const extraJson = await extraData.json();
-
-					// index 6 shortlink
-					setDatas((prev) => {
-						const newData = [...prev];
-						newData[index].loading = false;
-						newData[index].extraData = "Total click : " + extraJson.data.clickCount;
-						return newData;
-					});
-				}
-			}
+			// fetch extra data (total click short link)
+			// you can add more by adding extraFunc in dataElProps
+			if (dataElProps[index].extraFunc) dataElProps[index].extraFunc!(index);
 		} catch (err) {
 			setDatas((prev) => {
 				const newDatas = [...prev];
@@ -195,6 +205,7 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 
 		// fill data by looping
 		for (let i = 0; i < datas.length; i++) if (datas[i].loading) fetchDataFunc(i);
+		// add datas
 	}, [datas, classes.diff, classes.icon, classes.title, classes.value]);
 
 	return (
