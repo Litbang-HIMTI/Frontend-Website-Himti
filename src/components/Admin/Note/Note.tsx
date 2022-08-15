@@ -335,6 +335,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 								value={perPage}
 								stepHoldDelay={500}
 								stepHoldInterval={100}
+								min={5}
 								max={100}
 								onChange={(value) => {
 									if (!value) return;
