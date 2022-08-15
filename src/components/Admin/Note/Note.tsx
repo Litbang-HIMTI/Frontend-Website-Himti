@@ -17,6 +17,7 @@ import {
 	Divider,
 	Collapse,
 	NumberInput,
+	TabsValue,
 } from "@mantine/core";
 import { keys } from "@mantine/utils";
 import { IconSelector, IconChevronDown, IconChevronUp, IconSearch, IconEdit, IconTrash, IconFilePlus, IconLego, IconLetterA, IconLicense, IconDeviceWatch, IconRefresh } from "@tabler/icons";
@@ -24,6 +25,7 @@ import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { INote } from "../../../interfaces/db";
 import { showNotification } from "@mantine/notifications";
 import { SERVER_V1 } from "../../../utils";
+import { NextRouter, useRouter } from "next/router";
 
 const useStyles = createStyles((theme) => ({
 	th: {
@@ -83,6 +85,7 @@ interface sortI {
 
 export const Note: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useStyles();
+	const router = useRouter();
 
 	const [searchAll, setSearchAll] = useState("");
 	const [searchTitle, setSearchTitle] = useState("");
@@ -101,14 +104,33 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	const [tz, setTz] = useState("UTC");
 
 	// -----------------------------------------------------------
-	const resetSearch = () => {
-		setSearchAll("");
-		setSearchTitle("");
-		setSearchContent("");
-		setSearchAuthor("");
-		setSearchCreatedAt("");
+	const removeQueryParam = (param: string) => {
+		const { pathname, query } = router;
+		const params = new URLSearchParams(query as unknown as string);
+		params.delete(param);
+		router.replace({ pathname, query: params.toString() }, undefined, { shallow: true });
 	};
 
+	const addQueryParam = (param: string, value: string) => {
+		const { pathname } = router;
+		const params = new URLSearchParams(router.query as unknown as string);
+		params.set(param, value);
+		router.replace({ pathname, query: params.toString() }, undefined, { shallow: true });
+	};
+
+	const handleInputQueryChange = (e: React.ChangeEvent<HTMLInputElement>, setFunc: (value: string) => void, param: string) => {
+		setFunc(e.target.value);
+		if (e.target.value === "") removeQueryParam(param);
+		else addQueryParam(param, e.target.value);
+	};
+
+	const handleTabChange = (index: TabsValue) => {
+		setTabIndex(index ? parseInt(index) : 0);
+		addQueryParam("tab", index ? index : "0");
+	};
+
+	// -----------------------------------------------------------
+	// display
 	const searchAllHelper = (item: INote, query: string) => {
 		return (
 			item.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -131,7 +153,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 		return data;
 	};
 
-	const sortData = (type: validSort | null, data: INote[], query: string) => {
+	const sortSearchData = (type: validSort | null, data: INote[], query: string) => {
 		if (!type) return searchData(data, query);
 
 		const sortMap: sortI = {
@@ -150,10 +172,11 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 	const formatDate = (date: Date, tz: string) => {
 		const d = new Date(date);
-
 		return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} - ${d.toLocaleTimeString("en-us", { timeZone: tz })}`;
 	};
 
+	// -----------------------------------------------------------
+	// fetch
 	const fillData = async (perPage: number) => {
 		try {
 			setLoading(true);
@@ -181,7 +204,20 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 		}
 	};
 
+	const fetchUrlParams = () => {
+		// set to local state
+		const { query } = router;
+		const params = new URLSearchParams(query as unknown as string);
+		setSearchAll(params.get("qAll") || "");
+		setSearchTitle(params.get("title") || "");
+		setSearchContent(params.get("content") || "");
+		setSearchAuthor(params.get("author") || "");
+		setSearchCreatedAt(params.get("createdAt") || "");
+		setTabIndex(parseInt(params.get("tab") || "0"));
+	};
+
 	useEffect(() => {
+		fetchUrlParams();
 		setTz(Intl.DateTimeFormat().resolvedOptions().timeZone);
 		// fill data with setting
 		if (localStorage.getItem("perPage-note")) {
@@ -191,6 +227,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 			localStorage.setItem("perPage-note", perPage.toString());
 			fillData(perPage);
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (
@@ -202,78 +239,78 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 				</Button>
 			</div>
 			<div style={{ marginTop: "1.5rem" }}>
-				<Tabs defaultValue="first">
+				<Tabs value={tabIndex.toString() || "0"} onTabChange={handleTabChange}>
 					<Tabs.List>
-						<Tabs.Tab
-							value="first"
-							color="green"
-							onClick={() => {
-								setTabIndex(0);
-							}}
-						>
+						<Tabs.Tab value="0" color="green">
 							Search
 						</Tabs.Tab>
-						<Tabs.Tab
-							value="second"
-							color="lime"
-							onClick={() => {
-								setTabIndex(1);
-							}}
-						>
+						<Tabs.Tab value="1" color="lime">
 							Advanced Search
 						</Tabs.Tab>
-						<Tabs.Tab value="third" color="blue" onClick={() => setTabIndex(2)}>
+						<Tabs.Tab value="2" color="blue">
 							Setting
 						</Tabs.Tab>
 					</Tabs.List>
 
-					<Tabs.Panel value="first" pt="xs">
+					<Tabs.Panel value="0" pt="xs">
 						<Collapse in={tabIndex === 0}>
 							<Text color="dimmed">Quick search by any field</Text>
-							<TextInput placeholder="Search by any field" mb="md" icon={<IconSearch size={14} stroke={1.5} />} value={searchAll} onChange={(e) => setSearchAll(e.target.value)} mt={16} />
+							<TextInput
+								placeholder="Search by any field"
+								name="qAll"
+								mb="md"
+								icon={<IconSearch size={14} stroke={1.5} />}
+								value={searchAll}
+								onChange={(e) => handleInputQueryChange(e, setSearchAll, e.target.name)}
+								mt={16}
+							/>
 						</Collapse>
 					</Tabs.Panel>
 
-					<Tabs.Panel value="second" pt="xs" className="dash-textinput-gap">
+					<Tabs.Panel value="1" pt="xs" className="dash-textinput-gap">
 						<Collapse in={tabIndex === 1}>
 							<Text color="dimmed">Search more accurately by searching for each field</Text>
 
 							<TextInput
 								placeholder="Search by title field"
+								name="title"
 								label="Title"
 								icon={<IconLetterA size={14} stroke={1.5} />}
 								value={searchTitle}
-								onChange={(e) => setSearchTitle(e.target.value)}
+								onChange={(e) => handleInputQueryChange(e, setSearchTitle, e.target.name)}
 								mt={16}
 							/>
 							<TextInput
 								placeholder="Search by content field"
+								name="content"
 								label="Content"
 								icon={<IconLicense size={14} stroke={1.5} />}
 								value={searchContent}
-								onChange={(e) => setSearchContent(e.target.value)}
+								onChange={(e) => handleInputQueryChange(e, setSearchContent, e.target.name)}
 								mt={8}
 							/>
 							<TextInput
 								placeholder="Search by author field"
+								name="author"
 								label="Author"
 								icon={<IconLego size={14} stroke={1.5} />}
 								value={searchAuthor}
-								onChange={(e) => setSearchAuthor(e.target.value)}
+								onChange={(e) => handleInputQueryChange(e, setSearchAuthor, e.target.name)}
 								mt={8}
 							/>
 							<TextInput
 								placeholder="Search by createdAt field"
 								label="Created At"
+								name="createdAt"
 								icon={<IconDeviceWatch size={14} stroke={1.5} />}
 								value={searchCreatedAt}
-								onChange={(e) => setSearchCreatedAt(e.target.value)}
+								onChange={(e) => handleInputQueryChange(e, setSearchCreatedAt, e.target.name)}
 								mt={8}
 							/>
 						</Collapse>
 					</Tabs.Panel>
 
-					<Tabs.Panel value="third" pt="xs" className="dash-textinput-gap">
+					<Tabs.Panel value="2" pt="xs" className="dash-textinput-gap">
 						<Collapse in={tabIndex === 2}>
 							<Text color="dimmed">Customize data load setting</Text>
 
@@ -377,8 +414,8 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 							</tr>
 						</thead>
 						<tbody>
-							{notesData && notesData.length > 0 && sortData(sortBy, notesData, searchAll).length > 0 ? (
-								sortData(sortBy, notesData, searchAll).map((row) => (
+							{notesData && notesData.length > 0 && sortSearchData(sortBy, notesData, searchAll).length > 0 ? (
+								sortSearchData(sortBy, notesData, searchAll).map((row) => (
 									<tr key={row._id}>
 										<td>{row.title}</td>
 										<td>{row.content}</td>

@@ -42,6 +42,11 @@
 - [no img element](https://nextjs.org/docs/messages/no-img-element)
 - [get initial props](https://nextjs.org/docs/api-reference/data-fetching/get-initial-props)
 
+## URL
+
+- [change url without refresh](https://stackoverflow.com/questions/62845014/change-url-without-page-refresh-next-js)
+- [remove query params](https://stackoverflow.com/questions/65606974/next-js-how-to-remove-query-params)
+
 ## CORS
 
 - [CORS with Postman](https://stackoverflow.com/questions/36250615/cors-with-postman)
