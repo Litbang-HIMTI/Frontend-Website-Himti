@@ -46,8 +46,7 @@ const formatBytes = (bytes: number, decimals = 2) => {
 export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useStyles();
 
-	const [datas, setDatas] = useState<IstatsExtended[]>([emptyStats, emptyStats, emptyStats, emptyStats, emptyStats, emptyStats, emptyStats]);
-	const [stats, setStats] = useState<JSX.Element[] | null>(null);
+	const [statsData, setStatsData] = useState<IstatsExtended[]>([emptyStats, emptyStats, emptyStats, emptyStats, emptyStats, emptyStats, emptyStats]);
 
 	// ---------------------------------------------------------------------------------------------
 	const fetchShortlinkClicks = async (index: number) => {
@@ -64,7 +63,7 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 				const extraJson = await extraData.json();
 
 				// index 6 shortlink
-				setDatas((prev) => {
+				setStatsData((prev) => {
 					const newData = [...prev];
 					newData[index].loading = false;
 					newData[index].extraData = "Total click : " + extraJson.data.clickCount;
@@ -72,10 +71,11 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 				});
 			}
 		} catch (error) {
-			setDatas((prev) => {
+			setStatsData((prev) => {
 				const newDatas = [...prev];
 				newDatas[index].loading = false;
 				newDatas[index].extraData = "Total click : fail to load!";
+				newDatas[index].loadFail = true;
 				return newDatas;
 			});
 		}
@@ -104,7 +104,7 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 			});
 
 			if (fetched.status !== 200)
-				return setDatas((prev) => {
+				return setStatsData((prev) => {
 					const newDatas = [...prev];
 					newDatas[index].loading = false;
 					newDatas[index].loadFail = true;
@@ -112,7 +112,7 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 				});
 
 			const { data } = await fetched.json();
-			setDatas((prev) => {
+			setStatsData((prev) => {
 				const newData = [...prev];
 
 				// check if next is skipped, skipped because data is returned in the same route as the previous
@@ -125,7 +125,6 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 				} else {
 					newData[index] = data as IstatsExtended;
 					if (!dataElProps[index].extraFunc) newData[index].loading = false;
-
 					if (dataElProps[index].name === "shortlink") newData[index].extraData = "Total click : loading...";
 				}
 
@@ -136,7 +135,7 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 			// you can add more by adding extraFunc in dataElProps
 			if (dataElProps[index].extraFunc) dataElProps[index].extraFunc!(index);
 		} catch (err) {
-			setDatas((prev) => {
+			setStatsData((prev) => {
 				const newDatas = [...prev];
 				newDatas[index].loading = false;
 				newDatas[index].loadFail = true;
@@ -146,67 +145,11 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 	};
 
 	useEffect(() => {
-		const statsFill = datas.map((data, i) => {
-			const IconProps = dataElProps[i].icon;
-			return (
-				<Paper withBorder p="md" radius="md" key={i}>
-					<Group position="apart">
-						<Text size="xs" color="dimmed" className={classes.title}>
-							{dataElProps[i].name.replaceAll("_", " ")}
-						</Text>
-						<IconProps className={classes.icon} size={22} stroke={1.5} />
-					</Group>
-
-					<div style={{ position: "relative" }}>
-						<LoadingOverlay overlayBlur={2} visible={data.loading} zIndex={1} />
-						{!data.loadFail ? (
-							<>
-								<Group align="flex-end" spacing="xs" mt={25}>
-									<Text className={classes.value}>{data.count} documents</Text>
-									<Text color={"teal"} size="sm" weight={500} className={classes.diff}>
-										<span>{formatBytes(data.size)} (usage)</span>
-									</Text>
-								</Group>
-
-								<Text size="xs" color="dimmed" mt={7}>
-									<Tooltip label="(Pre) allocated space for the collection" color="blue" transition="pop" withArrow>
-										<span>Total index size: {formatBytes(data.storageSize)}</span>
-									</Tooltip>
-									<br />
-									Average: {data.avgObjSize ? formatBytes(data.avgObjSize) : "0 Bytes"}
-									<br />
-									{data.extraData ? data.extraData : null}
-								</Text>
-							</>
-						) : (
-							<>
-								<Group align="flex-end" spacing="xs" mt={25}>
-									<Text className={classes.value}>Fetch Error</Text>
-									<Text color={"red"} size="sm" weight={500} className={classes.diff}>
-										<span>Fail to load</span>
-									</Text>
-								</Group>
-
-								<Text size="xs" color="red" mt={7}>
-									Error loading data
-								</Text>
-
-								<Button mt={24} fullWidth leftIcon={<IconRefresh />} compact onClick={() => fetchDataFunc(i)}>
-									Refresh
-								</Button>
-							</>
-						)}
-					</div>
-				</Paper>
-			);
-		});
-
-		setStats(statsFill);
-
 		// fill data by looping
-		for (let i = 0; i < datas.length; i++) if (datas[i].loading) fetchDataFunc(i);
-		// add datas
-	}, [datas, classes.diff, classes.icon, classes.title, classes.value]);
+		for (let i = 0; i < statsData.length; i++) if (statsData[i].loading) fetchDataFunc(i);
+
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	return (
 		<>
@@ -223,7 +166,60 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 							{ maxWidth: "xs", cols: 1 },
 						]}
 					>
-						{stats && stats.length > 0 ? stats : null}
+						{statsData.map((data, i) => {
+							const IconProps = dataElProps[i].icon;
+							return (
+								<Paper withBorder p="md" radius="md" key={i}>
+									<Group position="apart">
+										<Text size="xs" color="dimmed" className={classes.title}>
+											{dataElProps[i].name.replaceAll("_", " ")}
+										</Text>
+										<IconProps className={classes.icon} size={22} stroke={1.5} />
+									</Group>
+
+									<div style={{ position: "relative" }}>
+										<LoadingOverlay overlayBlur={2} visible={data.loading} zIndex={1} />
+										{!data.loadFail ? (
+											<>
+												<Group align="flex-end" spacing="xs" mt={25}>
+													<Text className={classes.value}>{data.count} documents</Text>
+													<Text color={"teal"} size="sm" weight={500} className={classes.diff}>
+														<span>{formatBytes(data.size)} (usage)</span>
+													</Text>
+												</Group>
+
+												<Text size="xs" color="dimmed" mt={7}>
+													<Tooltip label="(Pre) allocated space for the collection" color="blue" transition="pop" withArrow>
+														<span>Total index size: {formatBytes(data.storageSize)}</span>
+													</Tooltip>
+													<br />
+													Average: {data.avgObjSize ? formatBytes(data.avgObjSize) : "0 Bytes"}
+													<br />
+													{data.extraData ? data.extraData : null}
+												</Text>
+											</>
+										) : (
+											<>
+												<Group align="flex-end" spacing="xs" mt={25}>
+													<Text className={classes.value}>Fetch Error</Text>
+													<Text color={"red"} size="sm" weight={500} className={classes.diff}>
+														<span>Fail to load</span>
+													</Text>
+												</Group>
+
+												<Text size="xs" color="red" mt={7}>
+													Error loading data
+												</Text>
+
+												<Button mt={24} fullWidth leftIcon={<IconRefresh />} compact onClick={() => fetchDataFunc(i)}>
+													Refresh
+												</Button>
+											</>
+										)}
+									</div>
+								</Paper>
+							);
+						})}
 
 						<Paper withBorder p="md" radius="md">
 							<Group position="apart">
