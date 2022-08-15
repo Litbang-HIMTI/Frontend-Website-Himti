@@ -47,6 +47,7 @@
 	margin-right: 4px;
 }
 
-.dash-textinput-gap div div input {
+.dash-textinput-gap div div input,
+.dash-textinput-gap div div textarea {
 	margin-top: 0.25rem;
 }

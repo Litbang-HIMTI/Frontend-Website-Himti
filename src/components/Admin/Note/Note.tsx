@@ -215,9 +215,9 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 			setNotesDataAll(data);
 			setLoadingDataAll(false);
-		} catch (error) {
+		} catch (error: any) {
 			setLoadingDataAll(false);
-			showNotification({ title: "Error indexing all data for search", message: `${error}`, color: "red" });
+			showNotification({ title: "Error indexing all data for search", message: error.message, color: "red" });
 		}
 	};
 
@@ -233,15 +233,15 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 			});
 
 			const { data, message, page, pages }: { data: INote[]; message: string; page: number; pages: number } = await fetchData.json();
-			if (fetchData.status !== 200) return showNotification({ title: "Error getting data", message, color: "red" });
+			if (fetchData.status !== 200) return showNotification({ title: "Error getting page data", message, color: "red" });
 
 			setCurPage(page);
 			setPages(pages);
 			setNotesData(data);
 			setLoadingDataPage(false);
-		} catch (error) {
+		} catch (error: any) {
 			setLoadingDataPage(false);
-			showNotification({ title: "Error getting data", message: `${error}`, color: "red" });
+			showNotification({ title: "Error getting page data", message: error.message, color: "red" });
 		}
 	};
 
@@ -468,7 +468,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 										<td>{row.title}</td>
 										<td>{row.content}</td>
 										<td>
-											{row.editedBy ? (
+											{row.editedBy && row.editedBy[0] ? (
 												<>
 													<Tooltip label={`Last edited by: ${row.editedBy[0].username}`}>
 														<span>{row.author[0].username}</span>
@@ -479,7 +479,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 											)}
 										</td>
 										<td>
-											{row.editedBy ? (
+											{row.editedBy && row.editedBy[0] ? (
 												<Tooltip label={`Last edited at: ${formatDate(row.updatedAt, tz)}`}>
 													<span>{formatDate(row.createdAt, tz)}</span>
 												</Tooltip>

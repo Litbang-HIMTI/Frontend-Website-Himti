@@ -24,7 +24,7 @@ export const UserPopout: NextPage<navProps> = (props) => {
 				</Menu.Target>
 				<Menu.Dropdown>
 					{validateAdmin(props.user!) ? (
-						<Link href={`/admin/user/${props.user?.username}`}>
+						<Link href={`/${props.pathname?.split("/")[1]}/user/${props.user?.username}`}>
 							<a>
 								<Menu.Item rightSection={<IconChevronRight size={14} stroke={1.5} />}>
 									<Group>
@@ -61,12 +61,12 @@ export const UserPopout: NextPage<navProps> = (props) => {
 
 					{validateEditor(props.user!) && (
 						<>
-							<Link href={`/admin/blog?author=${props.user?.username}?tab=2`}>
+							<Link href={`/${props.pathname?.split("/")[1]}/blog?author=${props.user?.username}?tab=2`}>
 								<a>
 									<Menu.Item icon={<IconNotebook size={14} stroke={1.5} color={theme.colors.red[6]} />}>Your Blog Posts</Menu.Item>
 								</a>
 							</Link>
-							<Link href={`/admin/event?author=${props.user?.username}?tab=2`}>
+							<Link href={`/${props.pathname?.split("/")[1]}/event?author=${props.user?.username}?tab=2`}>
 								<a>
 									<Menu.Item icon={<IconCalendarEvent size={14} stroke={1.5} color={theme.colors.yellow[6]} />}>Your Event Posts</Menu.Item>
 								</a>
@@ -76,7 +76,7 @@ export const UserPopout: NextPage<navProps> = (props) => {
 
 					{validateForumMod(props.user!) && (
 						<>
-							<Link href={`/admin/forum?author=${props.user?.username}?tab=2`}>
+							<Link href={`/${props.pathname?.split("/")[1]}/forum?author=${props.user?.username}?tab=2`}>
 								<a>
 									<Menu.Item icon={<IconMessage size={14} stroke={1.5} color={theme.colors.blue[6]} />}>Your Forum Posts</Menu.Item>
 								</a>
@@ -84,7 +84,7 @@ export const UserPopout: NextPage<navProps> = (props) => {
 						</>
 					)}
 
-					<Link href={`/admin/comment?author=${props.user?.username}?tab=2`}>
+					<Link href={`/${props.pathname?.split("/")[1]}/comment?author=${props.user?.username}?tab=2`}>
 						<a>
 							<Menu.Item icon={<IconMessages size={14} stroke={1.5} color={theme.colors.blue[6]} />}>Your comments</Menu.Item>
 						</a>
@@ -92,7 +92,7 @@ export const UserPopout: NextPage<navProps> = (props) => {
 
 					<Menu.Label>Settings</Menu.Label>
 					{validateAdmin(props.user!) && (
-						<Link href={`/admin/user/${props.user?.username}`}>
+						<Link href={`/${props.pathname?.split("/")[1]}/user/${props.user?.username}`}>
 							<a>
 								<Menu.Item icon={<IconSettings size={14} stroke={1.5} />}>Account settings</Menu.Item>
 							</a>
