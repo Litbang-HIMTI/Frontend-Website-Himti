@@ -8,6 +8,7 @@
 - [Note](#note)
   - [Next.js](#nextjs)
   - [URL](#url)
+  - [Mantine Quill RTE](#mantine-quill-rte)
   - [CORS](#cors)
   - [React Beautiful dnd](#react-beautiful-dnd)
   - [Error Handling](#error-handling)
@@ -47,6 +48,12 @@
 
 - [change url without refresh](https://stackoverflow.com/questions/62845014/change-url-without-page-refresh-next-js)
 - [remove query params](https://stackoverflow.com/questions/65606974/next-js-how-to-remove-query-params)
+
+## Mantine Quill RTE
+
+- [mantine rte docs](https://mantine.dev/others/rte/)
+- [render html](https://dev.to/agiksetiawan/render-html-tag-in-next-js-or-react-js-3cfe)
+- [render html 2](https://stackoverflow.com/questions/60357068/next-js-render-app-inside-html-markup-coming-as-string)
 
 ## CORS
 
