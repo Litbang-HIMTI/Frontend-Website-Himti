@@ -19,6 +19,7 @@ import {
 	NumberInput,
 	TabsValue,
 	Pagination,
+	Tooltip,
 } from "@mantine/core";
 import { keys } from "@mantine/utils";
 import { showNotification } from "@mantine/notifications";
@@ -114,7 +115,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 	// delete
 	const deleteGroup = async (id: string) => {
 		try {
-			const deleteFetch = await fetch(`${SERVER_V1}/note/${id}`, {
+			const deleteFetch = await fetch(`${SERVER_V1}/group/${id}`, {
 				method: "DELETE",
 				headers: {
 					"Content-Type": "application/json",
@@ -362,13 +363,23 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 								sortSearchData(sortBy, groupData, groupDataAll).map((row) => (
 									<tr key={row._id}>
 										<td>
-											<Text variant="link" component="a" href={`${props.pathname}/${row._id}`}>
-												{row.name}
-											</Text>
+											<Link href={`${props.pathname}/${row._id}`}>
+												<a>
+													<Text variant="link">{row.name}</Text>
+												</a>
+											</Link>
 										</td>
 										<td>{row.description}</td>
 										<td>{row.count}</td>
-										<td>{formatDateWithTz(row.createdAt, tz)}</td>
+										<td>
+											{row.updatedAt !== row.createdAt ? (
+												<Tooltip label={`Last edited at: ${formatDateWithTz(row.updatedAt, tz)}`}>
+													<span>{formatDateWithTz(row.createdAt, tz)}</span>
+												</Tooltip>
+											) : (
+												<>{formatDateWithTz(row.createdAt, tz)}</>
+											)}
+										</td>
 										<td style={{ padding: "1rem .5rem" }}>
 											<div className="dash-flex">
 												<Link href={`${props.pathname}/${row._id}`}>

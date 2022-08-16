@@ -6,14 +6,14 @@ import { DashboardNav } from "../../../src/components/Admin/Nav";
 import { IDashboardProps } from "../../../src/interfaces/props/Dashboard";
 import { SERVER_V1, validateStaff } from "../../../src/helper";
 
-const add: NextPage<IDashboardProps> = (props) => {
+const edit: NextPage<IDashboardProps> = (props) => {
 	return (
 		<>
 			<Head>
 				<meta charSet="UTF-8" />
 				<meta httpEquiv="X-UA-Compatible" content="IE=edge" />
 				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-				<title>Note Create | Himti UIN Jakarta</title>
+				<title>Note View/Edit | Himti UIN Jakarta</title>
 			</Head>
 			<AppShell header={<DashboardNav {...props} />}>
 				<main className="dashboard content-wrap">
@@ -64,4 +64,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 	};
 };
 
-export default add;
+export default edit;

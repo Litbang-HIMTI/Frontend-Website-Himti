@@ -430,9 +430,11 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 								sortSearchData(sortBy, notesData, notesDataAll).map((row) => (
 									<tr key={row._id}>
 										<td>
-											<Text variant="link" component="a" href={`${props.pathname}/${row._id}`}>
-												{row.title}
-											</Text>
+											<Link href={`${props.pathname}/${row._id}`}>
+												<a>
+													<Text variant="link">{row.title}</Text>
+												</a>
+											</Link>
 										</td>
 										<td dangerouslySetInnerHTML={{ __html: row.content }}></td>
 										<td>
@@ -447,7 +449,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 											)}
 										</td>
 										<td>
-											{row.editedBy && row.editedBy[0] ? (
+											{row.updatedAt !== row.createdAt ? (
 												<Tooltip label={`Last edited at: ${formatDateWithTz(row.updatedAt, tz)}`}>
 													<span>{formatDateWithTz(row.createdAt, tz)}</span>
 												</Tooltip>

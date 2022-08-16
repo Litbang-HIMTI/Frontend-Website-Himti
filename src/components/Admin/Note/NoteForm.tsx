@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
-import Link from "next/link";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { Box, Button, createStyles, Group, LoadingOverlay, TextInput, Text } from "@mantine/core";
@@ -41,6 +40,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 	const [editable, setEditable] = useState<boolean>(false);
 	const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
 	const [modalHandle, setModalHandle] = useState({ opened: false, closeFunc: () => {}, confirmFunc: () => {} });
+	const [pageOpenFetched, setPageOpenFetched] = useState<boolean>(false);
 	// ------------------------------------------------------------
 	const forms = useForm({
 		initialValues: {
@@ -71,34 +71,35 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 
 	const deleteNote = async () => {
 		setLoading(true);
+		setUnsavedChanges(false);
 		try {
-			const res = await fetch(`${SERVER_V1}/note/${props.note!._id}`, {
+			const req = await fetch(`${SERVER_V1}/note/${props.note!._id}`, {
 				method: "DELETE",
 				headers: {
 					"Content-Type": "application/json",
 				},
 				credentials: "include",
 			});
-			const data = await res.json();
-
+			const { message } = await req.json();
 			resetModalHandle();
-			if (res.status === 200) {
-				setUnsavedChanges(false);
+
+			if (req.status === 200) {
 				setSubmitted(true);
-				showNotification({ title: "Note deleted", message: "Note has been deleted successfully. Redirecting...", color: "red" });
+				showNotification({ title: "Note deleted", message: message + ". Redirecting...", disallowClose: true });
 
 				const { fromDashHome } = router.query;
-				setTimeout(() => {
-					router.push(fromDashHome === "true" ? "../" : "../note");
-				}, 1500);
+				setTimeout(() => router.push(fromDashHome === "true" ? "../" : "../note"), 1500);
 			} else {
-				showNotification({ title: "Error", message: data.message, color: "red" });
+				setUnsavedChanges(true);
+				setLoading(false);
+				resetModalHandle();
+				showNotification({ title: "Error", message, disallowClose: true, color: "red" });
 			}
-			setLoading(false);
-		} catch (err: any) {
+		} catch (error: any) {
+			setUnsavedChanges(true);
 			setLoading(false);
 			resetModalHandle();
-			showNotification({ title: "Error", message: err.message, color: "red" });
+			showNotification({ title: "Error", message: error.message, disallowClose: true, color: "red" });
 		}
 	};
 
@@ -119,6 +120,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 
 	const submitForm = async () => {
 		setLoading(true);
+		setUnsavedChanges(false);
 		if (submitted) return;
 		const { title } = forms.values;
 		const editor = document.getElementsByClassName("ql-editor")[0] as HTMLDivElement;
@@ -131,7 +133,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 			});
 
 		try {
-			const fetchSubmit = await fetch(`${SERVER_V1}/${props.note ? "note/" + props.note._id : "note"}`, {
+			const req = await fetch(`${SERVER_V1}/${props.note ? "note/" + props.note._id : "note"}`, {
 				method: props.note ? "PUT" : "POST",
 				credentials: "include",
 				headers: {
@@ -142,56 +144,46 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 					content,
 				}),
 			});
-
+			const { message } = await req.json();
 			resetModalHandle();
-			const { message } = await fetchSubmit.json();
-			if (fetchSubmit.status === 201 || fetchSubmit.status === 200) {
-				setUnsavedChanges(false);
+
+			if (req.status === 201 || req.status === 200) {
 				setSubmitted(true);
-				showNotification({
-					title: "Success",
-					message: message + ". Redirecting...",
-					disallowClose: true,
-				});
+				showNotification({ title: "Success", message: message + ". Redirecting...", disallowClose: true });
 
 				const { fromDashHome } = router.query;
-				setTimeout(() => {
-					router.push(fromDashHome === "true" ? "../" : "../note");
-				}, 1500);
+				setTimeout(() => router.push(fromDashHome === "true" ? "../" : "../note"), 1500);
 			} else {
+				setUnsavedChanges(true);
 				setLoading(false);
-				showNotification({
-					title: "Error",
-					message,
-					disallowClose: true,
-				});
+				resetModalHandle();
+				showNotification({ title: "Error", message, disallowClose: true, color: "red" });
 			}
 		} catch (error: any) {
-			resetModalHandle();
+			setUnsavedChanges(true);
 			setLoading(false);
-			showNotification({
-				title: "Error",
-				message: `${error.message}`,
-				disallowClose: true,
-			});
+			resetModalHandle();
+			showNotification({ title: "Error", message: error.message, disallowClose: true, color: "red" });
 		}
 	};
 
 	// ------------------------------------------------------------
 	// page open
 	useEffect(() => {
-		if (props.note) {
-			// edit mode
-			forms.setValues({
-				title: props.note.title,
-			});
-			setContent(props.note.content);
-		} else {
-			// create mode
-			setUnsavedChanges(true);
-			setEditable(true);
+		if (!pageOpenFetched) {
+			if (props.note) {
+				// edit mode
+				forms.setValues({
+					title: props.note.title,
+				});
+				setContent(props.note.content);
+			} else {
+				// create mode
+				setUnsavedChanges(true);
+				setEditable(true);
+			}
 		}
-
+		setPageOpenFetched(true);
 		// ------------------------------------------------------------
 		// on page leave
 		const warningText = "You might have unsaved changes - are you sure you wish to leave this page?";

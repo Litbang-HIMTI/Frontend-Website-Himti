@@ -1,10 +1,10 @@
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import { AppShell } from "@mantine/core";
-import { NoteForm } from "../../../src/components/Admin/Note";
+import { GroupForm } from "../../../src/components/Admin/Group";
 import { DashboardNav } from "../../../src/components/Admin/Nav";
 import { IDashboardProps } from "../../../src/interfaces/props/Dashboard";
-import { SERVER_V1, validateStaff } from "../../../src/helper";
+import { SERVER_V1, validateAdmin } from "../../../src/helper";
 
 const create: NextPage<IDashboardProps> = (props) => {
 	return (
@@ -13,11 +13,11 @@ const create: NextPage<IDashboardProps> = (props) => {
 				<meta charSet="UTF-8" />
 				<meta httpEquiv="X-UA-Compatible" content="IE=edge" />
 				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-				<title>Note Create | Himti UIN Jakarta</title>
+				<title>Group Create | Himti UIN Jakarta</title>
 			</Head>
 			<AppShell header={<DashboardNav {...props} />}>
 				<main className="dashboard content-wrap">
-					<NoteForm {...props} />
+					<GroupForm {...props} />
 				</main>
 			</AppShell>
 		</>
@@ -39,7 +39,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 	// validate role
 	const parsed = await checkLoggedIn.json();
-	if (!validateStaff(parsed.data)) return { notFound: true };
+	if (!validateAdmin(parsed.data)) return { notFound: true };
 
 	return {
 		props: {
