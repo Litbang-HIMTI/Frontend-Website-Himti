@@ -5,4 +5,5 @@ export interface IGroup {
 	description: string;
 	createdAt: Date;
 	updatedAt: Date;
+	count: number;
 }

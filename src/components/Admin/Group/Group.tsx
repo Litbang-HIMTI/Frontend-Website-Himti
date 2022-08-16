@@ -10,7 +10,6 @@ import {
 	Text,
 	Center,
 	TextInput,
-	Tooltip,
 	ActionIcon,
 	Tabs,
 	Button,
@@ -23,22 +22,22 @@ import {
 } from "@mantine/core";
 import { keys } from "@mantine/utils";
 import { showNotification } from "@mantine/notifications";
-import { IconSearch, IconEdit, IconTrash, IconFilePlus, IconLego, IconLetterA, IconLicense, IconDeviceWatch, IconRefresh } from "@tabler/icons";
+import { IconSearch, IconEdit, IconTrash, IconFilePlus, IconRefresh } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { INote } from "../../../interfaces/db";
+import { IGroup } from "../../../interfaces/db";
 import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../helper";
 import { Th, useTableStyles } from "../../Utils/Th";
 import { MDelete } from "../../Utils/Modals";
 
-type validSort = "title" | "content" | "author" | "createdAt";
+type validSort = "name" | "description" | "count" | "createdAt";
 interface sortI {
-	title: (a: INote, b: INote) => number;
-	content: (a: INote, b: INote) => number;
-	author: (a: INote, b: INote) => number;
-	createdAt: (a: INote, b: INote) => number;
+	name: (a: IGroup, b: IGroup) => number;
+	description: (a: IGroup, b: IGroup) => number;
+	count: (a: IGroup, b: IGroup) => number;
+	createdAt: (a: IGroup, b: IGroup) => number;
 }
 
-export const Note: NextPage<IDashboardProps> = (props) => {
+export const UserGroup: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useTableStyles();
 	const router = useRouter();
 	const [openModalDelete, setOpenModalDelete] = useState(false);
@@ -49,13 +48,9 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	const [perPage, setPerPage] = useState(25);
 
 	const [searchAll, setSearchAll] = useState("");
-	const [searchTitle, setSearchTitle] = useState("");
-	const [searchContent, setSearchContent] = useState("");
-	const [searchAuthor, setSearchAuthor] = useState("");
-	const [searchCreatedAt, setSearchCreatedAt] = useState("");
 
-	const [notesDataAll, setNotesDataAll] = useState<INote[]>([]);
-	const [notesData, setNotesData] = useState<INote[]>([]);
+	const [groupDataAll, setGroupDataAll] = useState<IGroup[]>([]);
+	const [groupData, setGroupData] = useState<IGroup[]>([]);
 	const [sortBy, setSortBy] = useState<validSort | null>(null);
 
 	const [reverseSortDirection, setReverseSortDirection] = useState(false);
@@ -85,45 +80,36 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// display
-	const searchAllHelper = (item: INote, query: string) => {
+	const searchAllHelper = (item: IGroup, query: string) => {
 		return (
-			item.title.toLowerCase().includes(query.toLowerCase()) ||
-			item.content.toLowerCase().includes(query.toLowerCase()) ||
-			item.author[0].username.toLowerCase().includes(query.toLowerCase()) ||
+			item.name.toLowerCase().includes(query.toLowerCase()) ||
+			item.description.toLowerCase().includes(query.toLowerCase()) ||
 			formatDateWithTz(item.createdAt, tz).toLowerCase().includes(query.toLowerCase())
 		);
 	};
 
 	const isSearching = () => {
 		// not on setting page and is actually searching and data all is fetched
-		return tabIndex !== 2 && notesDataAll.length > 0 && (searchAll !== "" || searchTitle !== "" || searchContent !== "" || searchAuthor !== "" || searchCreatedAt !== "");
+		return tabIndex !== 2 && groupDataAll.length > 0 && searchAll !== "";
 	};
 
-	const searchData = (dataPage: INote[], dataAll: INote[]) => {
+	const searchData = (dataPage: IGroup[], dataAll: IGroup[]) => {
 		// verify searching
 		if (isSearching()) dataPage = dataAll;
-
-		if (tabIndex === 0) {
-			if (searchAll !== "") dataPage = dataPage.filter((item) => keys(dataPage[0]).some(() => searchAllHelper(item, searchAll)));
-		} else if (tabIndex === 1) {
-			if (searchTitle !== "") dataPage = dataPage.filter((item) => item.title.toLowerCase().includes(searchTitle.toLowerCase()));
-			if (searchContent !== "") dataPage = dataPage.filter((item) => item.content.toLowerCase().includes(searchContent.toLowerCase()));
-			if (searchAuthor !== "") dataPage = dataPage.filter((item) => item.author[0].username.toLowerCase().includes(searchAuthor.toLowerCase()));
-			if (searchCreatedAt !== "") dataPage = dataPage.filter((item) => formatDateWithTz(item.createdAt, tz).toLowerCase().includes(searchCreatedAt.toLowerCase()));
-		}
+		if (searchAll !== "") dataPage = dataPage.filter((item) => keys(dataPage[0]).some(() => searchAllHelper(item, searchAll)));
 
 		return dataPage;
 	};
 
-	const sortSearchData = (type: validSort | null, dataPage: INote[], dataAll: INote[]) => {
+	const sortSearchData = (type: validSort | null, dataPage: IGroup[], dataAll: IGroup[]) => {
 		if (!type) return searchData(dataPage, dataAll);
 
 		if (isSearching()) dataPage = dataAll.length > 0 ? dataAll : dataPage;
 		const sortMap: sortI = {
-			title: (a: INote, b: INote) => a.title.localeCompare(b.title),
-			content: (a: INote, b: INote) => a.content.localeCompare(b.content),
-			author: (a: INote, b: INote) => a.author[0].username.localeCompare(b.author[0].username),
-			createdAt: (a: INote, b: INote) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf(),
+			name: (a: IGroup, b: IGroup) => a.name.localeCompare(b.name),
+			description: (a: IGroup, b: IGroup) => a.description.localeCompare(b.description),
+			count: (a: IGroup, b: IGroup) => a.count - b.count,
+			createdAt: (a: IGroup, b: IGroup) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf(),
 		};
 
 		// sort
@@ -148,10 +134,10 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 			const deleteData = await deleteFetch.json();
 			if (deleteFetch.status === 200 && deleteData && deleteData.success) {
 				// slice data
-				setNotesData((prev) => {
+				setGroupData((prev) => {
 					return prev.filter((item) => item._id !== id);
 				});
-				setNotesDataAll((prev) => {
+				setGroupDataAll((prev) => {
 					return prev.filter((item) => item._id !== id);
 				});
 
@@ -170,7 +156,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	const fillDataAll = async () => {
 		try {
 			setLoadingDataAll(true);
-			const fetchData = await fetch(SERVER_V1 + `/note`, {
+			const fetchData = await fetch(SERVER_V1 + `/group`, {
 				method: "GET",
 				headers: {
 					"Content-Type": "application/json",
@@ -178,13 +164,13 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 				credentials: "include",
 			});
 
-			const { data, message }: { data: INote[]; message: string; page: number; pages: number } = await fetchData.json();
+			const { data, message }: { data: IGroup[]; message: string; page: number; pages: number } = await fetchData.json();
 			if (fetchData.status !== 200) {
 				setLoadingDataAll(false);
 				return showNotification({ title: "Error indexing all data for search", message, color: "red" });
 			}
 
-			setNotesDataAll(data);
+			setGroupDataAll(data);
 			setLoadingDataAll(false);
 		} catch (error: any) {
 			setLoadingDataAll(false);
@@ -195,7 +181,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	const fillData = async (perPage: number, curPageQ: number) => {
 		try {
 			setLoadingDataPage(true);
-			const fetchData = await fetch(SERVER_V1 + `/note?perPage=${perPage}&page=${curPageQ}`, {
+			const fetchData = await fetch(SERVER_V1 + `/group?perPage=${perPage}&page=${curPageQ}`, {
 				method: "GET",
 				headers: {
 					"Content-Type": "application/json",
@@ -203,7 +189,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 				credentials: "include",
 			});
 
-			const { data, message, page, pages }: { data: INote[]; message: string; page: number; pages: number } = await fetchData.json();
+			const { data, message, page, pages }: { data: IGroup[]; message: string; page: number; pages: number } = await fetchData.json();
 			if (fetchData.status !== 200) {
 				setLoadingDataPage(false);
 				return showNotification({ title: "Error getting page data", message, color: "red" });
@@ -211,7 +197,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 			setCurPage(page);
 			setPages(pages);
-			setNotesData(data);
+			setGroupData(data);
 			setLoadingDataPage(false);
 		} catch (error: any) {
 			setLoadingDataPage(false);
@@ -225,10 +211,6 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 		// set to local state
 		setCurPage(params.get("page") ? parseInt(params.get("page") || "1") : 1);
 		setSearchAll(params.get("qAll") || "");
-		setSearchTitle(params.get("title") || "");
-		setSearchContent(params.get("content") || "");
-		setSearchAuthor(params.get("author") || "");
-		setSearchCreatedAt(params.get("createdAt") || "");
 		setTabIndex(parseInt(params.get("tab") || "0"));
 	};
 
@@ -236,11 +218,11 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 		fetchUrlParams();
 		setTz(Intl.DateTimeFormat().resolvedOptions().timeZone);
 		// fill data with setting
-		if (localStorage.getItem("perPage-note")) {
-			setPerPage(parseInt(localStorage.getItem("perPage-note") as string));
-			fillData(parseInt(localStorage.getItem("perPage-note")!), curPage);
+		if (localStorage.getItem("perPage-group")) {
+			setPerPage(parseInt(localStorage.getItem("perPage-group") as string));
+			fillData(parseInt(localStorage.getItem("perPage-group")!), curPage);
 		} else {
-			localStorage.setItem("perPage-note", perPage.toString());
+			localStorage.setItem("perPage-group", perPage.toString());
 			fillData(perPage, curPage);
 		}
 		fillDataAll();
@@ -252,7 +234,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 			<MDelete opened={openModalDelete} closeFunc={setOpenModalDelete} deleteFunc={deleteNote} idDelete={idDelete} />
 
 			<div className="dash-flex">
-				<h1>Notes</h1>
+				<h1>Groups</h1>
 				<Link href={"note/create"}>
 					<Button id="dash-add-new" ml={16} size="xs" compact leftIcon={<IconFilePlus size={20} />}>
 						Add new
@@ -265,10 +247,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 						<Tabs.Tab value="0" color="green">
 							Search
 						</Tabs.Tab>
-						<Tabs.Tab value="1" color="lime">
-							Advanced Search
-						</Tabs.Tab>
-						<Tabs.Tab value="2" color="blue">
+						<Tabs.Tab value="1" color="blue">
 							Setting
 						</Tabs.Tab>
 					</Tabs.List>
@@ -289,52 +268,9 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 								/>
 							</Collapse>
 						</Tabs.Panel>
-
-						<Tabs.Panel value="1" pt="xs" className="dash-textinput-gap">
-							<Collapse in={tabIndex === 1}>
-								<Text color="dimmed">Search more accurately by searching for each field</Text>
-
-								<TextInput
-									placeholder="Search by title field"
-									name="title"
-									label="Title"
-									icon={<IconLetterA size={14} stroke={1.5} />}
-									value={searchTitle}
-									onChange={(e) => handleInputQueryChange(e, setSearchTitle, e.target.name)}
-									mt={16}
-								/>
-								<TextInput
-									placeholder="Search by content field"
-									name="content"
-									label="Content"
-									icon={<IconLicense size={14} stroke={1.5} />}
-									value={searchContent}
-									onChange={(e) => handleInputQueryChange(e, setSearchContent, e.target.name)}
-									mt={8}
-								/>
-								<TextInput
-									placeholder="Search by author field"
-									name="author"
-									label="Author"
-									icon={<IconLego size={14} stroke={1.5} />}
-									value={searchAuthor}
-									onChange={(e) => handleInputQueryChange(e, setSearchAuthor, e.target.name)}
-									mt={8}
-								/>
-								<TextInput
-									placeholder="Search by createdAt field"
-									label="Created At"
-									name="createdAt"
-									icon={<IconDeviceWatch size={14} stroke={1.5} />}
-									value={searchCreatedAt}
-									onChange={(e) => handleInputQueryChange(e, setSearchCreatedAt, e.target.name)}
-									mt={8}
-								/>
-							</Collapse>
-						</Tabs.Panel>
 					</div>
-					<Tabs.Panel value="2" pt="xs" className="dash-textinput-gap">
-						<Collapse in={tabIndex === 2}>
+					<Tabs.Panel value="1" pt="xs" className="dash-textinput-gap">
+						<Collapse in={tabIndex === 1}>
 							<Text color="dimmed">Customize data load setting</Text>
 
 							<NumberInput
@@ -349,7 +285,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 								onChange={(value) => {
 									if (!value) return;
 									setPerPage(value);
-									localStorage.setItem("perPage-note", value.toString());
+									localStorage.setItem("perPage-group", value.toString());
 								}}
 								mt={8}
 							/>
@@ -380,39 +316,39 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 							<tr>
 								<Th
 									classes={classes}
-									sorted={sortBy === "title"}
+									sorted={sortBy === "name"}
 									reversed={reverseSortDirection}
 									onSort={() => {
-										if (sortBy === "title") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("title");
+										if (sortBy === "name") setReverseSortDirection(!reverseSortDirection);
+										setSortBy("name");
 									}}
-									width="15%"
+									width="20%"
 								>
 									Title
 								</Th>
 								<Th
 									classes={classes}
-									sorted={sortBy === "content"}
+									sorted={sortBy === "description"}
 									reversed={reverseSortDirection}
 									onSort={() => {
-										if (sortBy === "content") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("content");
+										if (sortBy === "description") setReverseSortDirection(!reverseSortDirection);
+										setSortBy("description");
 									}}
-									width="40%"
+									width="45%"
 								>
-									Content
+									Description
 								</Th>
 								<Th
 									classes={classes}
-									sorted={sortBy === "author"}
+									sorted={sortBy === "description"}
 									reversed={reverseSortDirection}
 									onSort={() => {
-										if (sortBy === "author") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("author");
+										if (sortBy === "description") setReverseSortDirection(!reverseSortDirection);
+										setSortBy("description");
 									}}
-									width="18%"
+									width="10%"
 								>
-									Author
+									Count
 								</Th>
 								<Th
 									classes={classes}
@@ -422,7 +358,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 										if (sortBy === "createdAt") setReverseSortDirection(!reverseSortDirection);
 										setSortBy("createdAt");
 									}}
-									width="17%"
+									width="20%"
 								>
 									Created At
 								</Th>
@@ -438,31 +374,13 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 							</tr>
 						</thead>
 						<tbody>
-							{notesData && notesData.length > 0 && sortSearchData(sortBy, notesData, notesDataAll).length > 0 ? (
-								sortSearchData(sortBy, notesData, notesDataAll).map((row) => (
+							{groupData && groupData.length > 0 && sortSearchData(sortBy, groupData, groupDataAll).length > 0 ? (
+								sortSearchData(sortBy, groupData, groupDataAll).map((row) => (
 									<tr key={row._id}>
-										<td>{row.title}</td>
-										<td dangerouslySetInnerHTML={{ __html: row.content }}></td>
-										<td>
-											{row.editedBy && row.editedBy[0] ? (
-												<>
-													<Tooltip label={`Last edited by: ${row.editedBy[0].username}`}>
-														<span>{row.author[0].username}</span>
-													</Tooltip>
-												</>
-											) : (
-												row.author[0].username
-											)}
-										</td>
-										<td>
-											{row.editedBy && row.editedBy[0] ? (
-												<Tooltip label={`Last edited at: ${formatDateWithTz(row.updatedAt, tz)}`}>
-													<span>{formatDateWithTz(row.createdAt, tz)}</span>
-												</Tooltip>
-											) : (
-												<>{formatDateWithTz(row.createdAt, tz)}</>
-											)}
-										</td>
+										<td>{row.name}</td>
+										<td>{row.description}</td>
+										<td>{row.count}</td>
+										<td>{formatDateWithTz(row.createdAt, tz)}</td>
 										<td style={{ padding: "1rem .5rem" }}>
 											<div className="dash-flex">
 												<Link href={`${props.pathname}/${row._id}`}>
