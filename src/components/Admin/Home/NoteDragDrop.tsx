@@ -107,7 +107,6 @@ export const NoteDragDrop: NextPage<IDashboardProps> = (props) => {
 
 	useEffect(() => {
 		fillData();
-
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 

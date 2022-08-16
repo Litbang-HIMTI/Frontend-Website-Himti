@@ -3,11 +3,11 @@ import Link from "next/link";
 import { Button, Center, createStyles, Divider, Group, LoadingOverlay, Paper, SimpleGrid, Text, Tooltip } from "@mantine/core";
 import { IconNotebook, IconHistory, IconCalendarEvent, IconMessage, IconMessages, IconLink, IconRefresh, IconChartPie, IconExternalLink } from "@tabler/icons";
 import { useEffect, useState } from "react";
-import { emptyStats, IstatsExtended } from "../../../interfaces/db/Stats";
-import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { SERVER_V1 } from "../../../helper/constants";
 import { NoteDragDrop } from "./NoteDragDrop";
 import { TitleDashboard } from "../../Utils/Dashboard";
+import { emptyStats, IstatsExtended } from "../../../interfaces/db/Stats";
+import { IDashboardProps } from "../../../interfaces/props/Dashboard";
+import { formatBytes, SERVER_V1 } from "../../../helper";
 
 const useStyles = createStyles((theme) => ({
 	value: {
@@ -32,21 +32,8 @@ const useStyles = createStyles((theme) => ({
 	},
 }));
 
-const formatBytes = (bytes: number, decimals = 2) => {
-	if (bytes === 0) return "0 Bytes";
-
-	const k = 1024;
-	const dm = decimals < 0 ? 0 : decimals;
-	const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-	return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-};
-
 export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useStyles();
-
 	const [statsData, setStatsData] = useState<IstatsExtended[]>([emptyStats, emptyStats, emptyStats, emptyStats, emptyStats, emptyStats, emptyStats]);
 
 	// ---------------------------------------------------------------------------------------------
@@ -146,9 +133,7 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 	};
 
 	useEffect(() => {
-		// fill data by looping
-		for (let i = 0; i < statsData.length; i++) if (statsData[i].loading) fetchDataFunc(i);
-
+		for (let i = 0; i < statsData.length; i++) if (statsData[i].loading) fetchDataFunc(i); // fill data by looping
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 

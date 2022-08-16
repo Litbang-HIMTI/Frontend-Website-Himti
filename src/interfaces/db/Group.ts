@@ -7,3 +7,11 @@ export interface IGroup {
 	updatedAt: Date;
 	count: number;
 }
+
+export type validGroupSort = "name" | "description" | "count" | "createdAt";
+export interface GroupSort {
+	name: (a: IGroup, b: IGroup) => number;
+	description: (a: IGroup, b: IGroup) => number;
+	count: (a: IGroup, b: IGroup) => number;
+	createdAt: (a: IGroup, b: IGroup) => number;
+}

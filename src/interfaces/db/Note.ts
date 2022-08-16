@@ -11,3 +11,11 @@ export interface INote {
 	updatedAt: Date;
 	position: number;
 }
+
+export type validNoteSort = "title" | "content" | "author" | "createdAt";
+export interface NoteSort {
+	title: (a: INote, b: INote) => number;
+	content: (a: INote, b: INote) => number;
+	author: (a: INote, b: INote) => number;
+	createdAt: (a: INote, b: INote) => number;
+}

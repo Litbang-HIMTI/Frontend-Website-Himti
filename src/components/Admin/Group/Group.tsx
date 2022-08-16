@@ -24,17 +24,9 @@ import { keys } from "@mantine/utils";
 import { showNotification } from "@mantine/notifications";
 import { IconSearch, IconEdit, IconTrash, IconRefresh } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { IGroup } from "../../../interfaces/db";
+import { IGroup, validGroupSort, GroupSort } from "../../../interfaces/db";
 import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../helper";
 import { Th, useTableStyles, MDelete, TitleDashboard } from "../../Utils/Dashboard";
-
-type validSort = "name" | "description" | "count" | "createdAt";
-interface sortI {
-	name: (a: IGroup, b: IGroup) => number;
-	description: (a: IGroup, b: IGroup) => number;
-	count: (a: IGroup, b: IGroup) => number;
-	createdAt: (a: IGroup, b: IGroup) => number;
-}
 
 export const UserGroup: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useTableStyles();
@@ -50,7 +42,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 
 	const [groupDataAll, setGroupDataAll] = useState<IGroup[]>([]);
 	const [groupData, setGroupData] = useState<IGroup[]>([]);
-	const [sortBy, setSortBy] = useState<validSort | null>(null);
+	const [sortBy, setSortBy] = useState<validGroupSort | null>(null);
 
 	const [reverseSortDirection, setReverseSortDirection] = useState(false);
 	const [loadingDataPage, setLoadingDataPage] = useState(true);
@@ -100,11 +92,11 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 		return dataPage;
 	};
 
-	const sortSearchData = (type: validSort | null, dataPage: IGroup[], dataAll: IGroup[]) => {
+	const sortSearchData = (type: validGroupSort | null, dataPage: IGroup[], dataAll: IGroup[]) => {
 		if (!type) return searchData(dataPage, dataAll);
 
 		if (isSearching()) dataPage = dataAll.length > 0 ? dataAll : dataPage;
-		const sortMap: sortI = {
+		const sortMap: GroupSort = {
 			name: (a: IGroup, b: IGroup) => a.name.localeCompare(b.name),
 			description: (a: IGroup, b: IGroup) => a.description.localeCompare(b.description),
 			count: (a: IGroup, b: IGroup) => a.count - b.count,

@@ -25,17 +25,9 @@ import { keys } from "@mantine/utils";
 import { showNotification } from "@mantine/notifications";
 import { IconSearch, IconEdit, IconTrash, IconFilePlus, IconLego, IconLetterA, IconLicense, IconDeviceWatch, IconRefresh } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { INote } from "../../../interfaces/db";
+import { INote, validNoteSort, NoteSort } from "../../../interfaces/db";
 import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../helper";
 import { Th, useTableStyles, MDelete, TitleDashboard } from "../../Utils/Dashboard";
-
-type validSort = "title" | "content" | "author" | "createdAt";
-interface sortI {
-	title: (a: INote, b: INote) => number;
-	content: (a: INote, b: INote) => number;
-	author: (a: INote, b: INote) => number;
-	createdAt: (a: INote, b: INote) => number;
-}
 
 export const Note: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useTableStyles();
@@ -55,7 +47,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 	const [notesDataAll, setNotesDataAll] = useState<INote[]>([]);
 	const [notesData, setNotesData] = useState<INote[]>([]);
-	const [sortBy, setSortBy] = useState<validSort | null>(null);
+	const [sortBy, setSortBy] = useState<validNoteSort | null>(null);
 
 	const [reverseSortDirection, setReverseSortDirection] = useState(false);
 	const [loadingDataPage, setLoadingDataPage] = useState(true);
@@ -114,11 +106,11 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 		return dataPage;
 	};
 
-	const sortSearchData = (type: validSort | null, dataPage: INote[], dataAll: INote[]) => {
+	const sortSearchData = (type: validNoteSort | null, dataPage: INote[], dataAll: INote[]) => {
 		if (!type) return searchData(dataPage, dataAll);
 
 		if (isSearching()) dataPage = dataAll.length > 0 ? dataAll : dataPage;
-		const sortMap: sortI = {
+		const sortMap: NoteSort = {
 			title: (a: INote, b: INote) => a.title.localeCompare(b.title),
 			content: (a: INote, b: INote) => a.content.localeCompare(b.content),
 			author: (a: INote, b: INote) => a.author[0].username.localeCompare(b.author[0].username),
