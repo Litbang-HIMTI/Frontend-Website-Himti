@@ -27,8 +27,7 @@ import { IconSearch, IconEdit, IconTrash, IconFilePlus, IconLego, IconLetterA, I
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { INote } from "../../../interfaces/db";
 import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../helper";
-import { Th, useTableStyles } from "../../Utils/Th";
-import { MDelete } from "../../Utils/Modals";
+import { Th, useTableStyles, MDelete, TitleDashboard } from "../../Utils/Dashboard";
 
 type validSort = "title" | "content" | "author" | "createdAt";
 interface sortI {
@@ -250,15 +249,8 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	return (
 		<>
 			<MDelete opened={openModalDelete} closeFunc={setOpenModalDelete} deleteFunc={deleteNote} idDelete={idDelete} />
+			<TitleDashboard title="Notes" hrefAddNew={`${props.pathname}/create`} />
 
-			<div className="dash-flex">
-				<h1>Notes</h1>
-				<Link href={"note/create"}>
-					<Button id="dash-add-new" ml={16} size="xs" compact leftIcon={<IconFilePlus size={20} />}>
-						Add new
-					</Button>
-				</Link>
-			</div>
 			<div style={{ marginTop: "1.5rem" }}>
 				<Tabs value={tabIndex.toString() || "0"} onTabChange={handleTabChange}>
 					<Tabs.List>

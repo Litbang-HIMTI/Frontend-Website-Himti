@@ -22,12 +22,11 @@ import {
 } from "@mantine/core";
 import { keys } from "@mantine/utils";
 import { showNotification } from "@mantine/notifications";
-import { IconSearch, IconEdit, IconTrash, IconFilePlus, IconRefresh } from "@tabler/icons";
+import { IconSearch, IconEdit, IconTrash, IconRefresh } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { IGroup } from "../../../interfaces/db";
 import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../helper";
-import { Th, useTableStyles } from "../../Utils/Th";
-import { MDelete } from "../../Utils/Modals";
+import { Th, useTableStyles, MDelete, TitleDashboard } from "../../Utils/Dashboard";
 
 type validSort = "name" | "description" | "count" | "createdAt";
 interface sortI {
@@ -232,15 +231,8 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 	return (
 		<>
 			<MDelete opened={openModalDelete} closeFunc={setOpenModalDelete} deleteFunc={deleteNote} idDelete={idDelete} />
+			<TitleDashboard title="Group" hrefAddNew={`${props.pathname}/create`} />
 
-			<div className="dash-flex">
-				<h1>Groups</h1>
-				<Link href={"note/create"}>
-					<Button id="dash-add-new" ml={16} size="xs" compact leftIcon={<IconFilePlus size={20} />}>
-						Add new
-					</Button>
-				</Link>
-			</div>
 			<div style={{ marginTop: "1.5rem" }}>
 				<Tabs value={tabIndex.toString() || "0"} onTabChange={handleTabChange}>
 					<Tabs.List>

@@ -8,7 +8,7 @@ import { IconArrowLeft } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { SERVER_V1, urlSafeRegex } from "../../../helper";
 import { INote } from "../../../interfaces/db";
-import RichText from "../../Utils/RichText";
+import RichText from "../../Utils/Dashboard/RichText";
 import { useRouter } from "next/router";
 import { Editor } from "@mantine/rte";
 
