@@ -1,4 +1,4 @@
-import { Breadcrumbs, Button, Text } from "@mantine/core";
+import { Breadcrumbs, Button, Skeleton, Text } from "@mantine/core";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { TablerIcon, IconFilePlus } from "@tabler/icons";
@@ -35,7 +35,7 @@ export const TitleDashboard = ({ title, hrefLink, hrefText, HrefIcon = IconFileP
 				)}
 			</div>
 			<Breadcrumbs mt={6}>
-				{links.length > 1 &&
+				{links.length > 1 ? (
 					links.map((item, index) => {
 						return (
 							<Link
@@ -53,7 +53,10 @@ export const TitleDashboard = ({ title, hrefLink, hrefText, HrefIcon = IconFileP
 								</a>
 							</Link>
 						);
-					})}
+					})
+				) : (
+					<Skeleton visible={links.length < 1} mt={6} width={130} height={19} />
+				)}
 			</Breadcrumbs>
 		</div>
 	);

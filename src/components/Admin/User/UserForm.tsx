@@ -6,8 +6,8 @@ import { showNotification } from "@mantine/notifications";
 import { Box, Button, createStyles, Group, LoadingOverlay, TextInput, Text, Textarea, Chip, Divider } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { SERVER_V1, urlSafeRegex } from "../../../helper";
-import { IGroup } from "../../../interfaces/db";
+import { emailRegex, SERVER_V1, urlSafeRegex, urlSaferRegex } from "../../../helper";
+import { IUser, IUserForm } from "../../../interfaces/db";
 import { TitleDashboard } from "../../Utils/Dashboard";
 import { openConfirmModal } from "@mantine/modals";
 import Link from "next/link";
@@ -28,11 +28,11 @@ const useStyles = createStyles((theme) => ({
 	},
 }));
 
-interface IGroupFormProps extends IDashboardProps {
-	group?: IGroup;
+interface IUserFormProps extends IDashboardProps {
+	user?: IUser;
 }
 
-export const GroupForm: NextPage<IGroupFormProps> = (props) => {
+export const UserForm: NextPage<IUserFormProps> = (props) => {
 	const { classes } = useStyles();
 	const router = useRouter();
 	const [loading, setLoading] = useState<boolean>(false);
@@ -42,16 +42,22 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 	const [pageOpenFetched, setPageOpenFetched] = useState<boolean>(false);
 
 	// ------------------------------------------------------------
-	const forms = useForm({
+	const forms = useForm<IUserForm>({
 		initialValues: {
-			name: "",
-			description: "",
+			username: "",
+			first_name: "",
+			last_name: "",
+			email: "",
+			group: [],
+			role: [],
 		},
 
 		validate: {
-			name: (value) =>
-				urlSafeRegex.test(value) ? undefined : "Title contains invalid character. Characters allowed are Alpha numeric, underscore, hyphen, space, ', \", comma, and @ regex",
-			description: (value) => (value.length > 10 ? undefined : "Description is required (minimal 10 character"),
+			username: (value) => urlSaferRegex.test(value) || "Invalid username",
+			first_name: (value) => value.length > 0 || "First name is required",
+			last_name: (value) => value.length > 0 || "Last name is required",
+			email: (value) => emailRegex.test(value) || "Invalid email",
+			role: (value) => value.length > 0 || "Role is required",
 		},
 	});
 
@@ -92,7 +98,7 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 		setLoading(true);
 		setUnsavedChanges(false);
 		try {
-			const req = await fetch(`${SERVER_V1}/group/${props.group!._id}`, {
+			const req = await fetch(`${SERVER_V1}/user/${props.user!._id}`, {
 				method: "DELETE",
 				headers: {
 					"Content-Type": "application/json",
@@ -103,9 +109,9 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 
 			if (req.status === 200) {
 				setSubmitted(true);
-				showNotification({ title: "Group deleted", message: message + ". Redirecting...", disallowClose: true });
+				showNotification({ title: "User deleted", message: message + ". Redirecting...", disallowClose: true });
 
-				setTimeout(() => router.push("../group"), 1500);
+				setTimeout(() => router.push("../user"), 1500);
 			} else {
 				setUnsavedChanges(true);
 				setLoading(false);
@@ -121,12 +127,16 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 	const resetForm = () => {
 		setSubmitted(false);
 
-		if (!props.group) {
+		if (!props.user) {
 			forms.reset();
 		} else {
 			forms.setValues({
-				name: props.group.name,
-				description: props.group.description,
+				username: props.user.username,
+				first_name: props.user.first_name,
+				last_name: props.user.last_name,
+				email: props.user.email,
+				group: props.user.group,
+				role: props.user.role,
 			});
 		}
 	};
@@ -135,18 +145,22 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 		setLoading(true);
 		setUnsavedChanges(false);
 		if (submitted) return;
-		const { name, description } = forms.values;
+		const { username, first_name, last_name, email, role, group } = forms.values;
 
 		try {
-			const req = await fetch(`${SERVER_V1}/${props.group ? "group/" + props.group._id : "group"}`, {
-				method: props.group ? "PUT" : "POST",
+			const req = await fetch(`${SERVER_V1}/${props.user ? "group/" + props.user._id : "group"}`, {
+				method: props.user ? "PUT" : "POST",
 				credentials: "include",
 				headers: {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
-					name,
-					description,
+					username,
+					first_name,
+					last_name,
+					email,
+					role,
+					group,
 				}),
 			});
 			const { message } = await req.json();
@@ -172,11 +186,15 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 	// page open
 	useEffect(() => {
 		if (!pageOpenFetched) {
-			if (props.group) {
+			if (props.user) {
 				// edit mode
 				forms.setValues({
-					name: props.group.name,
-					description: props.group.description,
+					username: props.user.username,
+					first_name: props.user.first_name,
+					last_name: props.user.last_name,
+					email: props.user.email,
+					group: props.user.group,
+					role: props.user.role,
 				});
 			} else {
 				// create mode
@@ -211,7 +229,7 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 
 	return (
 		<>
-			<TitleDashboard title={props.group ? "View/Edit Group" : "Add Group"} hrefLink="../group" hrefText="Back to groups" HrefIcon={IconArrowLeft} />
+			<TitleDashboard title={props.user ? "View/Edit Group" : "Add Group"} hrefLink="../group" hrefText="Back to groups" HrefIcon={IconArrowLeft} />
 
 			<Box component="div" sx={{ position: "relative" }} className="dash-textinput-gap">
 				<LoadingOverlay visible={loading} overlayBlur={3} />
@@ -237,16 +255,8 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 					/>
 
 					<Group>
-						<Link href={`../user?tab=1group=${props.group!.name.replaceAll(" ", "+")}`}>
-							<a>
-								<Chip mt="md" checked={false}>
-									Click here to view all group members
-								</Chip>
-							</a>
-						</Link>
-
 						<Group position="right" mt="md" ml="auto">
-							{props.group ? (
+							{props.user ? (
 								<>
 									<Button color="red" onClick={handleDelete}>
 										Delete

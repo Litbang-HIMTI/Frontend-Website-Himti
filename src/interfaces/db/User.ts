@@ -1,15 +1,17 @@
 import { IGroup } from "./Group";
 
 export type TRoles = "admin" | "editor" | "forum_moderator" | "shortlink_moderator" | "user";
-export interface IUser {
-	_id: string;
-	__v: number;
+export interface IUserForm {
 	username: string;
 	first_name: string;
 	last_name: string;
 	email: string;
 	group?: IGroup[];
 	role: TRoles[];
+}
+export interface IUser extends IUserForm {
+	_id: string;
+	__v: number;
 	createdAt: Date;
 	updatedAt: Date;
 }

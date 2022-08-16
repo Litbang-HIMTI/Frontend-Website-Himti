@@ -322,7 +322,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 										if (sortBy === "description") setReverseSortDirection(!reverseSortDirection);
 										setSortBy("description");
 									}}
-									width="45%"
+									width="40%"
 								>
 									Description
 								</Th>
@@ -334,7 +334,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 										if (sortBy === "description") setReverseSortDirection(!reverseSortDirection);
 										setSortBy("description");
 									}}
-									width="10%"
+									width="15%"
 								>
 									User Count
 								</Th>
@@ -373,7 +373,13 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 											</Link>
 										</td>
 										<td>{row.description}</td>
-										<td>{row.count}</td>
+										<td>
+											<Link href={`user?tab=1&group${row.name.replaceAll(" ", "+")}`}>
+												<a>
+													<Text variant="link">{row.count}</Text>
+												</a>
+											</Link>
+										</td>
 										<td>
 											{row.updatedAt !== row.createdAt ? (
 												<Tooltip label={`Last edited at: ${formatDateWithTz(row.updatedAt, tz)}`}>

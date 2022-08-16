@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Navbar, Center, Tooltip, createStyles, Stack, useMantineColorScheme, Menu, ActionIcon, useMantineTheme, MantineTheme, LoadingOverlay } from "@mantine/core";
+import { Navbar, Center, Tooltip, createStyles, Stack, useMantineColorScheme, Menu, ActionIcon, useMantineTheme, MantineTheme, LoadingOverlay, Skeleton } from "@mantine/core";
 import {
 	IconSun,
 	IconMoonStars,
@@ -188,7 +188,7 @@ const navData = [
 export const DashboardNav: NextPage<IDashboardProps> = (props) => {
 	const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 	const theme = useMantineTheme();
-	const [active, setActive] = useState(navData.findIndex((data) => data.path === props.pathname));
+	const [active, setActive] = useState(navData.findIndex((data) => data.path.includes(props.pathname as string)));
 	const [links, setLinks] = useState<JSX.Element[] | null>(null);
 
 	useEffect(() => {
@@ -221,9 +221,13 @@ export const DashboardNav: NextPage<IDashboardProps> = (props) => {
 				<UserPopout {...props} theme={theme} />
 			</Center>
 			<Navbar.Section grow mt={50} sx={{ position: "relative" }}>
-				<Stack justify="center" spacing={0}>
-					{links ? links : <LoadingOverlay overlayBlur={2} visible={true} />}
-				</Stack>
+				{links ? (
+					<Stack justify="center" spacing={0}>
+						{links}
+					</Stack>
+				) : (
+					<Skeleton visible={true} height={450}></Skeleton>
+				)}
 			</Navbar.Section>
 			<Navbar.Section>
 				<Stack justify="center" spacing={0}>
