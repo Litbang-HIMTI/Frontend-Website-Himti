@@ -1,7 +1,8 @@
 import type { NextPage } from "next";
+import { useRouter } from "next/router";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
-	createStyles,
 	Table,
 	ScrollArea,
 	UnstyledButton,
@@ -22,61 +23,12 @@ import {
 	Modal,
 } from "@mantine/core";
 import { keys } from "@mantine/utils";
-import { IconSelector, IconChevronDown, IconChevronUp, IconSearch, IconEdit, IconTrash, IconFilePlus, IconLego, IconLetterA, IconLicense, IconDeviceWatch, IconRefresh } from "@tabler/icons";
+import { showNotification } from "@mantine/notifications";
+import { IconSearch, IconEdit, IconTrash, IconFilePlus, IconLego, IconLetterA, IconLicense, IconDeviceWatch, IconRefresh } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { INote } from "../../../interfaces/db";
-import { showNotification } from "@mantine/notifications";
-import { SERVER_V1 } from "../../../utils";
-import { useRouter } from "next/router";
-import Link from "next/link";
-
-const useStyles = createStyles((theme) => ({
-	th: {
-		padding: "0 !important",
-	},
-
-	control: {
-		width: "100%",
-		padding: `${theme.spacing.xs}px ${theme.spacing.md}px`,
-
-		"&:hover": {
-			backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[6] : theme.colors.gray[0],
-		},
-	},
-
-	icon: {
-		width: 21,
-		height: 21,
-		borderRadius: 21,
-	},
-}));
-
-interface ThProps {
-	classes: Record<string, string>;
-	children: React.ReactNode;
-	reversed: boolean;
-	sorted: boolean;
-	onSort(): void;
-	width?: string;
-}
-
-function Th({ classes, children, reversed, sorted, onSort, width }: ThProps) {
-	const Icon = sorted ? (reversed ? IconChevronUp : IconChevronDown) : IconSelector;
-	return (
-		<th className={classes.th} style={{ width, overflowWrap: "break-word" }}>
-			<UnstyledButton onClick={onSort} className={classes.control}>
-				<Group position="apart">
-					<Text weight={500} size="sm">
-						{children}
-					</Text>
-					<Center className={classes.icon}>
-						<Icon size={14} stroke={1.5} />
-					</Center>
-				</Group>
-			</UnstyledButton>
-		</th>
-	);
-}
+import { addQueryParam, removeQueryParam, SERVER_V1 } from "../../../helper";
+import { Th, useTableStyles } from "../../Utils/Th";
 
 type validSort = "title" | "content" | "author" | "createdAt";
 interface sortI {
@@ -87,7 +39,7 @@ interface sortI {
 }
 
 export const Note: NextPage<IDashboardProps> = (props) => {
-	const { classes } = useStyles();
+	const { classes } = useTableStyles();
 	const router = useRouter();
 	const [openModalDelete, setOpenModalDelete] = useState(false);
 	const [idDelete, setIdDelete] = useState("");
@@ -114,34 +66,20 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	const [tz, setTz] = useState("UTC");
 
 	// -----------------------------------------------------------
-	const removeQueryParam = (param: string) => {
-		const { pathname, query } = router;
-		const params = new URLSearchParams(query as unknown as string);
-		params.delete(param);
-		router.replace({ pathname, query: params.toString() }, undefined, { shallow: true });
-	};
-
-	const addQueryParam = (param: string, value: string) => {
-		const { pathname } = router;
-		const params = new URLSearchParams(router.query as unknown as string);
-		params.set(param, value);
-		router.replace({ pathname, query: params.toString() }, undefined, { shallow: true });
-	};
-
 	const handleInputQueryChange = (e: React.ChangeEvent<HTMLInputElement>, setFunc: (value: string) => void, param: string) => {
 		setFunc(e.target.value);
-		if (e.target.value === "") removeQueryParam(param);
-		else addQueryParam(param, e.target.value);
+		if (e.target.value === "") removeQueryParam(router, param);
+		else addQueryParam(router, param, e.target.value);
 	};
 
 	const handleTabChange = (index: TabsValue) => {
 		setTabIndex(index ? parseInt(index) : 0);
-		addQueryParam("tab", index ? index : "0");
+		addQueryParam(router, "tab", index ? index : "0");
 	};
 
 	const pageChange = (page: number) => {
 		setCurPage(page);
-		addQueryParam("page", page.toString());
+		addQueryParam(router, "page", page.toString());
 		fillData(perPage, page);
 	};
 
@@ -571,7 +509,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 					</Table>
 				</ScrollArea>
 			</div>
-			<Center mt={16}>{!isSearching() ? <Pagination total={pages} page={curPage} onChange={pageChange} /> : <Pagination total={1} page={1} />}</Center>
+			<Center mt={16}>{!isSearching() && <Pagination total={pages} page={curPage} onChange={pageChange} />}</Center>
 		</>
 	);
 };

@@ -4,7 +4,7 @@ import { AppShell } from "@mantine/core";
 import { User } from "../../../src/components/Admin/User";
 import { DashboardNav } from "../../../src/components/Admin/Nav";
 import { IDashboardProps } from "../../../src/interfaces/props/Dashboard";
-import { SERVER_V1, validateAdmin } from "../../../src/utils";
+import { SERVER_V1, validateAdmin } from "../../../src/helper";
 
 const user: NextPage<IDashboardProps> = (props) => {
 	return (

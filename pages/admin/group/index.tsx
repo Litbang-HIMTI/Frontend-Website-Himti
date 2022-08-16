@@ -1,10 +1,10 @@
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import { AppShell } from "@mantine/core";
-import { Group } from "../../../src/components/Admin/Group";
+import { UserGroup } from "../../../src/components/Admin/Group";
 import { DashboardNav } from "../../../src/components/Admin/Nav";
 import { IDashboardProps } from "../../../src/interfaces/props/Dashboard";
-import { SERVER_V1, validateAdmin } from "../../../src/utils";
+import { SERVER_V1, validateAdmin } from "../../../src/helper";
 
 const group: NextPage<IDashboardProps> = (props) => {
 	return (
@@ -17,7 +17,7 @@ const group: NextPage<IDashboardProps> = (props) => {
 			</Head>
 			<AppShell header={<DashboardNav {...props} />}>
 				<main className="dashboard content-wrap">
-					<Group {...props} />
+					<UserGroup {...props} />
 				</main>
 			</AppShell>
 		</>

@@ -4,7 +4,7 @@ import Head from "next/head";
 import { Event } from "../../../src/components/Admin/Event";
 import { DashboardNav } from "../../../src/components/Admin/Nav";
 import { IDashboardProps } from "../../../src/interfaces/props/Dashboard";
-import { SERVER_V1, validateEditor } from "../../../src/utils";
+import { SERVER_V1, validateEditor } from "../../../src/helper";
 
 const event: NextPage<IDashboardProps> = (props) => {
 	return (

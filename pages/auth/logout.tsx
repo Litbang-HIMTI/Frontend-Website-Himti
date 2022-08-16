@@ -1,5 +1,5 @@
 import { GetServerSideProps, NextPage } from "next";
-import { SERVER_V1 } from "../../src/utils/constants";
+import { SERVER_V1 } from "../../src/helper/constants";
 
 const indexShortlink: NextPage = (props) => {
 	return <p>Logging out...</p>;

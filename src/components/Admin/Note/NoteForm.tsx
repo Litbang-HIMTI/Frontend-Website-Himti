@@ -6,7 +6,7 @@ import { showNotification } from "@mantine/notifications";
 import { Box, Button, createStyles, Group, LoadingOverlay, TextInput, Text } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { SERVER_V1, urlSafeRegex } from "../../../utils";
+import { SERVER_V1, urlSafeRegex } from "../../../helper";
 import { INote } from "../../../interfaces/db";
 import RichText from "../../Utils/RichText";
 import { useRouter } from "next/router";

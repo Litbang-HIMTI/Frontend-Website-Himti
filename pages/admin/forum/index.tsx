@@ -4,7 +4,7 @@ import { AppShell } from "@mantine/core";
 import { Forum } from "../../../src/components/Admin/Forum";
 import { DashboardNav } from "../../../src/components/Admin/Nav";
 import { IDashboardProps } from "../../../src/interfaces/props/Dashboard";
-import { SERVER_V1, validateForumMod } from "../../../src/utils";
+import { SERVER_V1, validateForumMod } from "../../../src/helper";
 
 const forum: NextPage<IDashboardProps> = (props) => {
 	return (

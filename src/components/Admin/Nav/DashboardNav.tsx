@@ -26,7 +26,7 @@ import {
 } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { UserPopout } from "./Userpopout";
-import { validateAdmin, validateEditor, validateForumMod, validateShortlinkMod, validateStaff } from "../../../utils/helper";
+import { validateAdmin, validateEditor, validateForumMod, validateShortlinkMod, validateStaff } from "../../../helper/role";
 
 const useStyles = createStyles((theme) => ({
 	link: {

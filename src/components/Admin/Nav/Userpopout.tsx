@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Menu, Group, Text, ActionIcon, MantineTheme } from "@mantine/core";
 import { IconLogout, IconSettings, IconChevronRight, IconDots, IconUser, IconNotebook, IconCalendarEvent, IconMessage, IconMessages } from "@tabler/icons";
 import { IUser } from "../../../interfaces/db/User";
-import { validateEditor, validateForumMod, validateAdmin } from "../../../utils/helper";
+import { validateEditor, validateForumMod, validateAdmin } from "../../../helper/role";
 
 interface navProps {
 	pathname?: string;

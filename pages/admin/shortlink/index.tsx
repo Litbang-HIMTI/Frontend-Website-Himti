@@ -3,7 +3,7 @@ import Head from "next/head";
 import { Shortlink } from "../../../src/components/Admin/Shortlink";
 import { DashboardNav } from "../../../src/components/Admin/Nav";
 import { IDashboardProps } from "../../../src/interfaces/props/Dashboard";
-import { SERVER_V1, validateShortlinkMod } from "../../../src/utils";
+import { SERVER_V1, validateShortlinkMod } from "../../../src/helper";
 
 const shortlink: NextPage<IDashboardProps> = (props) => {
 	return (

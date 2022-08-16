@@ -5,7 +5,7 @@ import { IconNotebook, IconHistory, IconCalendarEvent, IconMessage, IconMessages
 import { useEffect, useState } from "react";
 import { emptyStats, IstatsExtended } from "../../../interfaces/db/Stats";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { SERVER_V1 } from "../../../utils/constants";
+import { SERVER_V1 } from "../../../helper/constants";
 import { NoteDragDrop } from "./NoteDragDrop";
 
 const useStyles = createStyles((theme) => ({
