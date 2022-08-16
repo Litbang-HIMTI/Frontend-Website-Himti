@@ -7,6 +7,7 @@ import { getCookie, setCookie } from "cookies-next";
 import { MantineProvider, ColorScheme, ColorSchemeProvider } from "@mantine/core";
 import { NotificationsProvider } from "@mantine/notifications";
 import { RouterTransition } from "../src/components/Utils/RouterTransition";
+import { ModalsProvider } from "@mantine/modals";
 
 export default function App(props: AppProps & { colorScheme: ColorScheme }) {
 	const { Component, pageProps } = props;
@@ -33,10 +34,12 @@ export default function App(props: AppProps & { colorScheme: ColorScheme }) {
 					withGlobalStyles
 					withNormalizeCSS
 				>
-					<NotificationsProvider>
-						<RouterTransition />
-						<Component {...pageProps} />
-					</NotificationsProvider>
+					<ModalsProvider>
+						<NotificationsProvider>
+							<RouterTransition />
+							<Component {...pageProps} />
+						</NotificationsProvider>
+					</ModalsProvider>
 				</MantineProvider>
 			</ColorSchemeProvider>
 		</>

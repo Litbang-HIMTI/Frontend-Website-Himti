@@ -28,11 +28,11 @@ import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { INote, validNoteSort, NoteSort } from "../../../interfaces/db";
 import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../helper";
 import { Th, useTableStyles, MConfirmContinue, TitleDashboard } from "../../Utils/Dashboard";
+import { openConfirmModal } from "@mantine/modals";
 
 export const Note: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useTableStyles();
 	const router = useRouter();
-	const [modalHandle, setModalHandle] = useState({ opened: false, closeFunc: () => {}, confirmFunc: () => {} });
 	const [idDelete, setIdDelete] = useState("");
 
 	const [curPage, setCurPage] = useState(1);
@@ -57,10 +57,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	const [tz, setTz] = useState("UTC");
 
 	// -----------------------------------------------------------
-	const resetModalHandle = () => {
-		setModalHandle({ opened: false, closeFunc: () => {}, confirmFunc: () => {} });
-	};
-
+	// handler
 	const handleInputQueryChange = (e: React.ChangeEvent<HTMLInputElement>, setFunc: (value: string) => void, param: string) => {
 		setFunc(e.target.value);
 		if (e.target.value === "") removeQueryParam(router, param);
@@ -76,6 +73,18 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 		setCurPage(page);
 		addQueryParam(router, "page", page.toString());
 		fillData(perPage, page);
+	};
+
+	const handleDelete = (id: string) => {
+		setIdDelete(id);
+		openConfirmModal({
+			title: "Delete confirmation",
+			children: <Text size="sm">Are you sure you want to delete this note? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
+			labels: { confirm: "Yes, delete note", cancel: "No, cancel" },
+			confirmProps: { color: "red" },
+			onCancel: () => {},
+			onConfirm: () => deleteNote(),
+		});
 	};
 
 	// -----------------------------------------------------------
@@ -130,9 +139,9 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// delete
-	const deleteNote = async (id: string) => {
+	const deleteNote = async () => {
 		try {
-			const deleteFetch = await fetch(`${SERVER_V1}/note/${id}`, {
+			const deleteFetch = await fetch(`${SERVER_V1}/note/${idDelete}`, {
 				method: "DELETE",
 				headers: {
 					"Content-Type": "application/json",
@@ -144,19 +153,17 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 			if (deleteFetch.status === 200 && deleteData && deleteData.success) {
 				// slice data
 				setNotesData((prev) => {
-					return prev.filter((item) => item._id !== id);
+					return prev.filter((item) => item._id !== idDelete);
 				});
 				setNotesDataAll((prev) => {
-					return prev.filter((item) => item._id !== id);
+					return prev.filter((item) => item._id !== idDelete);
 				});
 
 				showNotification({ title: "Success", message: deleteData.message });
 			} else {
 				showNotification({ title: "Error", message: deleteData.message, color: "red" });
 			}
-			resetModalHandle();
 		} catch (error: any) {
-			resetModalHandle();
 			showNotification({ title: "Error", message: error.message, color: "red" });
 		}
 	};
@@ -244,7 +251,6 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 	return (
 		<>
-			<MConfirmContinue opened={modalHandle.opened} closeFunc={modalHandle.closeFunc} confirmFunc={modalHandle.confirmFunc} />
 			<TitleDashboard title="Notes" hrefAddNew={`${props.pathname}/create`} hrefText="Add new" />
 
 			<div>
@@ -464,16 +470,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 														<IconEdit size={14} stroke={1.5} />
 													</ActionIcon>
 												</Link>
-												<ActionIcon
-													onClick={() => {
-														setIdDelete(row._id);
-														setModalHandle({
-															opened: true,
-															closeFunc: () => resetModalHandle(),
-															confirmFunc: () => deleteNote(idDelete),
-														});
-													}}
-												>
+												<ActionIcon onClick={() => handleDelete(row._id)}>
 													<IconTrash size={14} stroke={1.5} />
 												</ActionIcon>
 											</div>

@@ -10,7 +10,7 @@ import { SERVER_V1, urlSafeRegex } from "../../../helper";
 import { INote } from "../../../interfaces/db";
 import RichText from "../../Utils/Dashboard/RichText";
 import { TitleDashboard } from "../../Utils/Dashboard";
-import { MConfirmContinue } from "../../Utils/Dashboard/Modals";
+import { openConfirmModal } from "@mantine/modals";
 
 const useStyles = createStyles((theme) => ({
 	buttonCancel: {
@@ -39,7 +39,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 	const [submitted, setSubmitted] = useState<boolean>(false);
 	const [editable, setEditable] = useState<boolean>(false);
 	const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
-	const [modalHandle, setModalHandle] = useState({ opened: false, closeFunc: () => {}, confirmFunc: () => {} });
+	// const [modalHandle, setModalHandle] = useState({ opened: false, closeFunc: () => {}, confirmFunc: () => {} });
 	const [pageOpenFetched, setPageOpenFetched] = useState<boolean>(false);
 	// ------------------------------------------------------------
 	const forms = useForm({
@@ -56,20 +56,38 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 
 	// ------------------------------------------------------------
 	// handler
-	const resetModalHandle = () => {
-		setModalHandle({ opened: false, closeFunc: () => {}, confirmFunc: () => {} });
-	};
 	const handleReset = () => {
-		setModalHandle({ opened: true, closeFunc: () => resetModalHandle(), confirmFunc: () => resetForm() });
+		openConfirmModal({
+			title: "Reset confirmation",
+			children: <Text size="sm">Are you sure you want to reset the form to its initial state? This action is irreversible.</Text>,
+			labels: { confirm: "Yes, reset form", cancel: "No, cancel" },
+			confirmProps: { color: "red" },
+			onCancel: () => {},
+			onConfirm: () => resetForm(),
+		});
 	};
 	const handleSubmit = () => {
-		setModalHandle({ opened: true, closeFunc: () => resetModalHandle(), confirmFunc: () => submitForm() });
+		openConfirmModal({
+			title: "Submit confirmation",
+			children: <Text size="sm">Are you sure you want to submit the form? This action is irreversible.</Text>,
+			labels: { confirm: "Yes, submit form", cancel: "No, cancel" },
+			confirmProps: { color: "red" },
+			onCancel: () => {},
+			onConfirm: () => submitForm(),
+		});
 	};
 	const handleDelete = () => {
-		setModalHandle({ opened: true, closeFunc: () => resetModalHandle(), confirmFunc: () => deleteNote() });
+		openConfirmModal({
+			title: "Delete confirmation",
+			children: <Text size="sm">Are you sure you want to delete this note? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
+			labels: { confirm: "Yes, delete note", cancel: "No, cancel" },
+			confirmProps: { color: "red" },
+			onCancel: () => {},
+			onConfirm: () => deleteForm(),
+		});
 	};
 
-	const deleteNote = async () => {
+	const deleteForm = async () => {
 		setLoading(true);
 		setUnsavedChanges(false);
 		try {
@@ -81,7 +99,6 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 				credentials: "include",
 			});
 			const { message } = await req.json();
-			resetModalHandle();
 
 			if (req.status === 200) {
 				setSubmitted(true);
@@ -92,13 +109,11 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 			} else {
 				setUnsavedChanges(true);
 				setLoading(false);
-				resetModalHandle();
 				showNotification({ title: "Error", message, disallowClose: true, color: "red" });
 			}
 		} catch (error: any) {
 			setUnsavedChanges(true);
 			setLoading(false);
-			resetModalHandle();
 			showNotification({ title: "Error", message: error.message, disallowClose: true, color: "red" });
 		}
 	};
@@ -115,7 +130,6 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 			});
 			setContent(props.note.content);
 		}
-		resetModalHandle();
 	};
 
 	const submitForm = async () => {
@@ -145,7 +159,6 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 				}),
 			});
 			const { message } = await req.json();
-			resetModalHandle();
 
 			if (req.status === 201 || req.status === 200) {
 				setSubmitted(true);
@@ -156,13 +169,11 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 			} else {
 				setUnsavedChanges(true);
 				setLoading(false);
-				resetModalHandle();
 				showNotification({ title: "Error", message, disallowClose: true, color: "red" });
 			}
 		} catch (error: any) {
 			setUnsavedChanges(true);
 			setLoading(false);
-			resetModalHandle();
 			showNotification({ title: "Error", message: error.message, disallowClose: true, color: "red" });
 		}
 	};
@@ -210,7 +221,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 
 	return (
 		<>
-			<MConfirmContinue opened={modalHandle.opened} closeFunc={modalHandle.closeFunc} confirmFunc={modalHandle.confirmFunc} />
+			{/* <MConfirmContinue opened={modalHandle.opened} closeFunc={modalHandle.closeFunc} confirmFunc={modalHandle.confirmFunc} /> */}
 			<TitleDashboard title={props.note ? "View/Edit Note" : "Add Note"} hrefAddNew="../note" hrefText="Back to notes" HrefIcon={IconArrowLeft} />
 
 			<Box component="div" sx={{ position: "relative" }} className="dash-textinput-gap">

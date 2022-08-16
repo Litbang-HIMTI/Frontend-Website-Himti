@@ -9,7 +9,7 @@ import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { SERVER_V1, urlSafeRegex } from "../../../helper";
 import { IGroup } from "../../../interfaces/db";
 import { TitleDashboard } from "../../Utils/Dashboard";
-import { MConfirmContinue } from "../../Utils/Dashboard/Modals";
+import { openConfirmModal } from "@mantine/modals";
 
 const useStyles = createStyles((theme) => ({
 	buttonCancel: {
@@ -38,7 +38,6 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 	const [submitted, setSubmitted] = useState<boolean>(false);
 	const [editable, setEditable] = useState<boolean>(false);
 	const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
-	const [modalHandle, setModalHandle] = useState({ opened: false, closeFunc: () => {}, confirmFunc: () => {} });
 	const [pageOpenFetched, setPageOpenFetched] = useState<boolean>(false);
 	// ------------------------------------------------------------
 	const forms = useForm({
@@ -56,20 +55,38 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 
 	// ------------------------------------------------------------
 	// handler
-	const resetModalHandle = () => {
-		setModalHandle({ opened: false, closeFunc: () => {}, confirmFunc: () => {} });
-	};
 	const handleReset = () => {
-		setModalHandle({ opened: true, closeFunc: () => resetModalHandle(), confirmFunc: () => resetForm() });
+		openConfirmModal({
+			title: "Reset confirmation",
+			children: <Text size="sm">Are you sure you want to reset the form to its initial state? This action is irreversible.</Text>,
+			labels: { confirm: "Yes, reset form", cancel: "No, cancel" },
+			confirmProps: { color: "red" },
+			onCancel: () => {},
+			onConfirm: () => resetForm(),
+		});
 	};
 	const handleSubmit = () => {
-		setModalHandle({ opened: true, closeFunc: () => resetModalHandle(), confirmFunc: () => submitForm() });
+		openConfirmModal({
+			title: "Submit confirmation",
+			children: <Text size="sm">Are you sure you want to submit the form? This action is irreversible.</Text>,
+			labels: { confirm: "Yes, submit form", cancel: "No, cancel" },
+			confirmProps: { color: "red" },
+			onCancel: () => {},
+			onConfirm: () => submitForm(),
+		});
 	};
 	const handleDelete = () => {
-		setModalHandle({ opened: true, closeFunc: () => resetModalHandle(), confirmFunc: () => deleteGroup() });
+		openConfirmModal({
+			title: "Delete confirmation",
+			children: <Text size="sm">Are you sure you want to delete this group? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
+			labels: { confirm: "Yes, delete group", cancel: "No, cancel" },
+			confirmProps: { color: "red" },
+			onCancel: () => {},
+			onConfirm: () => deleteForm(),
+		});
 	};
 
-	const deleteGroup = async () => {
+	const deleteForm = async () => {
 		setLoading(true);
 		setUnsavedChanges(false);
 		try {
@@ -82,7 +99,6 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 			});
 			const { message } = await req.json();
 
-			resetModalHandle();
 			if (req.status === 200) {
 				setSubmitted(true);
 				showNotification({ title: "Group deleted", message: message + ". Redirecting...", disallowClose: true });
@@ -91,13 +107,11 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 			} else {
 				setUnsavedChanges(true);
 				setLoading(false);
-				resetModalHandle();
 				showNotification({ title: "Error", message, color: "red", disallowClose: true });
 			}
 		} catch (error: any) {
 			setUnsavedChanges(true);
 			setLoading(false);
-			resetModalHandle();
 			showNotification({ title: "Error", message: error.message, disallowClose: true, color: "red" });
 		}
 	};
@@ -113,7 +127,6 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 				description: props.group.description,
 			});
 		}
-		resetModalHandle();
 	};
 
 	const submitForm = async () => {
@@ -135,7 +148,6 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 				}),
 			});
 			const { message } = await req.json();
-			resetModalHandle();
 
 			if (req.status === 201 || req.status === 200) {
 				setSubmitted(true);
@@ -145,13 +157,11 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 			} else {
 				setUnsavedChanges(true);
 				setLoading(false);
-				resetModalHandle();
 				showNotification({ title: "Error", message, disallowClose: true, color: "red" });
 			}
 		} catch (error: any) {
 			setUnsavedChanges(true);
 			setLoading(false);
-			resetModalHandle();
 			showNotification({ title: "Error", message: error.message, disallowClose: true, color: "red" });
 		}
 	};
@@ -199,7 +209,6 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 
 	return (
 		<>
-			<MConfirmContinue opened={modalHandle.opened} closeFunc={modalHandle.closeFunc} confirmFunc={modalHandle.confirmFunc} />
 			<TitleDashboard title={props.group ? "View/Edit Group" : "Add Group"} hrefAddNew="../group" hrefText="Back to groups" HrefIcon={IconArrowLeft} />
 
 			<Box component="div" sx={{ position: "relative" }} className="dash-textinput-gap">

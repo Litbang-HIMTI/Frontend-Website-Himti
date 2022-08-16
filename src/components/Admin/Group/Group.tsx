@@ -28,11 +28,11 @@ import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { IGroup, validGroupSort, GroupSort } from "../../../interfaces/db";
 import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../helper";
 import { Th, useTableStyles, MConfirmContinue, TitleDashboard } from "../../Utils/Dashboard";
+import { openConfirmModal } from "@mantine/modals";
 
 export const UserGroup: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useTableStyles();
 	const router = useRouter();
-	const [openModalDelete, setOpenModalDelete] = useState(false);
 	const [idDelete, setIdDelete] = useState("");
 
 	const [curPage, setCurPage] = useState(1);
@@ -53,6 +53,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 	const [tz, setTz] = useState("UTC");
 
 	// -----------------------------------------------------------
+	// handler
 	const handleInputQueryChange = (e: React.ChangeEvent<HTMLInputElement>, setFunc: (value: string) => void, param: string) => {
 		setFunc(e.target.value);
 		if (e.target.value === "") removeQueryParam(router, param);
@@ -68,6 +69,18 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 		setCurPage(page);
 		addQueryParam(router, "page", page.toString());
 		fillData(perPage, page);
+	};
+
+	const handleDelete = (id: string) => {
+		setIdDelete(id);
+		openConfirmModal({
+			title: "Delete confirmation",
+			children: <Text size="sm">Are you sure you want to delete this group? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
+			labels: { confirm: "Yes, delete group", cancel: "No, cancel" },
+			confirmProps: { color: "red" },
+			onCancel: () => {},
+			onConfirm: () => deleteGroup(),
+		});
 	};
 
 	// -----------------------------------------------------------
@@ -113,9 +126,9 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// delete
-	const deleteGroup = async (id: string) => {
+	const deleteGroup = async () => {
 		try {
-			const deleteFetch = await fetch(`${SERVER_V1}/group/${id}`, {
+			const deleteFetch = await fetch(`${SERVER_V1}/group/${idDelete}`, {
 				method: "DELETE",
 				headers: {
 					"Content-Type": "application/json",
@@ -127,19 +140,17 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 			if (deleteFetch.status === 200 && deleteData && deleteData.success) {
 				// slice data
 				setGroupData((prev) => {
-					return prev.filter((item) => item._id !== id);
+					return prev.filter((item) => item._id !== idDelete);
 				});
 				setGroupDataAll((prev) => {
-					return prev.filter((item) => item._id !== id);
+					return prev.filter((item) => item._id !== idDelete);
 				});
 
 				showNotification({ title: "Success", message: deleteData.message });
 			} else {
 				showNotification({ title: "Error", message: deleteData.message, color: "red" });
 			}
-			setOpenModalDelete(false);
 		} catch (error: any) {
-			setOpenModalDelete(false);
 			showNotification({ title: "Error", message: error.message, color: "red" });
 		}
 	};
@@ -223,7 +234,6 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 
 	return (
 		<>
-			<MConfirmContinue opened={openModalDelete} closeFunc={() => setOpenModalDelete(false)} confirmFunc={() => deleteGroup(idDelete)} />
 			<TitleDashboard title="Group" hrefAddNew={`${props.pathname}/create`} hrefText="Add new" />
 
 			<div>
@@ -387,12 +397,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 														<IconEdit size={14} stroke={1.5} />
 													</ActionIcon>
 												</Link>
-												<ActionIcon
-													onClick={() => {
-														setIdDelete(row._id);
-														setOpenModalDelete(true);
-													}}
-												>
+												<ActionIcon onClick={() => handleDelete(row._id)}>
 													<IconTrash size={14} stroke={1.5} />
 												</ActionIcon>
 											</div>
