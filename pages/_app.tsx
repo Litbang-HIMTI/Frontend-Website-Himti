@@ -1,22 +1,19 @@
 import "../styles/globals.css";
 import "../styles/dashboard.css";
-import { GetServerSidePropsContext } from "next";
-import { useState } from "react";
 import { AppProps } from "next/app";
-import { getCookie, setCookie } from "cookies-next";
 import { MantineProvider, ColorScheme, ColorSchemeProvider } from "@mantine/core";
 import { NotificationsProvider } from "@mantine/notifications";
 import { RouterTransition } from "../src/components/Utils/RouterTransition";
 import { ModalsProvider } from "@mantine/modals";
+import { useLocalStorage } from "@mantine/hooks";
 
 export default function App(props: AppProps & { colorScheme: ColorScheme }) {
 	const { Component, pageProps } = props;
-	const [colorScheme, setColorScheme] = useState<ColorScheme>(props.colorScheme);
+	const [colorScheme, setColorScheme] = useLocalStorage<ColorScheme>({ key: "mantine-color-scheme", defaultValue: "dark" });
 
 	const toggleColorScheme = (value?: ColorScheme) => {
 		const nextColorScheme = value || (colorScheme === "dark" ? "light" : "dark");
 		setColorScheme(nextColorScheme);
-		setCookie("mantine-color-scheme", nextColorScheme, { maxAge: 60 * 60 * 24 * 30, sameSite: true });
 	};
 
 	return (
@@ -45,7 +42,3 @@ export default function App(props: AppProps & { colorScheme: ColorScheme }) {
 		</>
 	);
 }
-
-App.getInitialProps = ({ ctx }: { ctx: GetServerSidePropsContext }) => ({
-	colorScheme: getCookie("mantine-color-scheme", ctx) || "light",
-});
