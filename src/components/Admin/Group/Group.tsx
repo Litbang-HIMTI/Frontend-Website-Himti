@@ -27,7 +27,7 @@ import { openConfirmModal } from "@mantine/modals";
 import { useLocalStorage } from "@mantine/hooks";
 import { IconSearch, IconEdit, IconTrash, IconRefresh } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { IGroup, validGroupSort, GroupSort } from "../../../interfaces/db";
+import { IGroup, validGroupSort, GroupSort, GroupQRes } from "../../../interfaces/db";
 import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../helper";
 import { Th, useTableStyles, TitleDashboard } from "../../Utils/Dashboard";
 
@@ -42,8 +42,8 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 
 	const [searchAll, setSearchAll] = useState("");
 
-	const [groupDataAll, setGroupDataAll] = useState<IGroup[]>([]);
-	const [groupData, setGroupData] = useState<IGroup[]>([]);
+	const [dataAllPage, setDataAllPage] = useState<IGroup[]>([]);
+	const [dataPage, setDataPage] = useState<IGroup[]>([]);
 	const [sortBy, setSortBy] = useState<validGroupSort | null>(null);
 
 	const [reverseSortDirection, setReverseSortDirection] = useState(false);
@@ -80,7 +80,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 			labels: { confirm: "Yes, delete group", cancel: "No, cancel" },
 			confirmProps: { color: "red" },
 			onCancel: () => {},
-			onConfirm: () => deleteGroup(),
+			onConfirm: () => deleteData(),
 		});
 	};
 
@@ -96,7 +96,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 
 	const isSearching = () => {
 		// not on setting page and is actually searching and data all is fetched
-		return tabIndex !== 2 && groupDataAll.length > 0 && searchAll !== "";
+		return tabIndex !== 2 && dataAllPage.length > 0 && searchAll !== "";
 	};
 
 	const searchData = (dataPage: IGroup[], dataAll: IGroup[]) => {
@@ -127,9 +127,9 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// delete
-	const deleteGroup = async () => {
+	const deleteData = async () => {
 		try {
-			const deleteFetch = await fetch(`${SERVER_V1}/group/${idDelete}`, {
+			const req = await fetch(`${SERVER_V1}/group/${idDelete}`, {
 				method: "DELETE",
 				headers: {
 					"Content-Type": "application/json",
@@ -137,19 +137,19 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 				credentials: "include",
 			});
 
-			const deleteData = await deleteFetch.json();
-			if (deleteFetch.status === 200 && deleteData && deleteData.success) {
+			const { success, message }: GroupQRes = await req.json();
+			if (req.status === 200 && success) {
 				// slice data
-				setGroupData((prev) => {
+				setDataPage((prev) => {
 					return prev.filter((item) => item._id !== idDelete);
 				});
-				setGroupDataAll((prev) => {
+				setDataAllPage((prev) => {
 					return prev.filter((item) => item._id !== idDelete);
 				});
 
-				showNotification({ title: "Success", message: deleteData.message });
+				showNotification({ title: "Success", message });
 			} else {
-				showNotification({ title: "Error", message: deleteData.message, color: "red" });
+				showNotification({ title: "Error", message, color: "red" });
 			}
 		} catch (error: any) {
 			showNotification({ title: "Error", message: error.message, color: "red" });
@@ -160,7 +160,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 	const fillDataAll = async () => {
 		try {
 			setLoadingDataAll(true);
-			const fetchData = await fetch(SERVER_V1 + `/group`, {
+			const req = await fetch(SERVER_V1 + `/group`, {
 				method: "GET",
 				headers: {
 					"Content-Type": "application/json",
@@ -168,13 +168,13 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 				credentials: "include",
 			});
 
-			const { data, message }: { data: IGroup[]; message: string; page: number; pages: number } = await fetchData.json();
-			if (fetchData.status !== 200) {
+			const { data, message }: GroupQRes = await req.json();
+			if (req.status !== 200) {
 				setLoadingDataAll(false);
 				return showNotification({ title: "Error indexing all data for search", message, color: "red" });
 			}
 
-			setGroupDataAll(data);
+			setDataAllPage(data);
 			setLoadingDataAll(false);
 		} catch (error: any) {
 			setLoadingDataAll(false);
@@ -185,7 +185,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 	const fillData = async (perPage: number, curPageQ: number) => {
 		try {
 			setLoadingDataPage(true);
-			const fetchData = await fetch(SERVER_V1 + `/group?perPage=${perPage}&page=${curPageQ}`, {
+			const req = await fetch(SERVER_V1 + `/group?perPage=${perPage}&page=${curPageQ}`, {
 				method: "GET",
 				headers: {
 					"Content-Type": "application/json",
@@ -193,15 +193,15 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 				credentials: "include",
 			});
 
-			const { data, message, page, pages }: { data: IGroup[]; message: string; page: number; pages: number } = await fetchData.json();
-			if (fetchData.status !== 200) {
+			const { data, message, page, pages }: GroupQRes = await req.json();
+			if (req.status !== 200) {
 				setLoadingDataPage(false);
 				return showNotification({ title: "Error getting page data", message, color: "red" });
 			}
 
 			setCurPage(page);
 			setPages(pages);
-			setGroupData(data);
+			setDataPage(data);
 			setLoadingDataPage(false);
 		} catch (error: any) {
 			setLoadingDataPage(false);
@@ -362,8 +362,8 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 							</tr>
 						</thead>
 						<tbody>
-							{groupData && groupData.length > 0 && sortSearchData(sortBy, groupData, groupDataAll).length > 0 ? (
-								sortSearchData(sortBy, groupData, groupDataAll).map((row) => (
+							{dataPage && dataPage.length > 0 && sortSearchData(sortBy, dataPage, dataAllPage).length > 0 ? (
+								sortSearchData(sortBy, dataPage, dataAllPage).map((row) => (
 									<tr key={row._id}>
 										<td>
 											<Link href={`${props.pathname}/${row._id}`}>

@@ -17,3 +17,11 @@ export interface IUser {
 export type validUserSort = "username" | "role" | "group" | "createdAt";
 // email is alongside username
 // fistname and last name appears when hovering username
+
+export interface UserQRes {
+	data: IUser[];
+	message: string;
+	page: number;
+	pages: number;
+	success: boolean;
+}

@@ -19,3 +19,11 @@ export interface NoteSort {
 	author: (a: INote, b: INote) => number;
 	createdAt: (a: INote, b: INote) => number;
 }
+
+export interface NoteQRes {
+	data: INote[];
+	message: string;
+	page: number;
+	pages: number;
+	success: boolean;
+}

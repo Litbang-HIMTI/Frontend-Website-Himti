@@ -15,3 +15,11 @@ export interface GroupSort {
 	count: (a: IGroup, b: IGroup) => number;
 	createdAt: (a: IGroup, b: IGroup) => number;
 }
+
+export interface GroupQRes {
+	data: IGroup[];
+	message: string;
+	page: number;
+	pages: number;
+	success: boolean;
+}
