@@ -23,12 +23,13 @@ import {
 } from "@mantine/core";
 import { keys } from "@mantine/utils";
 import { showNotification } from "@mantine/notifications";
+import { openConfirmModal } from "@mantine/modals";
+import { useLocalStorage } from "@mantine/hooks";
 import { IconSearch, IconEdit, IconTrash, IconFilePlus, IconLego, IconLetterA, IconLicense, IconDeviceWatch, IconRefresh } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { INote, validNoteSort, NoteSort } from "../../../interfaces/db";
 import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../helper";
-import { Th, useTableStyles, MConfirmContinue, TitleDashboard } from "../../Utils/Dashboard";
-import { openConfirmModal } from "@mantine/modals";
+import { Th, useTableStyles, TitleDashboard } from "../../Utils/Dashboard";
 
 export const Note: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useTableStyles();
@@ -37,7 +38,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 	const [curPage, setCurPage] = useState(1);
 	const [pages, setPages] = useState(1);
-	const [perPage, setPerPage] = useState(25);
+	const [perPage, setPerPage] = useLocalStorage({ key: "perPage-note", defaultValue: 25 });
 
 	const [searchAll, setSearchAll] = useState("");
 	const [searchTitle, setSearchTitle] = useState("");
@@ -237,14 +238,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	useEffect(() => {
 		fetchUrlParams();
 		setTz(Intl.DateTimeFormat().resolvedOptions().timeZone);
-		// fill data with setting
-		if (localStorage.getItem("perPage-note")) {
-			setPerPage(parseInt(localStorage.getItem("perPage-note") as string));
-			fillData(parseInt(localStorage.getItem("perPage-note")!), curPage);
-		} else {
-			localStorage.setItem("perPage-note", perPage.toString());
-			fillData(perPage, curPage);
-		}
+		fillData(perPage, curPage);
 		fillDataAll();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
@@ -343,7 +337,6 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 								onChange={(value) => {
 									if (!value) return;
 									setPerPage(value);
-									localStorage.setItem("perPage-note", value.toString());
 								}}
 								mt={8}
 							/>
