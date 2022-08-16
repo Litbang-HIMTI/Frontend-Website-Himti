@@ -10,8 +10,10 @@ export interface IUser {
 	email: string;
 	group?: IGroup[];
 	role: TRoles[];
-	salt: string;
-	hash: string;
 	createdAt: Date;
 	updatedAt: Date;
 }
+
+export type validUserSort = "username" | "role" | "group" | "createdAt";
+// email is alongside username
+// fistname and last name appears when hovering username

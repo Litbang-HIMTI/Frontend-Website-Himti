@@ -3,13 +3,14 @@ import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
-import { Box, Button, createStyles, Group, LoadingOverlay, TextInput, Text, Textarea } from "@mantine/core";
+import { Box, Button, createStyles, Group, LoadingOverlay, TextInput, Text, Textarea, Chip, Divider } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { SERVER_V1, urlSafeRegex } from "../../../helper";
-import { IGroup } from "../../../interfaces/db";
+import { IGroup, IUser, validUserSort } from "../../../interfaces/db";
 import { TitleDashboard } from "../../Utils/Dashboard";
 import { openConfirmModal } from "@mantine/modals";
+import Link from "next/link";
 
 const useStyles = createStyles((theme) => ({
 	buttonCancel: {
@@ -39,6 +40,7 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 	const [editable, setEditable] = useState<boolean>(false);
 	const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
 	const [pageOpenFetched, setPageOpenFetched] = useState<boolean>(false);
+
 	// ------------------------------------------------------------
 	const forms = useForm({
 		initialValues: {
@@ -234,40 +236,50 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 						disabled={!editable}
 					/>
 
-					<Group position="right" mt="md">
-						{props.group ? (
-							<>
-								<Button color="red" onClick={handleDelete}>
-									Delete
-								</Button>
-								<Button
-									color="yellow"
-									variant="outline"
-									className={classes.buttonCancel}
-									onClick={() => {
-										setUnsavedChanges(true);
-										setEditable(!editable);
-									}}
-								>
-									{editable ? "Disable edit" : "Enable Edit"}
-								</Button>
-								<Button color="pink" onClick={handleReset} disabled={!editable}>
-									Reset changes
-								</Button>
-								<Button variant="outline" className={classes.buttonSubmit} type="submit" disabled={!editable}>
-									Submit Edit
-								</Button>
-							</>
-						) : (
-							<>
-								<Button color="pink" onClick={handleReset}>
-									Reset
-								</Button>
-								<Button variant="outline" className={classes.buttonSubmit} type="submit">
-									Submit
-								</Button>
-							</>
-						)}
+					<Group>
+						<Link href={`../user?group=${props.group!.name.replaceAll(" ", "+")}`}>
+							<a>
+								<Chip mt="md" checked={false}>
+									Click here to view all group members
+								</Chip>
+							</a>
+						</Link>
+
+						<Group position="right" mt="md" ml="auto">
+							{props.group ? (
+								<>
+									<Button color="red" onClick={handleDelete}>
+										Delete
+									</Button>
+									<Button
+										color="yellow"
+										variant="outline"
+										className={classes.buttonCancel}
+										onClick={() => {
+											setUnsavedChanges(true);
+											setEditable(!editable);
+										}}
+									>
+										{editable ? "Disable edit" : "Enable Edit"}
+									</Button>
+									<Button color="pink" onClick={handleReset} disabled={!editable}>
+										Reset changes
+									</Button>
+									<Button variant="outline" className={classes.buttonSubmit} type="submit" disabled={!editable}>
+										Submit Edit
+									</Button>
+								</>
+							) : (
+								<>
+									<Button color="pink" onClick={handleReset}>
+										Reset
+									</Button>
+									<Button variant="outline" className={classes.buttonSubmit} type="submit">
+										Submit
+									</Button>
+								</>
+							)}
+						</Group>
 					</Group>
 				</form>
 			</Box>
