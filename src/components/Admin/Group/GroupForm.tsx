@@ -209,7 +209,7 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 
 	return (
 		<>
-			<TitleDashboard title={props.group ? "View/Edit Group" : "Add Group"} hrefAddNew="../group" hrefText="Back to groups" HrefIcon={IconArrowLeft} />
+			<TitleDashboard title={props.group ? "View/Edit Group" : "Add Group"} hrefLink="../group" hrefText="Back to groups" HrefIcon={IconArrowLeft} />
 
 			<Box component="div" sx={{ position: "relative" }} className="dash-textinput-gap">
 				<LoadingOverlay visible={loading} overlayBlur={3} />
@@ -249,7 +249,7 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 										setEditable(!editable);
 									}}
 								>
-									{editable ? "Cancel edit" : "Enable Edit"}
+									{editable ? "Disable edit" : "Enable Edit"}
 								</Button>
 								<Button color="pink" onClick={handleReset} disabled={!editable}>
 									Reset changes

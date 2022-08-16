@@ -245,7 +245,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 	return (
 		<>
-			<TitleDashboard title="Notes" hrefAddNew={`${props.pathname}/create`} hrefText="Add new" />
+			<TitleDashboard title="Notes" hrefLink={`${props.pathname}/create`} hrefText="Add new" />
 
 			<div>
 				<Tabs value={tabIndex.toString() || "0"} onTabChange={handleTabChange}>

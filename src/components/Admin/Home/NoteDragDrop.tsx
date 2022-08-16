@@ -161,7 +161,7 @@ export const NoteDragDrop: NextPage<IDashboardProps> = (props) => {
 													</div>
 
 													<div className={classes.editIcon}>
-														<Link href={`${props.pathname?.split("/")[1]}/note/${item._id}`}>
+														<Link href={`${props.pathname?.split("/")[1]}/note/${item._id}?fromDashHome=true`}>
 															<ActionIcon>
 																<IconEdit />
 															</ActionIcon>
