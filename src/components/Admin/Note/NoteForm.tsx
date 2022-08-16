@@ -65,6 +65,42 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 	const handleSubmit = () => {
 		setModalHandle({ opened: true, closeFunc: () => resetModalHandle(), confirmFunc: () => submitForm() });
 	};
+	const handleDelete = () => {
+		setModalHandle({ opened: true, closeFunc: () => resetModalHandle(), confirmFunc: () => deleteNote() });
+	};
+
+	const deleteNote = async () => {
+		setLoading(true);
+		try {
+			const res = await fetch(`${SERVER_V1}/note/${props.note!._id}`, {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				credentials: "include",
+			});
+			const data = await res.json();
+
+			resetModalHandle();
+			if (res.status === 200) {
+				setUnsavedChanges(false);
+				setSubmitted(true);
+				showNotification({ title: "Note deleted", message: "Note has been deleted successfully. Redirecting...", color: "red" });
+
+				const { fromDashHome } = router.query;
+				setTimeout(() => {
+					router.push(fromDashHome === "true" ? "../" : "../note");
+				}, 1500);
+			} else {
+				showNotification({ title: "Error", message: data.message, color: "red" });
+			}
+			setLoading(false);
+		} catch (err: any) {
+			setLoading(false);
+			resetModalHandle();
+			showNotification({ title: "Error", message: err.message, color: "red" });
+		}
+	};
 
 	const resetForm = () => {
 		setSubmitted(false);
@@ -223,6 +259,9 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 					<Group position="right" mt="md">
 						{props.note ? (
 							<>
+								<Button color="red" onClick={handleDelete}>
+									Delete
+								</Button>
 								<Button
 									color="yellow"
 									variant="outline"
