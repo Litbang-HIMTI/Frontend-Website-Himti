@@ -219,7 +219,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 	return (
 		<>
 			<MConfirmContinue opened={modalHandle.opened} closeFunc={modalHandle.closeFunc} confirmFunc={modalHandle.confirmFunc} />
-			<TitleDashboard title="Add Note" hrefAddNew="../note" hrefText="Back to notes" HrefIcon={IconArrowLeft} />
+			<TitleDashboard title={props.note ? "View/Edit Note" : "Add Note"} hrefAddNew="../note" hrefText="Back to notes" HrefIcon={IconArrowLeft} />
 
 			<Box component="div" sx={{ position: "relative" }} className="dash-textinput-gap">
 				<LoadingOverlay visible={loading} overlayBlur={3} />
