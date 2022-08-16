@@ -237,7 +237,7 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 					/>
 
 					<Group>
-						<Link href={`../user?group=${props.group!.name.replaceAll(" ", "+")}`}>
+						<Link href={`../user?tab=1group=${props.group!.name.replaceAll(" ", "+")}`}>
 							<a>
 								<Chip mt="md" checked={false}>
 									Click here to view all group members

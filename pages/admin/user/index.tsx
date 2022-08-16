@@ -1,7 +1,7 @@
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import { AppShell } from "@mantine/core";
-import { User } from "../../../src/components/Admin/User";
+import { User } from "../../../src/components/Admin/User/User";
 import { DashboardNav } from "../../../src/components/Admin/Nav";
 import { IDashboardProps } from "../../../src/interfaces/props/Dashboard";
 import { SERVER_V1, validateAdmin } from "../../../src/helper";
