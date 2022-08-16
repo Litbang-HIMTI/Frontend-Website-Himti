@@ -48,6 +48,8 @@
 
 - [change url without refresh](https://stackoverflow.com/questions/62845014/change-url-without-page-refresh-next-js)
 - [remove query params](https://stackoverflow.com/questions/65606974/next-js-how-to-remove-query-params)
+- [PREVENT PAGE LEAVE/URL CHANGE](https://github.com/vercel/next.js/issues/2694#issuecomment-732990201)
+- [PREVENT PAGE LEAVE/URL CHANGE 2](https://stackoverflow.com/questions/63664479/detect-when-a-user-leaves-page-in-next-js)
 
 ## Mantine Quill RTE
 

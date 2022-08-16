@@ -223,7 +223,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 	return (
 		<>
 			<MDelete opened={openModalDelete} closeFunc={setOpenModalDelete} deleteFunc={deleteNote} idDelete={idDelete} />
-			<TitleDashboard title="Group" hrefAddNew={`${props.pathname}/create`} />
+			<TitleDashboard title="Group" hrefAddNew={`${props.pathname}/create`} hrefText="Add new" />
 
 			<div>
 				<Tabs value={tabIndex.toString() || "0"} onTabChange={handleTabChange}>
@@ -332,7 +332,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 									}}
 									width="10%"
 								>
-									Count
+									User Count
 								</Th>
 								<Th
 									classes={classes}
@@ -361,7 +361,11 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 							{groupData && groupData.length > 0 && sortSearchData(sortBy, groupData, groupDataAll).length > 0 ? (
 								sortSearchData(sortBy, groupData, groupDataAll).map((row) => (
 									<tr key={row._id}>
-										<td>{row.name}</td>
+										<td>
+											<Text variant="link" component="a" href={`${props.pathname}/${row._id}`}>
+												{row.name}
+											</Text>
+										</td>
 										<td>{row.description}</td>
 										<td>{row.count}</td>
 										<td>{formatDateWithTz(row.createdAt, tz)}</td>

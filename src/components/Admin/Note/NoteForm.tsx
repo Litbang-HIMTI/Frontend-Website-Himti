@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import type { NextPage } from "next";
+import { useRouter } from "next/router";
 import Link from "next/link";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
@@ -9,8 +10,8 @@ import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { SERVER_V1, urlSafeRegex } from "../../../helper";
 import { INote } from "../../../interfaces/db";
 import RichText from "../../Utils/Dashboard/RichText";
-import { useRouter } from "next/router";
-import { Editor } from "@mantine/rte";
+import { TitleDashboard } from "../../Utils/Dashboard";
+import { MConfirmContinue } from "../../Utils/Dashboard/Modals";
 
 const useStyles = createStyles((theme) => ({
 	buttonCancel: {
@@ -21,7 +22,8 @@ const useStyles = createStyles((theme) => ({
 	},
 
 	buttonSubmit: {
-		"&:hover": {
+		// only hover when not disabled
+		"&:not([disabled]):hover": {
 			backgroundColor: theme.colorScheme === "dark" ? "rgba(51, 154, 240, 0.25);" : "rgba(51, 154, 240, 0.1);",
 		},
 	},
@@ -36,6 +38,10 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 	const router = useRouter();
 	const [loading, setLoading] = useState<boolean>(false);
 	const [submitted, setSubmitted] = useState<boolean>(false);
+	const [editable, setEditable] = useState<boolean>(false);
+	const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
+	const [modalReset, setModalReset] = useState<boolean>(false);
+	// ------------------------------------------------------------
 	const forms = useForm({
 		initialValues: {
 			title: "",
@@ -50,6 +56,10 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 
 	// ------------------------------------------------------------
 	const handleReset = () => {
+		setModalReset(true);
+	};
+
+	const resetForm = () => {
 		setSubmitted(false);
 
 		if (!props.note) {
@@ -61,6 +71,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 			});
 			setContent(props.note.content);
 		}
+		setModalReset(false);
 	};
 
 	const submitForm = async () => {
@@ -122,25 +133,45 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 
 	useEffect(() => {
 		if (props.note) {
+			// edit mode
 			forms.setValues({
 				title: props.note.title,
 			});
 			setContent(props.note.content);
+		} else {
+			// create mode
+			setUnsavedChanges(true);
+			setEditable(true);
 		}
 
+		// ------------------------------------------------------------
+		// page leave
+		const warningText = "You might have unsaved changes - are you sure you wish to leave this page?";
+		const handleWindowClose = (e: BeforeUnloadEvent) => {
+			if (!unsavedChanges) return;
+			e.preventDefault();
+			return (e.returnValue = warningText);
+		};
+		const handleBrowseAway = () => {
+			if (!unsavedChanges) return;
+			if (window.confirm(warningText)) return;
+			router.events.emit("routeChangeError");
+			throw "routeChange aborted.";
+		};
+
+		window.addEventListener("beforeunload", handleWindowClose);
+		router.events.on("routeChangeStart", handleBrowseAway);
+		return () => {
+			window.removeEventListener("beforeunload", handleWindowClose);
+			router.events.off("routeChangeStart", handleBrowseAway);
+		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [unsavedChanges]);
 
 	return (
 		<>
-			<div className="dash-flex">
-				<h1>Notes</h1>
-				<Link href={"../note"}>
-					<Button id="dash-add-new" ml={16} size="xs" compact leftIcon={<IconArrowLeft size={20} />}>
-						Back to notes
-					</Button>
-				</Link>
-			</div>
+			<MConfirmContinue opened={modalReset} closeFunc={() => setModalReset(false)} confirmFunc={() => resetForm()} />
+			<TitleDashboard title="Add Note" hrefAddNew="../note" hrefText="Back to notes" HrefIcon={IconArrowLeft} />
 
 			<Box component="div" sx={{ position: "relative" }} className="dash-textinput-gap">
 				<LoadingOverlay visible={loading} overlayBlur={3} />
@@ -152,6 +183,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 						placeholder="Note title"
 						{...forms.getInputProps("title")}
 						description={`Notes title, Characters allowed are Alpha numeric, underscore, hyphen, space, ', ", comma, and @ regex`}
+						disabled={!editable}
 					/>
 
 					<Text mt="md" size={"sm"}>
@@ -174,19 +206,39 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 							["unorderedList", "orderedList", "h1", "h2", "h3"],
 							["sup", "sub"],
 						]}
+						readOnly={!editable}
 					/>
 					<Group position="right" mt="md">
-						<Button color="pink" onClick={handleReset}>
-							Reset
-						</Button>
-						{props.note && (
-							<Button color="yellow" variant="outline" className={classes.buttonCancel} onClick={() => router.push("../note")}>
-								Cancel edit
-							</Button>
+						{props.note ? (
+							<>
+								<Button
+									color="yellow"
+									variant="outline"
+									className={classes.buttonCancel}
+									onClick={() => {
+										setUnsavedChanges(true);
+										setEditable(!editable);
+									}}
+								>
+									{editable ? "Cancel edit" : "Enable Edit"}
+								</Button>
+								<Button color="pink" onClick={handleReset} disabled={!editable}>
+									Reset changes
+								</Button>
+								<Button variant="outline" className={classes.buttonSubmit} type="submit" disabled={!editable}>
+									Submit Edit
+								</Button>
+							</>
+						) : (
+							<>
+								<Button color="pink" onClick={handleReset}>
+									Reset
+								</Button>
+								<Button variant="outline" className={classes.buttonSubmit} type="submit">
+									Submit
+								</Button>
+							</>
 						)}
-						<Button variant="outline" className={classes.buttonSubmit} type="submit">
-							Submit
-						</Button>
 					</Group>
 				</form>
 			</Box>

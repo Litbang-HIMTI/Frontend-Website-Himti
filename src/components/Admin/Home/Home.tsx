@@ -139,7 +139,7 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 
 	return (
 		<>
-			<TitleDashboard title={`Welcome ${props.user ? props.user.username : ""}`} mb="2rem" />
+			<TitleDashboard title={`Welcome ${props.user ? props.user.username : ""}`} mb="2rem" hrefText="Add new" />
 			<Center>
 				<div>
 					<SimpleGrid

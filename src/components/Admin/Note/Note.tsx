@@ -241,7 +241,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	return (
 		<>
 			<MDelete opened={openModalDelete} closeFunc={setOpenModalDelete} deleteFunc={deleteNote} idDelete={idDelete} />
-			<TitleDashboard title="Notes" hrefAddNew={`${props.pathname}/create`} />
+			<TitleDashboard title="Notes" hrefAddNew={`${props.pathname}/create`} hrefText="Add new" />
 
 			<div>
 				<Tabs value={tabIndex.toString() || "0"} onTabChange={handleTabChange}>
@@ -425,7 +425,11 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 							{notesData && notesData.length > 0 && sortSearchData(sortBy, notesData, notesDataAll).length > 0 ? (
 								sortSearchData(sortBy, notesData, notesDataAll).map((row) => (
 									<tr key={row._id}>
-										<td>{row.title}</td>
+										<td>
+											<Text variant="link" component="a" href={`${props.pathname}/${row._id}`}>
+												{row.title}
+											</Text>
+										</td>
 										<td dangerouslySetInnerHTML={{ __html: row.content }}></td>
 										<td>
 											{row.editedBy && row.editedBy[0] ? (
