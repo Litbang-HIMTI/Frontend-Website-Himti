@@ -26,7 +26,7 @@ import { IconSearch, IconEdit, IconTrash, IconRefresh } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { IGroup, validGroupSort, GroupSort } from "../../../interfaces/db";
 import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../helper";
-import { Th, useTableStyles, MDelete, TitleDashboard } from "../../Utils/Dashboard";
+import { Th, useTableStyles, MConfirmContinue, TitleDashboard } from "../../Utils/Dashboard";
 
 export const UserGroup: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useTableStyles();
@@ -112,7 +112,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// delete
-	const deleteNote = async (id: string) => {
+	const deleteGroup = async (id: string) => {
 		try {
 			const deleteFetch = await fetch(`${SERVER_V1}/note/${id}`, {
 				method: "DELETE",
@@ -222,7 +222,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 
 	return (
 		<>
-			<MDelete opened={openModalDelete} closeFunc={setOpenModalDelete} deleteFunc={deleteNote} idDelete={idDelete} />
+			<MConfirmContinue opened={openModalDelete} closeFunc={() => setOpenModalDelete(false)} confirmFunc={() => deleteGroup(idDelete)} />
 			<TitleDashboard title="Group" hrefAddNew={`${props.pathname}/create`} hrefText="Add new" />
 
 			<div>

@@ -27,12 +27,12 @@ import { IconSearch, IconEdit, IconTrash, IconFilePlus, IconLego, IconLetterA, I
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { INote, validNoteSort, NoteSort } from "../../../interfaces/db";
 import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../helper";
-import { Th, useTableStyles, MDelete, TitleDashboard } from "../../Utils/Dashboard";
+import { Th, useTableStyles, MConfirmContinue, TitleDashboard } from "../../Utils/Dashboard";
 
 export const Note: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useTableStyles();
 	const router = useRouter();
-	const [openModalDelete, setOpenModalDelete] = useState(false);
+	const [modalHandle, setModalHandle] = useState({ opened: false, closeFunc: () => {}, confirmFunc: () => {} });
 	const [idDelete, setIdDelete] = useState("");
 
 	const [curPage, setCurPage] = useState(1);
@@ -57,6 +57,10 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	const [tz, setTz] = useState("UTC");
 
 	// -----------------------------------------------------------
+	const resetModalHandle = () => {
+		setModalHandle({ opened: false, closeFunc: () => {}, confirmFunc: () => {} });
+	};
+
 	const handleInputQueryChange = (e: React.ChangeEvent<HTMLInputElement>, setFunc: (value: string) => void, param: string) => {
 		setFunc(e.target.value);
 		if (e.target.value === "") removeQueryParam(router, param);
@@ -150,9 +154,9 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 			} else {
 				showNotification({ title: "Error", message: deleteData.message, color: "red" });
 			}
-			setOpenModalDelete(false);
+			resetModalHandle();
 		} catch (error: any) {
-			setOpenModalDelete(false);
+			resetModalHandle();
 			showNotification({ title: "Error", message: error.message, color: "red" });
 		}
 	};
@@ -240,7 +244,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 	return (
 		<>
-			<MDelete opened={openModalDelete} closeFunc={setOpenModalDelete} deleteFunc={deleteNote} idDelete={idDelete} />
+			<MConfirmContinue opened={modalHandle.opened} closeFunc={modalHandle.closeFunc} confirmFunc={modalHandle.confirmFunc} />
 			<TitleDashboard title="Notes" hrefAddNew={`${props.pathname}/create`} hrefText="Add new" />
 
 			<div>
@@ -461,7 +465,11 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 												<ActionIcon
 													onClick={() => {
 														setIdDelete(row._id);
-														setOpenModalDelete(true);
+														setModalHandle({
+															opened: true,
+															closeFunc: () => resetModalHandle(),
+															confirmFunc: () => deleteNote(idDelete),
+														});
 													}}
 												>
 													<IconTrash size={14} stroke={1.5} />

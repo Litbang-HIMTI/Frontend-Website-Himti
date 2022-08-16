@@ -40,7 +40,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 	const [submitted, setSubmitted] = useState<boolean>(false);
 	const [editable, setEditable] = useState<boolean>(false);
 	const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
-	const [modalReset, setModalReset] = useState<boolean>(false);
+	const [modalHandle, setModalHandle] = useState({ opened: false, closeFunc: () => {}, confirmFunc: () => {} });
 	// ------------------------------------------------------------
 	const forms = useForm({
 		initialValues: {
@@ -55,8 +55,15 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 	const [content, setContent] = useState("");
 
 	// ------------------------------------------------------------
+	// handler
+	const resetModalHandle = () => {
+		setModalHandle({ opened: false, closeFunc: () => {}, confirmFunc: () => {} });
+	};
 	const handleReset = () => {
-		setModalReset(true);
+		setModalHandle({ opened: true, closeFunc: () => resetModalHandle(), confirmFunc: () => resetForm() });
+	};
+	const handleSubmit = () => {
+		setModalHandle({ opened: true, closeFunc: () => resetModalHandle(), confirmFunc: () => submitForm() });
 	};
 
 	const resetForm = () => {
@@ -71,7 +78,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 			});
 			setContent(props.note.content);
 		}
-		setModalReset(false);
+		resetModalHandle();
 	};
 
 	const submitForm = async () => {
@@ -100,8 +107,10 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 				}),
 			});
 
+			resetModalHandle();
 			const { message } = await fetchSubmit.json();
 			if (fetchSubmit.status === 201 || fetchSubmit.status === 200) {
+				setUnsavedChanges(false);
 				setSubmitted(true);
 				showNotification({
 					title: "Success",
@@ -122,6 +131,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 				});
 			}
 		} catch (error: any) {
+			resetModalHandle();
 			setLoading(false);
 			showNotification({
 				title: "Error",
@@ -131,6 +141,8 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 		}
 	};
 
+	// ------------------------------------------------------------
+	// page open
 	useEffect(() => {
 		if (props.note) {
 			// edit mode
@@ -145,7 +157,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 		}
 
 		// ------------------------------------------------------------
-		// page leave
+		// on page leave
 		const warningText = "You might have unsaved changes - are you sure you wish to leave this page?";
 		const handleWindowClose = (e: BeforeUnloadEvent) => {
 			if (!unsavedChanges) return;
@@ -170,12 +182,12 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 
 	return (
 		<>
-			<MConfirmContinue opened={modalReset} closeFunc={() => setModalReset(false)} confirmFunc={() => resetForm()} />
+			<MConfirmContinue opened={modalHandle.opened} closeFunc={modalHandle.closeFunc} confirmFunc={modalHandle.confirmFunc} />
 			<TitleDashboard title="Add Note" hrefAddNew="../note" hrefText="Back to notes" HrefIcon={IconArrowLeft} />
 
 			<Box component="div" sx={{ position: "relative" }} className="dash-textinput-gap">
 				<LoadingOverlay visible={loading} overlayBlur={3} />
-				<form onSubmit={forms.onSubmit(submitForm)}>
+				<form onSubmit={forms.onSubmit(handleSubmit)}>
 					<TextInput
 						mt="md"
 						required
