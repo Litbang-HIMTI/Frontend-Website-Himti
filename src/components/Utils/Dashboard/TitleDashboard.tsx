@@ -8,11 +8,12 @@ export const TitleDashboard = ({ title, hrefLink, hrefText, HrefIcon = IconFileP
 	const router = useRouter();
 	const [links, setLinks] = useState<any[]>([]);
 	const getPath = () => {
-		return router.pathname
+		return router.asPath
+			.split("?")[0]
 			.split("/")
+			.slice(1)
 			.map((item) => {
-				const path = item.replace("[", "").replace("]", "");
-				return item.includes("[") ? router.query[path] : item.charAt(0).toUpperCase() + item.slice(1);
+				return item.charAt(0).toUpperCase() + item.slice(1);
 			})
 			.filter((item) => item);
 	};
@@ -55,7 +56,7 @@ export const TitleDashboard = ({ title, hrefLink, hrefText, HrefIcon = IconFileP
 						);
 					})
 				) : (
-					<Skeleton visible={links.length < 1} mt={6} width={130} height={19} />
+					<Skeleton visible={links.length < 1} mt={links.length < 1 ? 6 : 0} width={130} height={19} />
 				)}
 			</Breadcrumbs>
 		</div>

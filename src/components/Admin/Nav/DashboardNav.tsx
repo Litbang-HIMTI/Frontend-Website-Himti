@@ -188,7 +188,7 @@ const navData = [
 export const DashboardNav: NextPage<IDashboardProps> = (props) => {
 	const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 	const theme = useMantineTheme();
-	const [active, setActive] = useState(navData.findIndex((data) => data.path.includes(props.pathname as string)));
+	const [active, setActive] = useState(navData.findIndex((data) => data.path.includes(props.pathname!.split("?")[0])));
 	const [links, setLinks] = useState<JSX.Element[] | null>(null);
 
 	useEffect(() => {

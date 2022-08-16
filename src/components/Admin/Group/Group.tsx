@@ -374,7 +374,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 										</td>
 										<td>{row.description}</td>
 										<td>
-											<Link href={`user?tab=1&group${row.name.replaceAll(" ", "+")}`}>
+											<Link href={`user?tab=1&group=${row.name.replaceAll(" ", "+")}`}>
 												<a>
 													<Text variant="link">{row.count}</Text>
 												</a>
