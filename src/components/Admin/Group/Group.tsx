@@ -233,7 +233,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 			<MDelete opened={openModalDelete} closeFunc={setOpenModalDelete} deleteFunc={deleteNote} idDelete={idDelete} />
 			<TitleDashboard title="Group" hrefAddNew={`${props.pathname}/create`} />
 
-			<div style={{ marginTop: "1.5rem" }}>
+			<div>
 				<Tabs value={tabIndex.toString() || "0"} onTabChange={handleTabChange}>
 					<Tabs.List>
 						<Tabs.Tab value="0" color="green">

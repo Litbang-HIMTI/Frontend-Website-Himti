@@ -7,6 +7,7 @@ import { emptyStats, IstatsExtended } from "../../../interfaces/db/Stats";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { SERVER_V1 } from "../../../helper/constants";
 import { NoteDragDrop } from "./NoteDragDrop";
+import { TitleDashboard } from "../../Utils/Dashboard";
 
 const useStyles = createStyles((theme) => ({
 	value: {
@@ -153,9 +154,7 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 
 	return (
 		<>
-			<div style={{ paddingBottom: "2rem" }}>
-				<h1>Welcome {props.user ? props.user.username : null}</h1>
-			</div>
+			<TitleDashboard title={`Welcome ${props.user ? props.user.username : ""}`} mb="2rem" />
 			<Center>
 				<div>
 					<SimpleGrid
