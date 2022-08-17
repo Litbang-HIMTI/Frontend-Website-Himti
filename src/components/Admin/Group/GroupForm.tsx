@@ -183,6 +183,10 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 				setUnsavedChanges(true);
 				setEditable(true);
 			}
+
+			if (router.query.name) {
+				forms.setFieldValue("name", router.query.name as string);
+			}
 		}
 		setPageOpenFetched(true);
 		// ------------------------------------------------------------
@@ -213,13 +217,13 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 		<>
 			<TitleDashboard title={props.group ? "View/Edit Group" : "Add Group"} hrefLink="../group" hrefText="Back to groups" HrefIcon={IconArrowLeft} />
 
-			<Box component="div" sx={{ position: "relative" }} className="dash-textinput-gap">
+			<Box component="div" sx={{ position: "relative" }}>
 				<LoadingOverlay visible={loading} overlayBlur={3} />
 				<form onSubmit={forms.onSubmit(handleSubmit)}>
 					<TextInput
 						mt="md"
 						required
-						label="Title"
+						label="Name"
 						placeholder="Group name"
 						{...forms.getInputProps("name")}
 						description={`Group name, Characters allowed are Alpha numeric, underscore, hyphen, space, ', ", comma, and @ regex`}
@@ -237,13 +241,15 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 					/>
 
 					<Group>
-						<Link href={`../user?tab=1group=${props.group!.name.replaceAll(" ", "+")}`}>
-							<a>
-								<Chip mt="md" checked={false}>
-									Click here to view all group members
-								</Chip>
-							</a>
-						</Link>
+						{props.group && (
+							<Link href={`../user?tab=1&group=${props.group!.name.replaceAll(" ", "+")}`}>
+								<a>
+									<Chip mt="md" checked={false}>
+										Click here to view all group members
+									</Chip>
+								</a>
+							</Link>
+						)}
 
 						<Group position="right" mt="md" ml="auto">
 							{props.group ? (

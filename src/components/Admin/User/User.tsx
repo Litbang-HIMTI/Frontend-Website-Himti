@@ -426,7 +426,7 @@ export const User: NextPage<IDashboardProps> = (props) => {
 								sortSearchData(sortBy, dataPage, dataAllPage).map((row) => (
 									<tr key={row._id}>
 										<td>
-											<Link href={`${props.pathname}/${row._id}`}>
+											<Link href={`${props.pathname}/${row.username}`}>
 												<a>
 													<Tooltip label={`(${row.first_name} ${row.last_name})`}>
 														<Text variant="link">{row.username}</Text>
@@ -435,7 +435,23 @@ export const User: NextPage<IDashboardProps> = (props) => {
 											</Link>
 										</td>
 										<td>{row.role.join(", ")}</td>
-										<td>{row.group && row.group.length > 0 ? row.group.join(", ") : "Not a part of any group"}</td>
+										<td>
+											{row.group && row.group.length > 0
+												? row.group.map((group, i) => {
+														return (
+															<Tooltip label={group.description} key={i} offset={-30}>
+																<span>
+																	<Link href={`group?qAll=${group.name}`}>
+																		<a>
+																			<Text variant="link">{group.name}</Text>
+																		</a>
+																	</Link>
+																</span>
+															</Tooltip>
+														);
+												  })
+												: "Not a part of any group"}
+										</td>
 										<td>
 											{row.updatedAt !== row.createdAt ? (
 												<Tooltip label={`Last edited at: ${formatDateWithTz(row.updatedAt, tz)}`}>

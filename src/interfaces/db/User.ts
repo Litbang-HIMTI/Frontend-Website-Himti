@@ -1,6 +1,7 @@
 import { IGroup } from "./Group";
 
 export type TRoles = "admin" | "editor" | "forum_moderator" | "shortlink_moderator" | "user";
+export const validRoles: TRoles[] = ["admin", "editor", "forum_moderator", "shortlink_moderator", "user"];
 export interface IUserForm {
 	username: string;
 	first_name: string;

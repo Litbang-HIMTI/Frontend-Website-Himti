@@ -3,14 +3,14 @@ import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
-import { Box, Button, createStyles, Group, LoadingOverlay, TextInput, Text, Textarea, Chip, Divider } from "@mantine/core";
+import { Box, Button, createStyles, Group, LoadingOverlay, TextInput, Text, Textarea, Chip, Divider, MultiSelect, PasswordInput } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { emailRegex, SERVER_V1, urlSafeRegex, urlSaferRegex } from "../../../helper";
-import { IUser, IUserForm } from "../../../interfaces/db";
+import { emailRegex, SERVER_V1, urlSaferRegex, validatePassword } from "../../../helper";
+import { GroupQRes, IUser, IUserForm, validRoles } from "../../../interfaces/db";
 import { TitleDashboard } from "../../Utils/Dashboard";
 import { openConfirmModal } from "@mantine/modals";
-import Link from "next/link";
+import { ISelect } from "../../../interfaces/input";
 
 const useStyles = createStyles((theme) => ({
 	buttonCancel: {
@@ -29,7 +29,7 @@ const useStyles = createStyles((theme) => ({
 }));
 
 interface IUserFormProps extends IDashboardProps {
-	user?: IUser;
+	userData?: IUser;
 }
 
 export const UserForm: NextPage<IUserFormProps> = (props) => {
@@ -48,18 +48,22 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 			first_name: "",
 			last_name: "",
 			email: "",
-			group: [],
 			role: [],
 		},
 
 		validate: {
-			username: (value) => urlSaferRegex.test(value) || "Invalid username",
-			first_name: (value) => value.length > 0 || "First name is required",
-			last_name: (value) => value.length > 0 || "Last name is required",
-			email: (value) => emailRegex.test(value) || "Invalid email",
-			role: (value) => value.length > 0 || "Role is required",
+			username: (value) => (urlSaferRegex.test(value) ? undefined : "Invalid username"),
+			first_name: (value) => (value.length > 0 ? undefined : "First name is required"),
+			last_name: (value) => (value.length > 0 ? undefined : "Last name is required"),
+			email: (value) => (emailRegex.test(value) ? undefined : "Invalid email"),
+			role: (value) => (value.length > 0 ? undefined : "Role is required"),
 		},
 	});
+	const [group, setGroup] = useState<string[]>([]);
+	const [password, setPassword] = useState<string>("");
+	const [passwordConfirm, setPasswordConfirm] = useState<string>("");
+	const [groupsListData, setGroupsListData] = useState<ISelect[]>([{ label: "Reload group data", value: "reload", group: "Utility" }]);
+	const userRoleData = validRoles.map((role) => ({ label: role, value: role }));
 
 	// ------------------------------------------------------------
 	// handler
@@ -86,8 +90,8 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 	const handleDelete = () => {
 		openConfirmModal({
 			title: "Delete confirmation",
-			children: <Text size="sm">Are you sure you want to delete this group? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
-			labels: { confirm: "Yes, delete group", cancel: "No, cancel" },
+			children: <Text size="sm">Are you sure you want to delete this user? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
+			labels: { confirm: "Yes, delete user", cancel: "No, cancel" },
 			confirmProps: { color: "red" },
 			onCancel: () => {},
 			onConfirm: () => deleteForm(),
@@ -98,7 +102,7 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 		setLoading(true);
 		setUnsavedChanges(false);
 		try {
-			const req = await fetch(`${SERVER_V1}/user/${props.user!._id}`, {
+			const req = await fetch(`${SERVER_V1}/user/${props.userData!._id}`, {
 				method: "DELETE",
 				headers: {
 					"Content-Type": "application/json",
@@ -126,18 +130,20 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 
 	const resetForm = () => {
 		setSubmitted(false);
-
-		if (!props.user) {
+		setPassword("");
+		setPasswordConfirm("");
+		if (!props.userData) {
 			forms.reset();
+			setGroup([]);
 		} else {
 			forms.setValues({
-				username: props.user.username,
-				first_name: props.user.first_name,
-				last_name: props.user.last_name,
-				email: props.user.email,
-				group: props.user.group,
-				role: props.user.role,
+				username: props.userData.username,
+				first_name: props.userData.first_name,
+				last_name: props.userData.last_name,
+				email: props.userData.email,
+				role: props.userData.role,
 			});
+			setGroup(props.userData.group ? props.userData.group.map((group) => group._id) : []);
 		}
 	};
 
@@ -145,11 +151,16 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 		setLoading(true);
 		setUnsavedChanges(false);
 		if (submitted) return;
-		const { username, first_name, last_name, email, role, group } = forms.values;
+		const { username, first_name, last_name, email, role } = forms.values;
 
 		try {
-			const req = await fetch(`${SERVER_V1}/${props.user ? "group/" + props.user._id : "group"}`, {
-				method: props.user ? "PUT" : "POST",
+			if (password !== passwordConfirm) throw new Error("Passwords do not match");
+
+			const validatePass = validatePassword(password);
+			if (!validatePass.success) throw new Error(validatePass.message);
+
+			const req = await fetch(`${SERVER_V1}/${props.userData ? "user/" + props.userData.username : "user"}`, {
+				method: props.userData ? "PUT" : "POST",
 				credentials: "include",
 				headers: {
 					"Content-Type": "application/json",
@@ -161,6 +172,7 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 					email,
 					role,
 					group,
+					password,
 				}),
 			});
 			const { message } = await req.json();
@@ -169,7 +181,7 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 				setSubmitted(true);
 				showNotification({ title: "Success", message: message + ". Redirecting...", disallowClose: true });
 
-				setTimeout(() => router.push("../group"), 1500);
+				setTimeout(() => router.push("../user"), 1500);
 			} else {
 				setUnsavedChanges(true);
 				setLoading(false);
@@ -182,20 +194,53 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 		}
 	};
 
+	const fetchGroups = async () => {
+		showNotification({ title: "Loading groups", message: "Please wait...", disallowClose: true, autoClose: 1000 });
+		try {
+			const req = await fetch(`${SERVER_V1}/group`, {
+				method: "GET",
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/json",
+				},
+			});
+			const { message, data }: GroupQRes = await req.json();
+
+			if (req.status === 200) {
+				setGroupsListData((prev) => {
+					const newFetch = data.map((group) => ({ label: group.name, value: group._id, group: "Available" }));
+					const newData = [...prev, ...newFetch];
+
+					// remove dupe
+					const unique = newData.filter((v, i, a) => a.findIndex((t) => t.value === v.value) === i);
+					return unique;
+				});
+
+				showNotification({ title: "Success", message, disallowClose: false, autoClose: 1000 });
+			} else {
+				showNotification({ title: "Error", message, disallowClose: true, color: "red" });
+			}
+		} catch (error: any) {
+			showNotification({ title: "Error", message: error.message, disallowClose: true, color: "red" });
+		}
+	};
+
 	// ------------------------------------------------------------
 	// page open
 	useEffect(() => {
 		if (!pageOpenFetched) {
-			if (props.user) {
+			fetchGroups();
+			if (props.userData) {
 				// edit mode
 				forms.setValues({
-					username: props.user.username,
-					first_name: props.user.first_name,
-					last_name: props.user.last_name,
-					email: props.user.email,
-					group: props.user.group,
-					role: props.user.role,
+					username: props.userData.username,
+					first_name: props.userData.first_name,
+					last_name: props.userData.last_name,
+					email: props.userData.email,
+					group: props.userData.group,
+					role: props.userData.role,
 				});
+				setGroup(props.userData.group ? props.userData.group.map((group) => group._id) : []);
 			} else {
 				// create mode
 				setUnsavedChanges(true);
@@ -229,34 +274,101 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 
 	return (
 		<>
-			<TitleDashboard title={props.user ? "View/Edit Group" : "Add Group"} hrefLink="../group" hrefText="Back to groups" HrefIcon={IconArrowLeft} />
+			<TitleDashboard title={props.userData ? "View/Edit User" : "Add User"} hrefLink="../user" hrefText="Back to users" HrefIcon={IconArrowLeft} />
 
-			<Box component="div" sx={{ position: "relative" }} className="dash-textinput-gap">
+			<Box component="div" sx={{ position: "relative" }}>
 				<LoadingOverlay visible={loading} overlayBlur={3} />
-				<form onSubmit={forms.onSubmit(handleSubmit)}>
+				<form onSubmit={forms.onSubmit(handleSubmit)} autoComplete="off">
 					<TextInput
 						mt="md"
 						required
-						label="Title"
-						placeholder="Group name"
-						{...forms.getInputProps("name")}
-						description={`Group name, Characters allowed are Alpha numeric, underscore, hyphen, space, ', ", comma, and @ regex`}
+						label="Username"
+						placeholder="Username"
+						{...forms.getInputProps("username")}
+						description={`Username. Characters allowed are alpha numeric, underscore, and hyphen regex`}
+						disabled={!editable}
+						autoComplete="false"
+					/>
+
+					<TextInput required mt="md" label="First Name" description=" " placeholder="First Name" {...forms.getInputProps("first_name")} disabled={!editable} />
+
+					<TextInput required mt="md" label="Last Name" description=" " placeholder="Last Name" {...forms.getInputProps("last_name")} disabled={!editable} />
+
+					<TextInput required mt="md" label="Email" description=" " placeholder="Email" {...forms.getInputProps("email")} disabled={!editable} />
+
+					<MultiSelect
+						mt="md"
+						data={groupsListData}
+						description=" "
+						placeholder="Group"
+						// {...forms.getInputProps("group")}
+						value={group}
+						onChange={(value) => {
+							if (value.includes("reload")) {
+								fetchGroups();
+							} else {
+								setGroup(value);
+							}
+						}}
+						label="Group"
+						disabled={!editable}
+						creatable
+						searchable
+						getCreateLabel={(q) => `+ Create ${q} (open from group page)`}
+						onCreate={(q) => {
+							window.open(`../group/create?name=${q}`, "_blank");
+							return "";
+						}}
+						maxDropdownHeight={160}
+					/>
+
+					<MultiSelect
+						required
+						mt="md"
+						data={userRoleData}
+						label="Role"
+						placeholder="Role"
+						{...forms.getInputProps("role")}
+						description={`User's role or permission level`}
 						disabled={!editable}
 					/>
 
-					<Textarea
-						mt="md"
-						required
-						label="Description"
-						placeholder="Group description"
-						{...forms.getInputProps("description")}
-						description={`Group description. Minimum character 10`}
-						disabled={!editable}
-					/>
+					{!props.userData ? (
+						<>
+							<PasswordInput
+								required
+								mt="md"
+								label="Password"
+								placeholder="Password"
+								value={password}
+								onChange={(e) => setPassword(e.target.value)}
+								disabled={!editable}
+								minLength={8}
+								maxLength={250}
+								description="Password must be at least 8 characters and include at least one lowercase letter, one uppercase letter, number and one special character (@$!%*?&._-)"
+								error={password !== passwordConfirm ? "Passwords do not match" : password.length && !validatePassword(password).success ? validatePassword(password).message : ""}
+								autoComplete="false"
+							/>
+							<PasswordInput
+								required
+								mt="md"
+								label="Password Confirmation"
+								placeholder="Password Confirmation"
+								description=" "
+								value={passwordConfirm}
+								onChange={(e) => setPasswordConfirm(e.target.value)}
+								disabled={!editable}
+								minLength={8}
+								maxLength={250}
+								error={password !== passwordConfirm ? "Passwords do not match" : password.length && !validatePassword(password).success ? validatePassword(password).message : ""}
+								autoComplete="false"
+							/>
+						</>
+					) : null}
 
 					<Group>
 						<Group position="right" mt="md" ml="auto">
-							{props.user ? (
+							{props.userData ? (
 								<>
 									<Button color="red" onClick={handleDelete}>
 										Delete

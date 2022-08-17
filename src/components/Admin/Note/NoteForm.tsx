@@ -229,7 +229,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 				HrefIcon={IconArrowLeft}
 			/>
 
-			<Box component="div" sx={{ position: "relative" }} className="dash-textinput-gap">
+			<Box component="div" sx={{ position: "relative" }}>
 				<LoadingOverlay visible={loading} overlayBlur={3} />
 				<form onSubmit={forms.onSubmit(handleSubmit)}>
 					<TextInput
