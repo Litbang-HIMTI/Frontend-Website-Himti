@@ -53,8 +53,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 	if (fetchUser.status !== 200) return { notFound: true };
 	const { data } = await fetchUser.json();
 
-	console.log("here");
-
 	return {
 		props: {
 			pathname: context.resolvedUrl,

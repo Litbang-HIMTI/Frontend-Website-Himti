@@ -245,7 +245,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 	return (
 		<>
-			<TitleDashboard title="Notes" hrefLink={`${props.pathname}/create`} hrefText="Add new" />
+			<TitleDashboard title="Notes" hrefLink={`${props.pathname?.split("?")[0]}/create`} hrefText="Add new" />
 
 			<div>
 				<Tabs value={tabIndex.toString() || "0"} onTabChange={handleTabChange}>
@@ -429,7 +429,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 								sortSearchData(sortBy, dataPage, dataAllPage).map((row) => (
 									<tr key={row._id}>
 										<td>
-											<Link href={`${props.pathname}/${row._id}`}>
+											<Link href={`${props.pathname?.split("?")[0]}/${row._id}`}>
 												<a>
 													<Text variant="link">{row.title}</Text>
 												</a>
@@ -458,7 +458,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 										</td>
 										<td style={{ padding: "1rem .5rem" }}>
 											<div className="dash-flex">
-												<Link href={`${props.pathname}/${row._id}`}>
+												<Link href={`${props.pathname?.split("?")[0]}/${row._id}`}>
 													<ActionIcon>
 														<IconEdit size={14} stroke={1.5} />
 													</ActionIcon>
