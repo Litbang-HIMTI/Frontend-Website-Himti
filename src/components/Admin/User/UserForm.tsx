@@ -65,6 +65,8 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 	const [groupsListData, setGroupsListData] = useState<ISelect[]>([{ label: "Reload group data", value: "reload", group: "Utility" }]);
 	const userRoleData = validRoles.map((role) => ({ label: role, value: role }));
 
+	const [changingPassword, setChangingPassword] = useState<boolean>(false);
+
 	// ------------------------------------------------------------
 	// handler
 	const handleReset = () => {
@@ -95,6 +97,16 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 			confirmProps: { color: "red" },
 			onCancel: () => {},
 			onConfirm: () => deleteForm(),
+		});
+	};
+	const handleChangePassword = () => {
+		openConfirmModal({
+			title: "Change password confirmation",
+			children: <Text size="sm">Are you sure you want to change the password of this user? This action is irreversible.</Text>,
+			labels: { confirm: "Yes, change password", cancel: "No, cancel" },
+			confirmProps: { color: "red" },
+			onCancel: () => {},
+			onConfirm: () => changePassword(),
 		});
 	};
 
@@ -191,6 +203,41 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 			}
 		} catch (error: any) {
 			setUnsavedChanges(true);
+			setLoading(false);
+			showNotification({ title: "Error", message: error.message, disallowClose: true, color: "red" });
+		}
+	};
+
+	const changePassword = async () => {
+		setLoading(true);
+
+		try {
+			if (password !== passwordConfirm) throw new Error("Passwords do not match");
+
+			const validatePass = validatePassword(password);
+			if (!validatePass.success) throw new Error(validatePass.message);
+
+			const req = await fetch(`${SERVER_V1}/user/${props.userData!._id}/password`, {
+				method: "PUT",
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					password,
+				}),
+			});
+			const { message } = await req.json();
+
+			if (req.status === 200) {
+				showNotification({ title: "Success", message: message, disallowClose: true });
+			} else {
+				showNotification({ title: "Error", message, disallowClose: true, color: "red" });
+			}
+
+			setLoading(false);
+			setChangingPassword(false);
+		} catch (error: any) {
 			setLoading(false);
 			showNotification({ title: "Error", message: error.message, disallowClose: true, color: "red" });
 		}
@@ -366,9 +413,69 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 								autoComplete="false"
 							/>
 						</>
-					) : null}
+					) : (
+						<>
+							{changingPassword && (
+								<>
+									<PasswordInput
+										required
+										mt="md"
+										label="Password"
+										placeholder="Password"
+										value={password}
+										onChange={(e) => setPassword(e.target.value)}
+										minLength={8}
+										maxLength={250}
+										description="Password must be at least 8 characters and include at least one lowercase letter, one uppercase letter, number and one special character (@$!%*?&._-)"
+										error={password !== passwordConfirm ? "Passwords do not match" : password.length && !validatePassword(password).success ? validatePassword(password).message : ""}
+										autoComplete="false"
+									/>
+									<PasswordInput
+										required
+										mt="md"
+										label="Password Confirmation"
+										placeholder="Password Confirmation"
+										description=" "
+										value={passwordConfirm}
+										onChange={(e) => setPasswordConfirm(e.target.value)}
+										minLength={8}
+										maxLength={250}
+										error={password !== passwordConfirm ? "Passwords do not match" : password.length && !validatePassword(password).success ? validatePassword(password).message : ""}
+										autoComplete="false"
+									/>
+								</>
+							)}
+						</>
+					)}
 
 					<Group>
+						{props.userData && (
+							<>
+								<Button
+									mt="md"
+									color="gray"
+									variant="outline"
+									className={classes.buttonCancel}
+									onClick={() => {
+										setUnsavedChanges(true);
+										if (!changingPassword) {
+											setPassword("");
+											setPasswordConfirm("");
+										}
+
+										setChangingPassword(!changingPassword);
+									}}
+								>
+									{changingPassword ? "Cancel" : "Change password"}
+								</Button>
+								{changingPassword && (
+									<Button mt="md" color="red" variant="outline" className={classes.buttonCancel} onClick={handleChangePassword}>
+										Confirm password change
+									</Button>
+								)}
+							</>
+						)}
+
 						<Group position="right" mt="md" ml="auto">
 							{props.userData ? (
 								<>
