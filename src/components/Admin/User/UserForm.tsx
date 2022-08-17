@@ -350,7 +350,6 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 						data={groupsListData}
 						description=" "
 						placeholder="Group"
-						// {...forms.getInputProps("group")}
 						value={group}
 						onChange={(value) => {
 							if (value.includes("reload")) {
