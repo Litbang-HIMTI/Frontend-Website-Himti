@@ -80,4 +80,4 @@ Next.js handles errors by rendering a custom error page. The error page is rende
 
 ## Authentication
 
-Because of CORS, we will need to set up a local API to fetch data from the backend server. Example located in the [`login page`](../pages/auth/login.tsx). It fetch the data not directly to the backend but through local [Next.js API](../pages/api/v1/auth/login.ts).
+We need to set credentials to true for every fetch that needs authentication. This is needed when fetching from client side. When fetching from server side, we will need to also add `connect.sid` cookie to header. Ex: `Cookie: "connect.sid=" + context.req.cookies["connect.sid"]`.

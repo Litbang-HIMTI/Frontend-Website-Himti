@@ -42,10 +42,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 	if (!validateAdmin(parsed.data)) return { notFound: true };
 
 	// get user data
-	const fetchUser = await fetch(`${SERVER_V1}/user/${context.params!.username}`, {
+	const fetchUser = await fetch(`${SERVER_V1}/user/${context.params!._id}/admin`, {
 		method: "GET",
 		headers: {
 			"Content-Type": "application/json",
+			Cookie: "connect.sid=" + context.req.cookies["connect.sid"],
 		},
 		credentials: "include",
 	});

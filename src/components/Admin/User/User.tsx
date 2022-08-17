@@ -426,7 +426,7 @@ export const User: NextPage<IDashboardProps> = (props) => {
 								sortSearchData(sortBy, dataPage, dataAllPage).map((row) => (
 									<tr key={row._id}>
 										<td>
-											<Link href={`${props.pathname?.split("?")[0]}/${row.username}`}>
+											<Link href={`${props.pathname?.split("?")[0]}/${row._id}`}>
 												<a>
 													<Tooltip label={`(${row.first_name} ${row.last_name})`}>
 														<Text component="span" variant="link">
@@ -468,7 +468,7 @@ export const User: NextPage<IDashboardProps> = (props) => {
 										</td>
 										<td style={{ padding: "1rem .5rem" }}>
 											<div className="dash-flex">
-												<Link href={`${props.pathname?.split("?")[0]}/${row.username}`}>
+												<Link href={`${props.pathname?.split("?")[0]}/${row._id}`}>
 													<ActionIcon>
 														<IconEdit size={14} stroke={1.5} />
 													</ActionIcon>
