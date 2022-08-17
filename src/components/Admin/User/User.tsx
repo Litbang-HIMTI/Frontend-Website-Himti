@@ -382,7 +382,7 @@ export const User: NextPage<IDashboardProps> = (props) => {
 										if (sortBy === "role") setReverseSortDirection(!reverseSortDirection);
 										setSortBy("role");
 									}}
-									width="20%"
+									width="25%"
 								>
 									Role
 								</Th>
@@ -394,7 +394,7 @@ export const User: NextPage<IDashboardProps> = (props) => {
 										if (sortBy === "group") setReverseSortDirection(!reverseSortDirection);
 										setSortBy("group");
 									}}
-									width="20%"
+									width="25%"
 								>
 									Group
 								</Th>
@@ -410,7 +410,7 @@ export const User: NextPage<IDashboardProps> = (props) => {
 								>
 									Created At
 								</Th>
-								<th className={classes.th} style={{ width: "20%" }}>
+								<th className={classes.th} style={{ width: "10%" }}>
 									<UnstyledButton className={classes.control}>
 										<Group position="apart">
 											<Text weight={500} size="sm">
@@ -429,7 +429,9 @@ export const User: NextPage<IDashboardProps> = (props) => {
 											<Link href={`${props.pathname?.split("?")[0]}/${row.username}`}>
 												<a>
 													<Tooltip label={`(${row.first_name} ${row.last_name})`}>
-														<Text variant="link">{row.username}</Text>
+														<Text component="span" variant="link">
+															{row.username}
+														</Text>
 													</Tooltip>
 												</a>
 											</Link>
@@ -439,13 +441,16 @@ export const User: NextPage<IDashboardProps> = (props) => {
 											{row.group && row.group.length > 0
 												? row.group.map((group, i) => {
 														return (
-															<Tooltip label={group.description} key={i} offset={-30}>
+															<Tooltip label={group.description} key={i}>
 																<span>
 																	<Link href={`group?qAll=${group.name}`}>
 																		<a>
-																			<Text variant="link">{group.name}</Text>
+																			<Text component="span" variant="link">
+																				{group.name}
+																			</Text>
 																		</a>
 																	</Link>
+																	{i < row.group!.length - 1 ? ", " : ""}
 																</span>
 															</Tooltip>
 														);
@@ -463,7 +468,7 @@ export const User: NextPage<IDashboardProps> = (props) => {
 										</td>
 										<td style={{ padding: "1rem .5rem" }}>
 											<div className="dash-flex">
-												<Link href={`${props.pathname?.split("?")[0]}/${row._id}`}>
+												<Link href={`${props.pathname?.split("?")[0]}/${row.username}`}>
 													<ActionIcon>
 														<IconEdit size={14} stroke={1.5} />
 													</ActionIcon>

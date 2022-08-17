@@ -154,12 +154,14 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 		const { username, first_name, last_name, email, role } = forms.values;
 
 		try {
-			if (password !== passwordConfirm) throw new Error("Passwords do not match");
+			if (!props.userData) {
+				if (password !== passwordConfirm) throw new Error("Passwords do not match");
 
-			const validatePass = validatePassword(password);
-			if (!validatePass.success) throw new Error(validatePass.message);
+				const validatePass = validatePassword(password);
+				if (!validatePass.success) throw new Error(validatePass.message);
+			}
 
-			const req = await fetch(`${SERVER_V1}/${props.userData ? "user/" + props.userData.username : "user"}`, {
+			const req = await fetch(`${SERVER_V1}/${props.userData ? "user/" + props.userData!._id : "user"}`, {
 				method: props.userData ? "PUT" : "POST",
 				credentials: "include",
 				headers: {
