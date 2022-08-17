@@ -34,7 +34,6 @@ import { Th, useTableStyles, TitleDashboard } from "../../Utils/Dashboard";
 export const Note: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useTableStyles();
 	const router = useRouter();
-	const [idDelete, setIdDelete] = useState("");
 
 	const [curPage, setCurPage] = useState(1);
 	const [pages, setPages] = useState(1);
@@ -77,14 +76,13 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	};
 
 	const handleDelete = (id: string) => {
-		setIdDelete(id);
 		openConfirmModal({
 			title: "Delete confirmation",
 			children: <Text size="sm">Are you sure you want to delete this note? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
 			labels: { confirm: "Yes, delete note", cancel: "No, cancel" },
 			confirmProps: { color: "red" },
 			onCancel: () => {},
-			onConfirm: () => deleteData(),
+			onConfirm: () => deleteData(id),
 		});
 	};
 
@@ -140,9 +138,9 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// delete
-	const deleteData = async () => {
+	const deleteData = async (_id: string) => {
 		try {
-			const req = await fetch(`${SERVER_V1}/note/${idDelete}`, {
+			const req = await fetch(`${SERVER_V1}/note/${_id}`, {
 				method: "DELETE",
 				headers: {
 					"Content-Type": "application/json",
@@ -154,10 +152,10 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 			if (req.status === 200 && success) {
 				// slice data
 				setDataPage((prev) => {
-					return prev.filter((item) => item._id !== idDelete);
+					return prev.filter((item) => item._id !== _id);
 				});
 				setDataAllPage((prev) => {
-					return prev.filter((item) => item._id !== idDelete);
+					return prev.filter((item) => item._id !== _id);
 				});
 
 				showNotification({ title: "Success", message });

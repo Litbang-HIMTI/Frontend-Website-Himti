@@ -34,7 +34,6 @@ import { Th, useTableStyles, TitleDashboard } from "../../Utils/Dashboard";
 export const User: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useTableStyles();
 	const router = useRouter();
-	const [idDelete, setIdDelete] = useState("");
 
 	const [curPage, setCurPage] = useState(1);
 	const [pages, setPages] = useState(1);
@@ -77,14 +76,13 @@ export const User: NextPage<IDashboardProps> = (props) => {
 	};
 
 	const handleDelete = (id: string) => {
-		setIdDelete(id);
 		openConfirmModal({
 			title: "Delete confirmation",
 			children: <Text size="sm">Are you sure you want to delete this user? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
 			labels: { confirm: "Yes, delete user", cancel: "No, cancel" },
 			confirmProps: { color: "red" },
 			onCancel: () => {},
-			onConfirm: () => deleteData(),
+			onConfirm: () => deleteData(id),
 		});
 	};
 
@@ -140,9 +138,9 @@ export const User: NextPage<IDashboardProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// delete
-	const deleteData = async () => {
+	const deleteData = async (_id: string) => {
 		try {
-			const req = await fetch(`${SERVER_V1}/user/${idDelete}`, {
+			const req = await fetch(`${SERVER_V1}/user/${_id}`, {
 				method: "DELETE",
 				headers: {
 					"Content-Type": "application/json",
@@ -150,19 +148,19 @@ export const User: NextPage<IDashboardProps> = (props) => {
 				credentials: "include",
 			});
 
-			const deleteData = await req.json();
-			if (req.status === 200 && deleteData && deleteData.success) {
+			const { message, success }: UserQRes = await req.json();
+			if (req.status === 200 && success) {
 				// slice data
 				setDataPage((prev) => {
-					return prev.filter((item) => item._id !== idDelete);
+					return prev.filter((item) => item._id !== _id);
 				});
 				setDataAllPage((prev) => {
-					return prev.filter((item) => item._id !== idDelete);
+					return prev.filter((item) => item._id !== _id);
 				});
 
-				showNotification({ title: "Success", message: deleteData.message });
+				showNotification({ title: "Success", message });
 			} else {
-				showNotification({ title: "Error", message: deleteData.message, color: "red" });
+				showNotification({ title: "Error", message, color: "red" });
 			}
 		} catch (error: any) {
 			showNotification({ title: "Error", message: error.message, color: "red" });
