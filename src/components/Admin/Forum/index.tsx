@@ -1,2 +1,2 @@
 export { Forum } from "./Forum";
-export { ForumCategory } from "./ForumCategory";
+export { ForumCategory } from "./Category/ForumCategory";

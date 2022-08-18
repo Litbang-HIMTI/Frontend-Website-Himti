@@ -26,10 +26,10 @@ import { showNotification } from "@mantine/notifications";
 import { openConfirmModal } from "@mantine/modals";
 import { useLocalStorage } from "@mantine/hooks";
 import { IconSearch, IconEdit, IconTrash, IconRefresh } from "@tabler/icons";
-import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { IForumCategory, validForumCategorySort, ForumCategorySort, ForumCategoryQRes } from "../../../interfaces/db";
-import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../helper";
-import { Th, useTableStyles, TitleDashboard } from "../../Utils/Dashboard";
+import { IDashboardProps } from "../../../../interfaces/props/Dashboard";
+import { IForumCategory, validForumCategorySort, ForumCategorySort, ForumCategoryQRes } from "../../../../interfaces/db";
+import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../../helper";
+import { Th, useTableStyles, TitleDashboard } from "../../../Utils/Dashboard";
 
 export const ForumCategory: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useTableStyles();
