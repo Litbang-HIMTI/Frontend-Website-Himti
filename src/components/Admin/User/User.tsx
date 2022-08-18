@@ -111,7 +111,7 @@ export const User: NextPage<IDashboardProps> = (props) => {
 		} else if (tabIndex === 1) {
 			if (searchUsername !== "") dataPage = dataPage.filter((item) => item.username.toLowerCase().includes(searchUsername.toLowerCase()));
 			if (searchRole !== "") dataPage = dataPage.filter((item) => item.role.some((role) => role.toLowerCase().includes(searchRole.toLowerCase())));
-			if (searchGroup !== "") dataPage = dataPage.filter((item) => (item.group ? item.group.some((group) => group.name.toLowerCase().includes(searchGroup.toLowerCase())) : false));
+			if (searchGroup !== "") dataPage = dataPage.filter((item) => item.group?.some((group) => group.name.toLowerCase().includes(searchGroup.toLowerCase())));
 			if (searchCreatedAt !== "") dataPage = dataPage.filter((item) => formatDateWithTz(item.createdAt, tz).toLowerCase().includes(searchCreatedAt.toLowerCase()));
 		}
 

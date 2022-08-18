@@ -92,7 +92,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 		return (
 			item.title.toLowerCase().includes(query.toLowerCase()) ||
 			item.content.toLowerCase().includes(query.toLowerCase()) ||
-			item.author[0].username.toLowerCase().includes(query.toLowerCase()) ||
+			item.author[0]?.username.toLowerCase().includes(query.toLowerCase()) ||
 			formatDateWithTz(item.createdAt, tz).toLowerCase().includes(query.toLowerCase())
 		);
 	};
@@ -111,7 +111,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 		} else if (tabIndex === 1) {
 			if (searchTitle !== "") dataPage = dataPage.filter((item) => item.title.toLowerCase().includes(searchTitle.toLowerCase()));
 			if (searchContent !== "") dataPage = dataPage.filter((item) => item.content.toLowerCase().includes(searchContent.toLowerCase()));
-			if (searchAuthor !== "") dataPage = dataPage.filter((item) => item.author[0].username.toLowerCase().includes(searchAuthor.toLowerCase()));
+			if (searchAuthor !== "") dataPage = dataPage.filter((item) => item.author[0]?.username.toLowerCase().includes(searchAuthor.toLowerCase()));
 			if (searchCreatedAt !== "") dataPage = dataPage.filter((item) => formatDateWithTz(item.createdAt, tz).toLowerCase().includes(searchCreatedAt.toLowerCase()));
 		}
 
@@ -125,7 +125,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 		const sortMap: NoteSort = {
 			title: (a: INote, b: INote) => a.title.localeCompare(b.title),
 			content: (a: INote, b: INote) => a.content.localeCompare(b.content),
-			author: (a: INote, b: INote) => a.author[0].username.localeCompare(b.author[0].username),
+			author: (a: INote, b: INote) => a.author[0]?.username.localeCompare(b.author[0]?.username),
 			createdAt: (a: INote, b: INote) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf(),
 		};
 
@@ -438,11 +438,13 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 											{row.editedBy && row.editedBy[0] ? (
 												<>
 													<Tooltip label={`Last edited by: ${row.editedBy[0].username}`}>
-														<span>{row.author[0].username}</span>
+														<span>{row.author[0] ? row.author[0].username : "Deleted"}</span>
 													</Tooltip>
 												</>
-											) : (
+											) : row.author[0] ? (
 												row.author[0].username
+											) : (
+												"Deleted"
 											)}
 										</td>
 										<td>
