@@ -79,8 +79,8 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 	const handleDelete = (id: string) => {
 		openConfirmModal({
 			title: "Delete confirmation",
-			children: <Text size="sm">Are you sure you want to delete this note? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
-			labels: { confirm: "Yes, delete note", cancel: "No, cancel" },
+			children: <Text size="sm">Are you sure you want to delete this shorten link? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
+			labels: { confirm: "Yes, delete shorten link", cancel: "No, cancel" },
 			confirmProps: { color: "red" },
 			onCancel: () => {},
 			onConfirm: () => deleteData(id),
@@ -232,8 +232,9 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 		// set to local state
 		setCurPage(params.get("page") ? parseInt(params.get("page") || "1") : 1);
 		setSearchAll(params.get("qAll") || "");
-		setSearchShorten(params.get("title") || "");
-		setSearchUrl(params.get("content") || "");
+		setSearchShorten(params.get("shorten") || "");
+		setSearchUrl(params.get("originalUrl") || "");
+		setSearchAuthor(params.get("clicks") || "");
 		setSearchAuthor(params.get("author") || "");
 		setSearchCreatedAt(params.get("createdAt") || "");
 		setTabIndex(parseInt(params.get("tab") || "0"));
@@ -249,7 +250,7 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 
 	return (
 		<>
-			<TitleDashboard title="Notes" hrefLink={`${props.pathname?.split("?")[0]}/create`} hrefText="Add new" />
+			<TitleDashboard title="Shortlinks" hrefLink={`${props.pathname?.split("?")[0]}/create`} hrefText="Add new" />
 
 			<div>
 				<Tabs value={tabIndex.toString() || "0"} onTabChange={handleTabChange}>
@@ -297,8 +298,8 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 								/>
 								<TextInput
 									placeholder="Search by original url"
-									name="original"
-									label="Original"
+									name="originalUrl"
+									label="Original URL"
 									icon={<IconLink size={14} stroke={1.5} />}
 									value={searchUrl}
 									onChange={(e) => handleInputQueryChange(e, setSearchUrl, e.target.name)}
@@ -306,13 +307,18 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 								/>
 								<NumberInput
 									placeholder="Search by clicks field"
-									name="click"
+									name="clicks"
 									label="Clicks"
 									icon={<IconNumber9 size={14} stroke={1.5} />}
 									value={parseInt(searchClickCount) ? parseInt(searchClickCount) : undefined}
 									onChange={(value) => {
-										if (!value) return setSearchClickCount("");
-										setSearchClickCount(value.toString());
+										if (!value) {
+											setSearchClickCount("");
+											removeQueryParam(router, "click");
+										} else {
+											setSearchClickCount(value.toString());
+											addQueryParam(router, "click", value.toString());
+										}
 									}}
 									mt={8}
 								/>
