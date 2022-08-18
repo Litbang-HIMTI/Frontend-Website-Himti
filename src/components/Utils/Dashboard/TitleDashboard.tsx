@@ -29,9 +29,11 @@ export const TitleDashboard = ({ title, hrefLink, hrefText, HrefIcon = IconFileP
 				<h1>{title}</h1>
 				{hrefLink && hrefText && (
 					<Link href={hrefLink}>
-						<Button id="dash-add-new" ml={16} size="xs" compact leftIcon={<HrefIcon size={20} />}>
-							{hrefText}
-						</Button>
+						<a>
+							<Button id="dash-add-new" ml={16} size="xs" compact leftIcon={<HrefIcon size={20} />}>
+								{hrefText}
+							</Button>
+						</a>
 					</Link>
 				)}
 			</div>

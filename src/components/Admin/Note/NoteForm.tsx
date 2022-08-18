@@ -39,7 +39,6 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 	const [submitted, setSubmitted] = useState<boolean>(false);
 	const [editable, setEditable] = useState<boolean>(false);
 	const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
-	// const [modalHandle, setModalHandle] = useState({ opened: false, closeFunc: () => {}, confirmFunc: () => {} });
 	const [pageOpenFetched, setPageOpenFetched] = useState<boolean>(false);
 	// ------------------------------------------------------------
 	const forms = useForm({

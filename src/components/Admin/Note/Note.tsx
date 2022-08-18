@@ -211,7 +211,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 			}
 
 			setCurPage(page);
-			setPages(pages);
+			setPages(pages ? pages : 1);
 			setDataPage(data);
 			setLoadingDataPage(false);
 		} catch (error: any) {
@@ -459,9 +459,11 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 										<td style={{ padding: "1rem .5rem" }}>
 											<div className="dash-flex">
 												<Link href={`${props.pathname?.split("?")[0]}/${row._id}`}>
-													<ActionIcon>
-														<IconEdit size={14} stroke={1.5} />
-													</ActionIcon>
+													<a>
+														<ActionIcon>
+															<IconEdit size={14} stroke={1.5} />
+														</ActionIcon>
+													</a>
 												</Link>
 												<ActionIcon onClick={() => handleDelete(row._id)}>
 													<IconTrash size={14} stroke={1.5} />

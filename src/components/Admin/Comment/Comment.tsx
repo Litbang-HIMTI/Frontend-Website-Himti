@@ -10,6 +10,7 @@ import {
 	Text,
 	Center,
 	TextInput,
+	Tooltip,
 	ActionIcon,
 	Tabs,
 	Button,
@@ -19,31 +20,34 @@ import {
 	NumberInput,
 	TabsValue,
 	Pagination,
-	Tooltip,
 } from "@mantine/core";
 import { keys } from "@mantine/utils";
 import { showNotification } from "@mantine/notifications";
 import { openConfirmModal } from "@mantine/modals";
 import { useLocalStorage } from "@mantine/hooks";
-import { IconSearch, IconEdit, IconTrash, IconRefresh } from "@tabler/icons";
+import { IconSearch, IconExternalLink, IconTrash, IconLego, IconMessage, IconLicense, IconDeviceWatch, IconRefresh } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { IGroup, validGroupSort, GroupSort, GroupQRes } from "../../../interfaces/db";
+import { IComment, validCommentSort, CommentSort, CommentQRes } from "../../../interfaces/db";
 import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../helper";
 import { Th, useTableStyles, TitleDashboard } from "../../Utils/Dashboard";
 
-export const UserGroup: NextPage<IDashboardProps> = (props) => {
+export const Comment: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useTableStyles();
 	const router = useRouter();
 
 	const [curPage, setCurPage] = useState(1);
 	const [pages, setPages] = useState(1);
-	const [perPage, setPerPage] = useLocalStorage({ key: "perPage-group", defaultValue: 25 });
+	const [perPage, setPerPage] = useLocalStorage({ key: "perPage-comment", defaultValue: 25 });
 
 	const [searchAll, setSearchAll] = useState("");
+	const [searchAuthor, setSearchAuthor] = useState("");
+	const [searchContent, setSearchContent] = useState("");
+	const [searchForumTitle, setSearchForumTitle] = useState("");
+	const [searchCreatedAt, setSearchCreatedAt] = useState("");
 
-	const [dataAllPage, setDataAllPage] = useState<IGroup[]>([]);
-	const [dataPage, setDataPage] = useState<IGroup[]>([]);
-	const [sortBy, setSortBy] = useState<validGroupSort | null>(null);
+	const [dataAllPage, setDataAllPage] = useState<IComment[]>([]);
+	const [dataPage, setDataPage] = useState<IComment[]>([]);
+	const [sortBy, setSortBy] = useState<validCommentSort | null>(null);
 
 	const [reverseSortDirection, setReverseSortDirection] = useState(false);
 	const [loadingDataPage, setLoadingDataPage] = useState(true);
@@ -74,8 +78,8 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 	const handleDelete = (id: string) => {
 		openConfirmModal({
 			title: "Delete confirmation",
-			children: <Text size="sm">Are you sure you want to delete this group? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
-			labels: { confirm: "Yes, delete group", cancel: "No, cancel" },
+			children: <Text size="sm">Are you sure you want to delete this note? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
+			labels: { confirm: "Yes, delete note", cancel: "No, cancel" },
 			confirmProps: { color: "red" },
 			onCancel: () => {},
 			onConfirm: () => deleteData(id),
@@ -84,36 +88,45 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// display
-	const searchAllHelper = (item: IGroup, query: string) => {
+	const searchAllHelper = (item: IComment, query: string) => {
 		return (
-			item.name.toLowerCase().includes(query.toLowerCase()) ||
-			item.description.toLowerCase().includes(query.toLowerCase()) ||
+			item.author![0]?.username.toLowerCase().includes(query.toLowerCase()) ||
+			item.content.toLowerCase().includes(query.toLowerCase()) ||
+			item.forumId![0]?.title.toLowerCase().includes(query.toLowerCase()) ||
 			formatDateWithTz(item.createdAt, tz).toLowerCase().includes(query.toLowerCase())
 		);
 	};
 
 	const isSearching = () => {
 		// not on setting page and is actually searching and data all is fetched
-		return tabIndex !== 2 && dataAllPage.length > 0 && searchAll !== "";
+		return tabIndex !== 2 && dataAllPage.length > 0 && (searchAll !== "" || searchAuthor !== "" || searchContent !== "" || searchForumTitle !== "" || searchCreatedAt !== "");
 	};
 
-	const searchData = (dataPage: IGroup[], dataAll: IGroup[]) => {
+	const searchData = (dataPage: IComment[], dataAll: IComment[]) => {
 		// verify searching
 		if (isSearching()) dataPage = dataAll;
-		if (searchAll !== "") dataPage = dataPage.filter((item) => keys(dataPage[0]).some(() => searchAllHelper(item, searchAll)));
+
+		if (tabIndex === 0) {
+			if (searchAll !== "") dataPage = dataPage.filter((item) => keys(dataPage[0]).some(() => searchAllHelper(item, searchAll)));
+		} else if (tabIndex === 1) {
+			if (searchAuthor !== "") dataPage = dataPage.filter((item) => item.author![0]?.username.toLowerCase().includes(searchAuthor.toLowerCase()));
+			if (searchContent !== "") dataPage = dataPage.filter((item) => item.content.toLowerCase().includes(searchContent.toLowerCase()));
+			if (searchForumTitle !== "") dataPage = dataPage.filter((item) => item.forumId![0]?.title.toLowerCase().includes(searchForumTitle.toLowerCase()));
+			if (searchCreatedAt !== "") dataPage = dataPage.filter((item) => formatDateWithTz(item.createdAt, tz).toLowerCase().includes(searchCreatedAt.toLowerCase()));
+		}
 
 		return dataPage;
 	};
 
-	const sortSearchData = (type: validGroupSort | null, dataPage: IGroup[], dataAll: IGroup[]) => {
+	const sortSearchData = (type: validCommentSort | null, dataPage: IComment[], dataAll: IComment[]) => {
 		if (!type) return searchData(dataPage, dataAll);
 
 		if (isSearching()) dataPage = dataAll.length > 0 ? dataAll : dataPage;
-		const sortMap: GroupSort = {
-			name: (a: IGroup, b: IGroup) => a.name.localeCompare(b.name),
-			description: (a: IGroup, b: IGroup) => a.description.localeCompare(b.description),
-			count: (a: IGroup, b: IGroup) => a.count - b.count,
-			createdAt: (a: IGroup, b: IGroup) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf(),
+		const sortMap: CommentSort = {
+			author: (a: IComment, b: IComment) => a.author![0]?.username.localeCompare(b.author![0]?.username),
+			content: (a: IComment, b: IComment) => a.content.localeCompare(b.content),
+			forum: (a: IComment, b: IComment) => a.forumId![0]?.title.localeCompare(b.forumId![0]?.title),
+			createdAt: (a: IComment, b: IComment) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf(),
 		};
 
 		// sort
@@ -127,7 +140,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 	// delete
 	const deleteData = async (_id: string) => {
 		try {
-			const req = await fetch(`${SERVER_V1}/group/${_id}`, {
+			const req = await fetch(`${SERVER_V1}/comment/${_id}`, {
 				method: "DELETE",
 				headers: {
 					"Content-Type": "application/json",
@@ -135,7 +148,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 				credentials: "include",
 			});
 
-			const { success, message }: GroupQRes = await req.json();
+			const { success, message }: CommentQRes = await req.json();
 			if (req.status === 200 && success) {
 				// slice data
 				setDataPage((prev) => {
@@ -158,7 +171,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 	const fillDataAll = async () => {
 		try {
 			setLoadingDataAll(true);
-			const req = await fetch(SERVER_V1 + `/group`, {
+			const req = await fetch(SERVER_V1 + `/comment?content=1`, {
 				method: "GET",
 				headers: {
 					"Content-Type": "application/json",
@@ -166,7 +179,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 				credentials: "include",
 			});
 
-			const { data, message }: GroupQRes = await req.json();
+			const { data, message }: CommentQRes = await req.json();
 			if (req.status !== 200) {
 				setLoadingDataAll(false);
 				return showNotification({ title: "Error indexing all data for search", message, color: "red" });
@@ -183,7 +196,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 	const fillData = async (perPage: number, curPageQ: number) => {
 		try {
 			setLoadingDataPage(true);
-			const req = await fetch(SERVER_V1 + `/group?perPage=${perPage}&page=${curPageQ}`, {
+			const req = await fetch(SERVER_V1 + `/comment?perPage=${perPage}&page=${curPageQ}&content=1`, {
 				method: "GET",
 				headers: {
 					"Content-Type": "application/json",
@@ -191,7 +204,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 				credentials: "include",
 			});
 
-			const { data, message, page, pages }: GroupQRes = await req.json();
+			const { data, message, page, pages }: CommentQRes = await req.json();
 			if (req.status !== 200) {
 				setLoadingDataPage(false);
 				return showNotification({ title: "Error getting page data", message, color: "red" });
@@ -213,6 +226,10 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 		// set to local state
 		setCurPage(params.get("page") ? parseInt(params.get("page") || "1") : 1);
 		setSearchAll(params.get("qAll") || "");
+		setSearchAuthor(params.get("author") || "");
+		setSearchContent(params.get("content") || "");
+		setSearchForumTitle(params.get("forum") || "");
+		setSearchCreatedAt(params.get("createdAt") || "");
 		setTabIndex(parseInt(params.get("tab") || "0"));
 	};
 
@@ -226,7 +243,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 
 	return (
 		<>
-			<TitleDashboard title="Group" hrefLink={`${props.pathname}/create`} hrefText="Add new" />
+			<TitleDashboard title="Comments" />
 
 			<div>
 				<Tabs value={tabIndex.toString() || "0"} onTabChange={handleTabChange}>
@@ -234,7 +251,10 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 						<Tabs.Tab value="0" color="green">
 							Search
 						</Tabs.Tab>
-						<Tabs.Tab value="1" color="blue">
+						<Tabs.Tab value="1" color="lime">
+							Advanced Search
+						</Tabs.Tab>
+						<Tabs.Tab value="2" color="blue">
 							Setting
 						</Tabs.Tab>
 					</Tabs.List>
@@ -255,9 +275,51 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 								/>
 							</Collapse>
 						</Tabs.Panel>
+
+						<Tabs.Panel value="1" pt="xs" className="dash-textinput-gap">
+							<Collapse in={tabIndex === 1}>
+								<Text color="dimmed">Search more accurately by searching for each field</Text>
+								<TextInput
+									placeholder="Search by author field"
+									name="author"
+									label="Author"
+									icon={<IconLego size={14} stroke={1.5} />}
+									value={searchAuthor}
+									onChange={(e) => handleInputQueryChange(e, setSearchAuthor, e.target.name)}
+									mt={16}
+								/>
+								<TextInput
+									placeholder="Search by content field"
+									name="content"
+									label="Content"
+									icon={<IconLicense size={14} stroke={1.5} />}
+									value={searchContent}
+									onChange={(e) => handleInputQueryChange(e, setSearchContent, e.target.name)}
+									mt={8}
+								/>
+								<TextInput
+									placeholder="Search by forum field"
+									name="forum"
+									label="Forum"
+									icon={<IconMessage size={14} stroke={1.5} />}
+									value={searchForumTitle}
+									onChange={(e) => handleInputQueryChange(e, setSearchForumTitle, e.target.name)}
+									mt={8}
+								/>
+								<TextInput
+									placeholder="Search by createdAt field"
+									label="Created At"
+									name="createdAt"
+									icon={<IconDeviceWatch size={14} stroke={1.5} />}
+									value={searchCreatedAt}
+									onChange={(e) => handleInputQueryChange(e, setSearchCreatedAt, e.target.name)}
+									mt={8}
+								/>
+							</Collapse>
+						</Tabs.Panel>
 					</div>
-					<Tabs.Panel value="1" pt="xs" className="dash-textinput-gap">
-						<Collapse in={tabIndex === 1}>
+					<Tabs.Panel value="2" pt="xs" className="dash-textinput-gap">
+						<Collapse in={tabIndex === 2}>
 							<Text color="dimmed">Customize data load setting</Text>
 
 							<NumberInput
@@ -302,39 +364,39 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 							<tr>
 								<Th
 									classes={classes}
-									sorted={sortBy === "name"}
+									sorted={sortBy === "author"}
 									reversed={reverseSortDirection}
 									onSort={() => {
-										if (sortBy === "name") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("name");
-									}}
-									width="20%"
-								>
-									Title
-								</Th>
-								<Th
-									classes={classes}
-									sorted={sortBy === "description"}
-									reversed={reverseSortDirection}
-									onSort={() => {
-										if (sortBy === "description") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("description");
-									}}
-									width="40%"
-								>
-									Description
-								</Th>
-								<Th
-									classes={classes}
-									sorted={sortBy === "description"}
-									reversed={reverseSortDirection}
-									onSort={() => {
-										if (sortBy === "description") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("description");
+										if (sortBy === "author") setReverseSortDirection(!reverseSortDirection);
+										setSortBy("author");
 									}}
 									width="15%"
 								>
-									User Count
+									Author
+								</Th>
+								<Th
+									classes={classes}
+									sorted={sortBy === "content"}
+									reversed={reverseSortDirection}
+									onSort={() => {
+										if (sortBy === "content") setReverseSortDirection(!reverseSortDirection);
+										setSortBy("content");
+									}}
+									width="40%"
+								>
+									Content
+								</Th>
+								<Th
+									classes={classes}
+									sorted={sortBy === "forum"}
+									reversed={reverseSortDirection}
+									onSort={() => {
+										if (sortBy === "forum") setReverseSortDirection(!reverseSortDirection);
+										setSortBy("forum");
+									}}
+									width="18%"
+								>
+									Forum
 								</Th>
 								<Th
 									classes={classes}
@@ -344,7 +406,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 										if (sortBy === "createdAt") setReverseSortDirection(!reverseSortDirection);
 										setSortBy("createdAt");
 									}}
-									width="20%"
+									width="17%"
 								>
 									Created At
 								</Th>
@@ -364,19 +426,23 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 								sortSearchData(sortBy, dataPage, dataAllPage).map((row) => (
 									<tr key={row._id}>
 										<td>
-											<Link href={`${props.pathname}/${row._id}`}>
+											<Link href={`user/${row._id}`}>
 												<a>
-													<Text variant="link">{row.name}</Text>
+													<Text variant="link">{row.author![0] ? row.author![0].username : "Deleted"}</Text>
 												</a>
 											</Link>
 										</td>
-										<td>{row.description}</td>
+										<td>{row.content}</td>
 										<td>
-											<Link href={`user?tab=1&group=${row.name.replaceAll(" ", "+")}`}>
-												<a>
-													<Text variant="link">{row.count}</Text>
-												</a>
-											</Link>
+											{row.forumId && row.forumId[0] ? (
+												<Link href={`forum/${row.forumId[0]._id}`}>
+													<a>
+														<Text variant="link">{row.forumId![0] ? row.forumId![0].title : "Deleted"}</Text>
+													</a>
+												</Link>
+											) : (
+												"Deleted"
+											)}
 										</td>
 										<td>
 											{row.updatedAt !== row.createdAt ? (
@@ -389,10 +455,10 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 										</td>
 										<td style={{ padding: "1rem .5rem" }}>
 											<div className="dash-flex">
-												<Link href={`${props.pathname}/${row._id}`}>
+												<Link href={`/forum/${row.forumId[0].title}-${row.forumId[0]._id}#comment-${row._id}`}>
 													<a>
 														<ActionIcon>
-															<IconEdit size={14} stroke={1.5} />
+															<IconExternalLink size={14} stroke={1.5} />
 														</ActionIcon>
 													</a>
 												</Link>
