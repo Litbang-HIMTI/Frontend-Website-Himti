@@ -145,8 +145,8 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
-					name,
-					description,
+					name: name.trim(),
+					description: description.trim(),
 				}),
 			});
 			const { message } = await req.json();

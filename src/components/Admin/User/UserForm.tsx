@@ -180,13 +180,13 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
-					username,
-					first_name,
-					last_name,
-					email,
+					username: username.trim(),
+					first_name: first_name.trim(),
+					last_name: last_name.trim(),
+					email: email.trim(),
 					role,
 					group,
-					password,
+					password: password.trim(),
 				}),
 			});
 			const { message } = await req.json();
@@ -224,7 +224,7 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
-					password,
+					password: password.trim(),
 				}),
 			});
 			const { message } = await req.json();

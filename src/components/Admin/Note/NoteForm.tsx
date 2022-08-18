@@ -154,8 +154,8 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
-					title,
-					content,
+					title: title.trim(),
+					content: content.trim(),
 				}),
 			});
 			const { message } = await req.json();
