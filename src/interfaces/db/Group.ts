@@ -3,9 +3,9 @@ export interface IGroup {
 	__v: number;
 	name: string;
 	description: string;
+	count: number;
 	createdAt: Date;
 	updatedAt: Date;
-	count: number;
 }
 
 export type validGroupSort = "name" | "description" | "count" | "createdAt";

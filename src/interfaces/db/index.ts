@@ -4,3 +4,6 @@ export * from "./Note";
 export * from "./Shortlink";
 export * from "./Stats";
 export * from "./User";
+export * from "./Forum_Category";
+export * from "./Forum";
+export * from "./Comment";
