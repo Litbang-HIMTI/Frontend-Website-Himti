@@ -78,8 +78,8 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 	const handleDelete = (id: string) => {
 		openConfirmModal({
 			title: "Delete confirmation",
-			children: <Text size="sm">Are you sure you want to delete this note? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
-			labels: { confirm: "Yes, delete note", cancel: "No, cancel" },
+			children: <Text size="sm">Are you sure you want to delete this comment? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
+			labels: { confirm: "Yes, delete comment", cancel: "No, cancel" },
 			confirmProps: { color: "red" },
 			onCancel: () => {},
 			onConfirm: () => deleteData(id),
