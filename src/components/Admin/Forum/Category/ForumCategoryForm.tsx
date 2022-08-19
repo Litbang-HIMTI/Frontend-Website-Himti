@@ -5,10 +5,10 @@ import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { Box, Button, createStyles, Group, LoadingOverlay, TextInput, Text, Textarea, Chip } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons";
-import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { SERVER_V1, urlSafeRegex } from "../../../helper";
-import { IGroup } from "../../../interfaces/db";
-import { TitleDashboard } from "../../Utils/Dashboard";
+import { IDashboardProps } from "../../../../interfaces/props/Dashboard";
+import { SERVER_V1, urlSafeRegex } from "../../../../helper";
+import { IForumCategory } from "../../../../interfaces/db";
+import { TitleDashboard } from "../../../Utils/Dashboard";
 import { openConfirmModal } from "@mantine/modals";
 import Link from "next/link";
 
@@ -28,11 +28,11 @@ const useStyles = createStyles((theme) => ({
 	},
 }));
 
-interface IGroupFormProps extends IDashboardProps {
-	group?: IGroup;
+interface IForumCategoryFormProps extends IDashboardProps {
+	forum_category?: IForumCategory;
 }
 
-export const GroupForm: NextPage<IGroupFormProps> = (props) => {
+export const ForumCategoryForm: NextPage<IForumCategoryFormProps> = (props) => {
 	const { classes } = useStyles();
 	const router = useRouter();
 	const [loading, setLoading] = useState<boolean>(false);
@@ -80,8 +80,8 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 	const handleDelete = () => {
 		openConfirmModal({
 			title: "Delete confirmation",
-			children: <Text size="sm">Are you sure you want to delete this group? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
-			labels: { confirm: "Yes, delete group", cancel: "No, cancel" },
+			children: <Text size="sm">Are you sure you want to delete this forum category? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
+			labels: { confirm: "Yes, delete forum category", cancel: "No, cancel" },
 			confirmProps: { color: "red" },
 			onCancel: () => {},
 			onConfirm: () => deleteForm(),
@@ -92,7 +92,7 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 		setLoading(true);
 		setUnsavedChanges(false);
 		try {
-			const req = await fetch(`${SERVER_V1}/group/${props.group!._id}`, {
+			const req = await fetch(`${SERVER_V1}/forum_category/${props.forum_category!._id}`, {
 				method: "DELETE",
 				headers: {
 					"Content-Type": "application/json",
@@ -103,9 +103,9 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 
 			if (req.status === 200) {
 				setSubmitted(true);
-				showNotification({ title: "Group deleted", message: message + ". Redirecting...", disallowClose: true });
+				showNotification({ title: "Forum category deleted", message: message + ". Redirecting...", disallowClose: true });
 
-				setTimeout(() => router.push("../group"), 1500);
+				setTimeout(() => router.push("../category"), 1500);
 			} else {
 				setUnsavedChanges(true);
 				setLoading(false);
@@ -121,12 +121,12 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 	const resetForm = () => {
 		setSubmitted(false);
 
-		if (!props.group) {
+		if (!props.forum_category) {
 			forms.reset();
 		} else {
 			forms.setValues({
-				name: props.group.name,
-				description: props.group.description,
+				name: props.forum_category.name,
+				description: props.forum_category.description,
 			});
 		}
 	};
@@ -139,8 +139,8 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 
 		try {
 			if (description.trim().length < 10) throw new Error("Description is required (minimal 10 character");
-			const req = await fetch(`${SERVER_V1}/${props.group ? "group/" + props.group._id : "group"}`, {
-				method: props.group ? "PUT" : "POST",
+			const req = await fetch(`${SERVER_V1}/${props.forum_category ? "forum_category/" + props.forum_category._id : "forum_category"}`, {
+				method: props.forum_category ? "PUT" : "POST",
 				credentials: "include",
 				headers: {
 					"Content-Type": "application/json",
@@ -156,7 +156,7 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 				setSubmitted(true);
 				showNotification({ title: "Success", message: message + ". Redirecting...", disallowClose: true });
 
-				setTimeout(() => router.push("../group"), 1500);
+				setTimeout(() => router.push("../category"), 1500);
 			} else {
 				setUnsavedChanges(true);
 				setLoading(false);
@@ -173,11 +173,11 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 	// page open
 	useEffect(() => {
 		if (!pageOpenFetched) {
-			if (props.group) {
+			if (props.forum_category) {
 				// edit mode
 				forms.setValues({
-					name: props.group.name,
-					description: props.group.description,
+					name: props.forum_category.name,
+					description: props.forum_category.description,
 				});
 			} else {
 				// create mode
@@ -216,7 +216,7 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 
 	return (
 		<>
-			<TitleDashboard title={props.group ? "View/Edit Group" : "Add Group"} hrefLink="../group" hrefText="Back to groups" HrefIcon={IconArrowLeft} />
+			<TitleDashboard title={props.forum_category ? "View/Edit Forum Category" : "Add Forum Category"} hrefLink="../categoru" hrefText="Back to Forum Categories" HrefIcon={IconArrowLeft} />
 
 			<Box component="div" sx={{ position: "relative" }}>
 				<LoadingOverlay visible={loading} overlayBlur={3} />
@@ -225,9 +225,9 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 						mt="md"
 						required
 						label="Name"
-						placeholder="Group name"
+						placeholder="Forum Category Name"
 						{...forms.getInputProps("name")}
-						description={`Group name, Characters allowed are Alpha numeric, underscore, hyphen, space, ', ", comma, and @ regex`}
+						description={`Forum category name, Characters allowed are Alpha numeric, underscore, hyphen, space, ', ", comma, and @ regex`}
 						disabled={!editable}
 					/>
 
@@ -235,26 +235,26 @@ export const GroupForm: NextPage<IGroupFormProps> = (props) => {
 						mt="md"
 						required
 						label="Description"
-						placeholder="Group description"
+						placeholder="Description"
 						{...forms.getInputProps("description")}
-						description={`Group description. Minimum character 10`}
+						description={`Forum category description. Minimum character 10`}
 						disabled={!editable}
 						minLength={10}
 					/>
 
 					<Group>
-						{props.group && (
-							<Link href={`../user?tab=1&group=${props.group!.name.replaceAll(" ", "+")}`}>
+						{props.forum_category && (
+							<Link href={`../../forum?tab=1&category=${props.forum_category!.name.replaceAll(" ", "+")}`}>
 								<a>
 									<Chip mt="md" checked={false}>
-										Click here to view all group members
+										Click here to view all post with this category
 									</Chip>
 								</a>
 							</Link>
 						)}
 
 						<Group position="right" mt="md" ml="auto">
-							{props.group ? (
+							{props.forum_category ? (
 								<>
 									<Button color="red" onClick={handleDelete}>
 										Delete

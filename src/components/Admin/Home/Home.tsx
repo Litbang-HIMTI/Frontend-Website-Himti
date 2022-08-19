@@ -48,13 +48,13 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 			});
 
 			if (extraData.status === 200) {
-				const extraJson = await extraData.json();
+				const { data } = await extraData.json();
 
 				// index 6 shortlink
 				setStatsData((prev) => {
 					const newData = [...prev];
 					newData[index].loading = false;
-					newData[index].extraData = "Total click : " + extraJson.data.clickCount;
+					newData[index].extraData = "Total click : " + data;
 					return newData;
 				});
 			}
@@ -62,7 +62,7 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 			setStatsData((prev) => {
 				const newDatas = [...prev];
 				newDatas[index].loading = false;
-				newDatas[index].extraData = "Total click : fail to load!";
+				newDatas[index].extraData = "Total click : Failed to fetch!";
 				newDatas[index].loadFail = true;
 				return newDatas;
 			});
@@ -83,7 +83,7 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 		if (dataElProps[index].skipFetch) return; // skip dupe. blog_revision and event_revision is returned in the same route. Index Refer to dataElProps
 
 		try {
-			const fetched = await fetch(SERVER_V1 + dataElProps[index].fetchLink, {
+			const req = await fetch(SERVER_V1 + dataElProps[index].fetchLink, {
 				method: "GET",
 				headers: {
 					"Content-Type": "application/json",
@@ -91,7 +91,7 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 				credentials: "include",
 			});
 
-			if (fetched.status !== 200)
+			if (req.status !== 200)
 				return setStatsData((prev) => {
 					const newDatas = [...prev];
 					newDatas[index].loading = false;
@@ -99,7 +99,7 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 					return newDatas;
 				});
 
-			const { data } = await fetched.json();
+			const { data } = await req.json();
 			setStatsData((prev) => {
 				const newData = [...prev];
 

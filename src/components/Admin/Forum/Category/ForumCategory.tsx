@@ -226,7 +226,7 @@ export const ForumCategory: NextPage<IDashboardProps> = (props) => {
 
 	return (
 		<>
-			<TitleDashboard title="Forum Category" hrefLink={`${props.pathname}/create`} hrefText="Add new" />
+			<TitleDashboard title="Forum Category" hrefLink={`${props.pathname?.split("?")[0]}/create`} hrefText="Add new" />
 
 			<div>
 				<Tabs value={tabIndex.toString() || "0"} onTabChange={handleTabChange}>
@@ -334,7 +334,7 @@ export const ForumCategory: NextPage<IDashboardProps> = (props) => {
 									}}
 									width="15%"
 								>
-									User Count
+									Post Count
 								</Th>
 								<Th
 									classes={classes}
@@ -364,7 +364,7 @@ export const ForumCategory: NextPage<IDashboardProps> = (props) => {
 								sortSearchData(sortBy, dataPage, dataAllPage).map((row) => (
 									<tr key={row._id}>
 										<td>
-											<Link href={`${props.pathname}/${row._id}`}>
+											<Link href={`${props.pathname?.split("?")[0]}/${row._id}`}>
 												<a>
 													<Text variant="link">{row.name}</Text>
 												</a>
@@ -389,7 +389,7 @@ export const ForumCategory: NextPage<IDashboardProps> = (props) => {
 										</td>
 										<td style={{ padding: "1rem .5rem" }}>
 											<div className="dash-flex">
-												<Link href={`${props.pathname}/${row._id}`}>
+												<Link href={`${props.pathname?.split("?")[0]}/${row._id}`}>
 													<a>
 														<ActionIcon>
 															<IconEdit size={14} stroke={1.5} />

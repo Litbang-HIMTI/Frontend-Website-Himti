@@ -514,7 +514,7 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 							) : (
 								<>
 									<tr>
-										<td colSpan={5}>
+										<td colSpan={6}>
 											<Text weight={500} align="center">
 												Nothing found
 											</Text>
