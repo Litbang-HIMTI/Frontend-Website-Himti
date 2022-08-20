@@ -2,6 +2,9 @@ import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import {
 	Table,
 	ScrollArea,
@@ -20,6 +23,7 @@ import {
 	NumberInput,
 	TabsValue,
 	Pagination,
+	TypographyStylesProvider,
 } from "@mantine/core";
 import { keys } from "@mantine/utils";
 import { showNotification } from "@mantine/notifications";
@@ -433,7 +437,11 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 												</a>
 											</Link>
 										</td>
-										<td dangerouslySetInnerHTML={{ __html: row.content }}></td>
+										<td>
+											<TypographyStylesProvider>
+												<ReactMarkdown children={row.content} rehypePlugins={[rehypeAutolinkHeadings, rehypeRaw]} />
+											</TypographyStylesProvider>
+										</td>
 										<td>
 											{row.editedBy && row.editedBy[0] ? (
 												<>

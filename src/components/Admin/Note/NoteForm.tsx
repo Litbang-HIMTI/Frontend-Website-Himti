@@ -8,7 +8,7 @@ import { IconArrowLeft } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { SERVER_V1, urlSafeRegex } from "../../../helper";
 import { INote } from "../../../interfaces/db";
-import { RTE, TitleDashboard } from "../../Utils/Dashboard";
+import { MDE, TitleDashboard } from "../../Utils/Dashboard";
 import { openConfirmModal } from "@mantine/modals";
 
 const useStyles = createStyles((theme) => ({
@@ -135,9 +135,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 		setUnsavedChanges(false);
 		if (submitted) return;
 		const { title } = forms.values;
-		const editor = document.getElementsByClassName("ql-editor")[0] as HTMLDivElement;
-
-		if (editor.innerText.length - 1 < 25)
+		if (content.length < 25)
 			showNotification({
 				title: "Error",
 				message: "Note must be at least 25 characters long",
@@ -219,7 +217,6 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 
 	return (
 		<>
-			{/* <MConfirmContinue opened={modalHandle.opened} closeFunc={modalHandle.closeFunc} confirmFunc={modalHandle.confirmFunc} /> */}
 			<TitleDashboard
 				title={props.note ? "View/Edit Note" : "Add Note"}
 				hrefLink={router.query.fromDashHome === "true" ? "../" : "../notes"}
@@ -249,18 +246,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 							Must be at least 25 characters long.
 						</Text>
 					</Text>
-					<RTE
-						content={content}
-						setContent={setContent}
-						editable={!editable}
-						controls={[
-							["bold", "italic", "underline", "link", "blockquote", "codeBlock", "clean"],
-							["unorderedList", "orderedList"],
-							["sup", "sub"],
-							["image", "video"],
-						]}
-						formats={["bold", "italic", "underline", "link", "blockquote", "code-block", "clean", "list", "script", "image", "video"]}
-					/>
+					<MDE content={content} setContent={setContent} editable={!editable} />
 					<Group position="right" mt="md">
 						{props.note ? (
 							<>

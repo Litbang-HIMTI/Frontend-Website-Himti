@@ -1,7 +1,7 @@
 import { showNotification } from "@mantine/notifications";
 import { ToolbarControl } from "@mantine/rte/lib/components/Toolbar/controls";
 import { useCallback } from "react";
-import { SERVER_LOCAL_V1 } from "../../../helper";
+import { SERVER_LOCAL_V1 } from "../../../../helper";
 import RichText from "./RTE_Import";
 
 interface I_RTE {

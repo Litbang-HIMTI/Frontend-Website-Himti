@@ -9,6 +9,9 @@ import { SERVER_V1 } from "../../../helper/constants";
 import { INote } from "../../../interfaces/db/Note";
 import { showNotification } from "@mantine/notifications";
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
 const useStyles = createStyles((theme) => ({
 	item: {
@@ -159,7 +162,7 @@ export const NoteDragDrop: NextPage<IDashboardProps> = (props) => {
 														<Text>{item.title}</Text>
 														<TypographyStylesProvider>
 															<Text color="dimmed">
-																<div dangerouslySetInnerHTML={{ __html: item.content }} />
+																<ReactMarkdown children={item.content} rehypePlugins={[rehypeRaw, rehypeAutolinkHeadings]} />
 															</Text>
 														</TypographyStylesProvider>
 													</div>

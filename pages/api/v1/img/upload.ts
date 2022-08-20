@@ -1,7 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-// const cloudinary = require("cloudinary").v2;
 import cloudinary from "cloudinary";
 
+export const config = {
+	api: {
+		bodyParser: {
+			sizeLimit: "4mb", // Set desired value here
+		},
+	},
+};
 type Data = {
 	message: string;
 	success: boolean;
@@ -34,7 +40,6 @@ export default async (req: NextApiRequest, res: NextApiResponse<Data>) => {
 	const image = body.file;
 
 	const uploadRes = await cloudinary.v2.uploader.upload(image, {
-		access_mode: "authenticated",
 		upload_preset: process.env.CLOUDINARY_UPLOAD_PRESET!,
 	});
 
