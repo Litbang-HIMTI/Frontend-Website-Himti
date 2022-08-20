@@ -2,9 +2,6 @@ import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import rehypeRaw from "rehype-raw";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import {
 	Table,
 	ScrollArea,
@@ -34,6 +31,7 @@ import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { INote, validNoteSort, NoteSort, NoteQRes } from "../../../interfaces/db";
 import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../helper";
 import { Th, useTableStyles, TitleDashboard } from "../../Utils/Dashboard";
+import { MDRender } from "../../Utils/MDRender";
 
 export const Note: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useTableStyles();
@@ -439,7 +437,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 										</td>
 										<td>
 											<TypographyStylesProvider>
-												<ReactMarkdown children={row.content} rehypePlugins={[rehypeAutolinkHeadings, rehypeRaw]} />
+												<MDRender content={row.content} />
 											</TypographyStylesProvider>
 										</td>
 										<td>
