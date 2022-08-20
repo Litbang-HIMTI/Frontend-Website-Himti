@@ -1,5 +1,5 @@
-import { ChangeEvent, useCallback, useState } from "react";
-import { ActionIcon, Button, Group, LoadingOverlay, Text, TextInput, Tooltip, useMantineColorScheme, useMantineTheme } from "@mantine/core";
+import { ChangeEvent, useCallback } from "react";
+import { ActionIcon, Button, Group, Text, TextInput, Tooltip, useMantineColorScheme, useMantineTheme } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
@@ -8,7 +8,7 @@ import { SERVER_LOCAL_V1 } from "../../../../helper";
 import { MDEditor } from "./MDE_Import";
 import { closeAllModals, openModal } from "@mantine/modals";
 import { Dropzone, IMAGE_MIME_TYPE } from "@mantine/dropzone";
-import { IconUpload, IconPhoto, IconX } from "@tabler/icons";
+import { IconUpload, IconPhoto, IconX, IconVideo, IconCirclePlus } from "@tabler/icons";
 import rehypeSanitize from "rehype-sanitize";
 
 interface I_RTE {
@@ -71,7 +71,7 @@ export const MDE = ({ content, setContent, editable }: I_RTE) => {
 							files.forEach(async (file) => {
 								const url = await handleImageUpload(file);
 								setContent((content: string) => {
-									return content + `![alt text](${url})\n`;
+									return content + `\n![alt text](${url})\n`;
 								});
 							});
 						}}
@@ -116,7 +116,55 @@ export const MDE = ({ content, setContent, editable }: I_RTE) => {
 										<IconPhoto
 											onClick={() => {
 												setContent((content: string) => {
-													return content + `![alt text](${img_url_input})`;
+													return content + `\n![alt text](${img_url_input})\n`;
+												});
+											}}
+										/>
+									</ActionIcon>
+								</Tooltip>
+							</>
+						}
+					/>
+
+					<Button fullWidth onClick={() => closeAllModals()} mt="md">
+						Close
+					</Button>
+				</div>
+			),
+		});
+	};
+
+	const openDialogYTUrl = () => {
+		let yt_url_input = "",
+			re = /(https?:\/\/)?(((m|www)\.)?(youtube(-nocookie)?|youtube.googleapis)\.com.*(v\/|v=|vi=|vi\/|e\/|embed\/|user\/.*\/u\/\d+\/)|youtu\.be\/)([_0-9a-z-]+)/i;
+		openModal({
+			title: "Youtube URL",
+			children: (
+				<div>
+					<TextInput
+						placeholder="https://www.youtube.com/watch?v=123456789"
+						label="Paste Youtube URL here"
+						onChange={(e: ChangeEvent<HTMLInputElement>) => {
+							yt_url_input = e.target.value;
+						}}
+						rightSection={
+							<>
+								<Tooltip label="Add to textfield">
+									<ActionIcon>
+										<IconCirclePlus
+											onClick={() => {
+												const matchedId = yt_url_input.match(re);
+
+												if (!matchedId || matchedId.length < 8) {
+													return showNotification({ title: "Error", message: `Invalid Youtube URL`, color: "red", disallowClose: true });
+												}
+
+												setContent((content: string) => {
+													return (
+														content +
+														`\n\n<iframe type="text/html" width="420" height="340" src="http://www.youtube.com/embed/${matchedId[8]}` +
+														`?enablejsapi=1&origin=${window ? window.location.host : ""}" frameborder="0" title="Youtube video embed" />\n\n`
+													);
 												});
 											}}
 										/>
@@ -164,13 +212,25 @@ export const MDE = ({ content, setContent, editable }: I_RTE) => {
 											<IconPhoto size={13} />
 										</Button>
 									</Tooltip>
+									<Tooltip label="Embed youtube video" withinPortal>
+										<Button
+											disabled={disabled}
+											onClick={() => {
+												openDialogYTUrl();
+											}}
+										>
+											<IconVideo size={13} />
+										</Button>
+									</Tooltip>
 								</>
 							);
 						}
 					},
 				}}
 				previewOptions={{
-					rehypePlugins: [[rehypeSanitize]],
+					rehypePlugins: [
+						// [rehypeSanitize] // disable iframe
+					],
 				}}
 			/>
 		</div>

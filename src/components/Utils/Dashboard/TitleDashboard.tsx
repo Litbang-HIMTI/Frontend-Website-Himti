@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 export const TitleDashboard = ({ title, hrefLink, hrefText, HrefIcon = IconFilePlus, mb }: { title: string; hrefLink?: string; hrefText?: string; HrefIcon?: TablerIcon; mb?: string }) => {
 	const router = useRouter();
-	const [links, setLinks] = useState<any[]>([]);
+	const [links, setLinks] = useState<string[]>([]);
 	const getPath = () => {
 		return router.asPath
 			.split("?")[0]
