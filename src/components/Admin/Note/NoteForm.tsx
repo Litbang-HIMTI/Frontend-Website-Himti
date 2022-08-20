@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useForm } from "@mantine/form";
@@ -8,8 +8,7 @@ import { IconArrowLeft } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { SERVER_V1, urlSafeRegex } from "../../../helper";
 import { INote } from "../../../interfaces/db";
-import RichText from "../../Utils/Dashboard/RichText";
-import { TitleDashboard } from "../../Utils/Dashboard";
+import { RTE, TitleDashboard } from "../../Utils/Dashboard";
 import { openConfirmModal } from "@mantine/modals";
 
 const useStyles = createStyles((theme) => ({
@@ -250,18 +249,17 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 							Must be at least 25 characters long.
 						</Text>
 					</Text>
-					<RichText
-						id="content"
-						placeholder="Content..."
-						value={content}
-						onChange={setContent}
-						mt="xs"
+					<RTE
+						content={content}
+						setContent={setContent}
+						editable={!editable}
 						controls={[
 							["bold", "italic", "underline", "link", "blockquote", "codeBlock", "clean"],
-							["unorderedList", "orderedList", "h1", "h2", "h3"],
+							["unorderedList", "orderedList"],
 							["sup", "sub"],
+							["image", "video"],
 						]}
-						readOnly={!editable}
+						formats={["bold", "italic", "underline", "link", "blockquote", "code-block", "clean", "list", "script", "image", "video"]}
 					/>
 					<Group position="right" mt="md">
 						{props.note ? (

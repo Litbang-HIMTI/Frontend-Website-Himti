@@ -1,6 +1,6 @@
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
-import { ActionIcon, createStyles, LoadingOverlay, Text } from "@mantine/core";
+import { ActionIcon, createStyles, LoadingOverlay, Text, TypographyStylesProvider } from "@mantine/core";
 import { useId, useListState } from "@mantine/hooks";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { IconGripVertical, IconEdit, IconPlus } from "@tabler/icons";
@@ -157,7 +157,11 @@ export const NoteDragDrop: NextPage<IDashboardProps> = (props) => {
 													</div>
 													<div>
 														<Text>{item.title}</Text>
-														<Text color="dimmed" size="sm" dangerouslySetInnerHTML={{ __html: item.content }}></Text>
+														<TypographyStylesProvider>
+															<Text color="dimmed">
+																<div dangerouslySetInnerHTML={{ __html: item.content }} />
+															</Text>
+														</TypographyStylesProvider>
 													</div>
 
 													<div className={classes.editIcon}>
