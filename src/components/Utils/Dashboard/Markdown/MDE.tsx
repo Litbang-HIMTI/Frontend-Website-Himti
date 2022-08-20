@@ -162,8 +162,8 @@ export const MDE = ({ content, setContent, editable }: I_RTE) => {
 												setContent((content: string) => {
 													return (
 														content +
-														`\n\n<iframe type="text/html" width="420" height="340" src="http://www.youtube.com/embed/${matchedId[8]}` +
-														`?enablejsapi=1&origin=${window ? window.location.host : ""}" frameborder="0" title="Youtube video embed" />\n\n`
+														`\n\n<iframe class="ql-video" type="text/html" src="http://www.youtube.com/embed/${matchedId[8]}` +
+														`?enablejsapi=1&origin=${window ? window.location.host : ""}" frameborder="0" title="Youtube video embed" style="width: 90%; height: 400px;"/>\n\n`
 													);
 												});
 											}}
