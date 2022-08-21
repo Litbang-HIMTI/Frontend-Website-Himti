@@ -2,6 +2,7 @@ import { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { createStyles, Title, Text, Button, Container, Group } from "@mantine/core";
+import { useRouter } from "next/router";
 
 const useStyles = createStyles((theme) => ({
 	root: {
@@ -43,6 +44,7 @@ const useStyles = createStyles((theme) => ({
 
 const PageNotFound: NextPage = (props) => {
 	const { classes } = useStyles();
+	const router = useRouter();
 
 	return (
 		<>
@@ -58,8 +60,11 @@ const PageNotFound: NextPage = (props) => {
 					You may have mistyped the address, or the page has been moved to another URL.
 				</Text>
 				<Group position="center">
+					<Button size="md" color="green" onClick={() => router.back()}>
+						Go back
+					</Button>
 					<Link href="/">
-						<Button size="md">Take me back to home page</Button>
+						<Button size="md">Take me to home page</Button>
 					</Link>
 				</Group>
 			</Container>

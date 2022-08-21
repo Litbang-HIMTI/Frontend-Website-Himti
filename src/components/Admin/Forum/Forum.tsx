@@ -267,7 +267,7 @@ export const Forum: NextPage<IDashboardProps> = (props) => {
 		// set to local state
 		setCurPage(params.get("page") ? parseInt(params.get("page") || "1") : 1);
 		setSearchAll(params.get("qAll") || "");
-		setSearchTitle(params.get("username") || "");
+		setSearchTitle(params.get("title") || "");
 		setSearchCategory(params.get("category") || "");
 		setSearchAuthor(params.get("author") || "");
 		setSearchCommentCount(params.get("commentCount") || "");
@@ -288,7 +288,7 @@ export const Forum: NextPage<IDashboardProps> = (props) => {
 
 	return (
 		<>
-			<TitleDashboard title="User" hrefLink={`${props.pathname?.split("?")[0]}/create`} hrefText="Add new" />
+			<TitleDashboard title="Forum Posts" hrefLink={`${props.pathname?.split("?")[0]}/create`} hrefText="Add new" />
 			<div>
 				<Tabs value={tabIndex.toString() || "0"} onTabChange={handleTabChange}>
 					<Tabs.List>

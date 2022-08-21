@@ -367,7 +367,7 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 							window.open(`../group/create?name=${q}`, "_blank");
 							return "";
 						}}
-						maxDropdownHeight={160}
+						maxDropdownHeight={300}
 					/>
 
 					<MultiSelect

@@ -3,13 +3,14 @@ import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
-import { Box, Button, createStyles, Group, LoadingOverlay, TextInput, Text } from "@mantine/core";
+import { Box, Button, createStyles, Group, LoadingOverlay, TextInput, Text, Select, Checkbox } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { SERVER_V1, urlSafeRegex } from "../../../helper";
-import { INote } from "../../../interfaces/db";
+import { ForumCategoryQRes, IForum, INote } from "../../../interfaces/db";
 import { MDE, TitleDashboard } from "../../Utils/Dashboard";
 import { openConfirmModal } from "@mantine/modals";
+import { ISelect } from "../../../interfaces/input";
 
 const useStyles = createStyles((theme) => ({
 	buttonCancel: {
@@ -28,10 +29,10 @@ const useStyles = createStyles((theme) => ({
 }));
 
 interface INoteFormProps extends IDashboardProps {
-	note?: INote;
+	forum?: IForum;
 }
 
-export const NoteForm: NextPage<INoteFormProps> = (props) => {
+export const ForumForm: NextPage<INoteFormProps> = (props) => {
 	const { classes } = useStyles();
 	const router = useRouter();
 	const [loading, setLoading] = useState<boolean>(false);
@@ -43,6 +44,10 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 	const forms = useForm({
 		initialValues: {
 			title: "",
+			category: "",
+			locked: false,
+			pinned: false,
+			showAtHome: false,
 		},
 
 		validate: {
@@ -51,6 +56,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 		},
 	});
 	const [content, setContent] = useState("");
+	const [categoryListData, setCategoryListData] = useState<ISelect[]>([{ label: "Reload category data", value: "reload", group: "Utility" }]);
 
 	// ------------------------------------------------------------
 	// handler
@@ -77,8 +83,8 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 	const handleDelete = () => {
 		openConfirmModal({
 			title: "Delete confirmation",
-			children: <Text size="sm">Are you sure you want to delete this note? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
-			labels: { confirm: "Yes, delete note", cancel: "No, cancel" },
+			children: <Text size="sm">Are you sure you want to delete this forum post? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
+			labels: { confirm: "Yes, delete forum post", cancel: "No, cancel" },
 			confirmProps: { color: "red" },
 			onCancel: () => {},
 			onConfirm: () => deleteForm(),
@@ -89,7 +95,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 		setLoading(true);
 		setUnsavedChanges(false);
 		try {
-			const req = await fetch(`${SERVER_V1}/note/${props.note!._id}`, {
+			const req = await fetch(`${SERVER_V1}/forum/${props.forum!._id}`, {
 				method: "DELETE",
 				headers: {
 					"Content-Type": "application/json",
@@ -100,10 +106,8 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 
 			if (req.status === 200) {
 				setSubmitted(true);
-				showNotification({ title: "Note deleted", message: message + ". Redirecting...", disallowClose: true });
-
-				const { fromDashHome } = router.query;
-				setTimeout(() => router.push(fromDashHome === "true" ? "../" : "../note"), 1500);
+				showNotification({ title: "Forum post deleted", message: message + ". Redirecting...", disallowClose: true });
+				setTimeout(() => router.push("../forum"), 1500);
 			} else {
 				setUnsavedChanges(true);
 				setLoading(false);
@@ -119,14 +123,18 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 	const resetForm = () => {
 		setSubmitted(false);
 
-		if (!props.note) {
+		if (!props.forum) {
 			forms.reset();
 			setContent("");
 		} else {
 			forms.setValues({
-				title: props.note.title,
+				title: props.forum.title,
+				category: props.forum.category[0] ? props.forum.category[0]._id : "",
+				locked: props.forum.locked,
+				pinned: props.forum.pinned,
+				showAtHome: props.forum.showAtHome,
 			});
-			setContent(props.note.content);
+			setContent(props.forum.content);
 		}
 	};
 
@@ -134,11 +142,13 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 		setLoading(true);
 		setUnsavedChanges(false);
 		if (submitted) return;
-		const { title } = forms.values;
+		const { title, category, locked, pinned, showAtHome } = forms.values;
+
 		try {
+			if (category.length === 0) throw new Error("Category is required");
 			if (content.length < 15) throw new Error("Content is too short. Minimum length is 15 characters.");
-			const req = await fetch(`${SERVER_V1}/${props.note ? "note/" + props.note._id : "note"}`, {
-				method: props.note ? "PUT" : "POST",
+			const req = await fetch(`${SERVER_V1}/${props.forum ? "forum/" + props.forum._id : "forum"}`, {
+				method: props.forum ? "PUT" : "POST",
 				credentials: "include",
 				headers: {
 					"Content-Type": "application/json",
@@ -146,6 +156,10 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 				body: JSON.stringify({
 					title: title.trim(),
 					content: content.trim(),
+					category,
+					locked,
+					pinned,
+					showAtHome,
 				}),
 			});
 			const { message } = await req.json();
@@ -155,7 +169,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 				showNotification({ title: "Success", message: message + ". Redirecting...", disallowClose: true });
 
 				const { fromDashHome } = router.query;
-				setTimeout(() => router.push(fromDashHome === "true" ? "../" : "../note"), 1500);
+				setTimeout(() => router.push(fromDashHome === "true" ? "../" : "../forum"), 1500);
 			} else {
 				setUnsavedChanges(true);
 				setLoading(false);
@@ -168,16 +182,52 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 		}
 	};
 
+	const fetchCategories = async () => {
+		showNotification({ title: "Loading categories", message: "Please wait...", disallowClose: true, autoClose: 1000 });
+		try {
+			const req = await fetch(`${SERVER_V1}/forum_category`, {
+				method: "GET",
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/json",
+				},
+			});
+			const { message, data }: ForumCategoryQRes = await req.json();
+
+			if (req.status === 200) {
+				setCategoryListData((prev) => {
+					const newFetch = data.map((group) => ({ label: group.name, value: group._id, group: "Available" }));
+					const newData = [...prev, ...newFetch];
+
+					// remove dupe
+					const unique = newData.filter((v, i, a) => a.findIndex((t) => t.value === v.value) === i);
+					return unique;
+				});
+
+				showNotification({ title: "Success", message, disallowClose: false, autoClose: 1000 });
+			} else {
+				showNotification({ title: "Error", message, disallowClose: true, color: "red" });
+			}
+		} catch (error: any) {
+			showNotification({ title: "Error", message: error.message, disallowClose: true, color: "red" });
+		}
+	};
+
 	// ------------------------------------------------------------
 	// page open
 	useEffect(() => {
 		if (!pageOpenFetched) {
-			if (props.note) {
+			fetchCategories();
+			if (props.forum) {
 				// edit mode
 				forms.setValues({
-					title: props.note.title,
+					title: props.forum.title,
+					category: props.forum.category[0] ? props.forum.category[0]._id : "",
+					locked: props.forum.locked,
+					pinned: props.forum.pinned,
+					showAtHome: props.forum.showAtHome,
 				});
-				setContent(props.note.content);
+				setContent(props.forum.content);
 			} else {
 				// create mode
 				setUnsavedChanges(true);
@@ -211,12 +261,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 
 	return (
 		<>
-			<TitleDashboard
-				title={props.note ? "View/Edit Note" : "Add Note"}
-				hrefLink={router.query.fromDashHome === "true" ? "../" : "../note"}
-				hrefText={router.query.fromDashHome === "true" ? "Back to home" : "Back to notes"}
-				HrefIcon={IconArrowLeft}
-			/>
+			<TitleDashboard title={props.forum ? "View/Edit Forum Post" : "Add Forum Post"} hrefLink={"../forum"} hrefText={"Back to forum posts"} HrefIcon={IconArrowLeft} />
 
 			<Box component="div" sx={{ position: "relative" }}>
 				<LoadingOverlay visible={loading} overlayBlur={3} />
@@ -225,11 +270,42 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 						mt="md"
 						required
 						label="Title"
-						placeholder="Note title"
+						placeholder="Forum Post title"
 						{...forms.getInputProps("title")}
-						description={`Notes title, Characters allowed are Alpha numeric, underscore, hyphen, space, ', ", comma, and @ regex`}
+						description={`Forum Post title, Characters allowed are Alpha numeric, underscore, hyphen, space, ', ", comma, and @ regex`}
 						disabled={!editable}
 					/>
+
+					<Select
+						mt="md"
+						data={categoryListData}
+						description=" "
+						placeholder="Category"
+						value={forms.values.category}
+						onChange={(value) => {
+							if (value?.includes("reload")) {
+								fetchCategories();
+							} else {
+								forms.setFieldValue("category", value!);
+							}
+						}}
+						label="Forum Category"
+						disabled={!editable}
+						creatable
+						searchable
+						getCreateLabel={(q) => `+ Create ${q} (open from forum category page)`}
+						onCreate={(q) => {
+							window.open(`../forum/category/create?name=${q}`, "_blank");
+							return "";
+						}}
+						maxDropdownHeight={300}
+					/>
+
+					<Checkbox mt="md" label="Locked" description="Lock this forum post so no one can reply to it" {...forms.getInputProps("locked")} disabled={!editable} />
+
+					<Checkbox mt="md" label="Pinned" description="Pin this forum post to the top of the forum list" {...forms.getInputProps("pinned")} disabled={!editable} />
+
+					<Checkbox mt="md" label="Show at home" description="Show this forum post on the home page" {...forms.getInputProps("showAtHome")} disabled={!editable} />
 
 					<Text mt="md" size={"sm"}>
 						Content{" "}
@@ -242,7 +318,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 					</Text>
 					<MDE content={content} setContent={setContent} editable={!editable} />
 					<Group position="right" mt="md">
-						{props.note ? (
+						{props.forum ? (
 							<>
 								<Button color="red" onClick={handleDelete}>
 									Delete
