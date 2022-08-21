@@ -153,7 +153,14 @@ export const MDE = ({ content, setContent, editable }: I_RTE) => {
 					<TextInput
 						mt={6}
 						placeholder="https://cooldomain.com/image.png"
-						label="Or you can paste image URL here"
+						label={
+							<Text>
+								Or paste image URL (Secure/HTTPS) here
+								<Text size="xs" color="dimmed" inline>
+									(Use the plus icon to add)
+								</Text>
+							</Text>
+						}
 						onChange={(e: ChangeEvent<HTMLInputElement>) => {
 							img_url_input = e.target.value;
 						}}
@@ -161,7 +168,7 @@ export const MDE = ({ content, setContent, editable }: I_RTE) => {
 							<>
 								<Tooltip label="Add to textfield">
 									<ActionIcon>
-										<IconPhoto
+										<IconCirclePlus
 											onClick={() => {
 												setContent((content: string) => {
 													return content + `\n![alt text](${img_url_input})\n`;
@@ -191,7 +198,14 @@ export const MDE = ({ content, setContent, editable }: I_RTE) => {
 				<div>
 					<TextInput
 						placeholder="https://www.youtube.com/watch?v=123456789"
-						label="Paste Youtube URL here"
+						label={
+							<Text>
+								Paste Youtube URL here
+								<Text size="xs" color="dimmed" inline>
+									(Use the plus icon to add)
+								</Text>
+							</Text>
+						}
 						onChange={(e: ChangeEvent<HTMLInputElement>) => {
 							yt_url_input = e.target.value;
 						}}
