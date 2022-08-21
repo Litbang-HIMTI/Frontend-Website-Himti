@@ -22,11 +22,6 @@ export interface IBlogRevision extends IBlog {
 	blogId: IBlog | string;
 }
 
-export interface BlogTags {
-	_id: string;
-	count: number;
-}
-
 export type validBlogSort = "author" | "title" | "visibility" | "tags" | "pinned" | "showAtHome" | "createdAt";
 export interface BlogSort {
 	author: (a: IBlog, b: IBlog) => number;

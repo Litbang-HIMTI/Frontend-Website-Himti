@@ -7,3 +7,6 @@ export * from "./User";
 export * from "./Forum_Category";
 export * from "./Forum";
 export * from "./Comment";
+export * from "./Blog";
+export * from "./Event";
+export * from "./Global";

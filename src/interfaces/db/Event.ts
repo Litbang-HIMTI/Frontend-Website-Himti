@@ -29,11 +29,6 @@ export interface IEventRevision extends IEvent {
 	eventId: IEvent | string;
 }
 
-export interface EventTags {
-	_id: string;
-	count: number;
-}
-
 export type validEventSort = "author" | "title" | "visibility" | "tags" | "pinned" | "showAtHome" | "createdAt";
 export interface EventSort {
 	author: (a: IEvent, b: IEvent) => number;
