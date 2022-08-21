@@ -6,6 +6,6 @@ interface MDRenderProps {
 	content: string;
 }
 
-export const MDRender = ({ content }: MDRenderProps) => {
+export const ReactMD = ({ content }: MDRenderProps) => {
 	return <ReactMarkdown children={content} rehypePlugins={[rehypeAutolinkHeadings, rehypeRaw]} />;
 };

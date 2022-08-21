@@ -27,6 +27,7 @@
 		"@radix-ui/react-icons": "^1.1.1",
 		"@types/react-beautiful-dnd": "^13.1.2",
 		"@types/validator": "^13.7.5",
+		"@uiw/react-markdown-preview": "^4.0.24",
 		"@uiw/react-md-editor": "^3.17.2",
 		"axios": "^0.27.2",
 		"cloudinary": "^1.30.1",

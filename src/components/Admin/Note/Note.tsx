@@ -21,6 +21,7 @@ import {
 	TabsValue,
 	Pagination,
 	TypographyStylesProvider,
+	useMantineColorScheme,
 } from "@mantine/core";
 import { keys } from "@mantine/utils";
 import { showNotification } from "@mantine/notifications";
@@ -31,7 +32,7 @@ import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { INote, validNoteSort, NoteSort, NoteQRes } from "../../../interfaces/db";
 import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../helper";
 import { Th, useTableStyles, TitleDashboard } from "../../Utils/Dashboard";
-import { MDRender } from "../../Utils/MDRender";
+import { MDPreview } from "../../Utils/Viewer/Markdown/MDPreview";
 
 export const Note: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useTableStyles();
@@ -437,7 +438,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 										</td>
 										<td>
 											<TypographyStylesProvider>
-												<MDRender content={row.content} />
+												<MDPreview content={row.content} />
 											</TypographyStylesProvider>
 										</td>
 										<td>

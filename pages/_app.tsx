@@ -1,9 +1,10 @@
 import "../styles/globals.css";
 import "../styles/dashboard.css";
+import "../styles/markdown.css";
 import { AppProps } from "next/app";
 import { MantineProvider, ColorScheme, ColorSchemeProvider } from "@mantine/core";
 import { NotificationsProvider } from "@mantine/notifications";
-import { RouterTransition } from "../src/components/Utils/RouterTransition";
+import { RouterTransition } from "../src/components/Utils/Looks/RouterTransition";
 import { ModalsProvider } from "@mantine/modals";
 import { useLocalStorage } from "@mantine/hooks";
 

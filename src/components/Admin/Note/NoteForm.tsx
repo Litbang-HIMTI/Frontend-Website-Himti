@@ -135,12 +135,10 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 		setUnsavedChanges(false);
 		if (submitted) return;
 		const { title } = forms.values;
-		if (content.length < 25)
-			showNotification({
-				title: "Error",
-				message: "Note must be at least 25 characters long",
-				color: "red",
-			});
+		if (content.length < 15) {
+			showNotification({ title: "Error", message: "Note must be at least 15 characters long", color: "red" });
+			return;
+		}
 
 		try {
 			const req = await fetch(`${SERVER_V1}/${props.note ? "note/" + props.note._id : "note"}`, {
@@ -219,7 +217,7 @@ export const NoteForm: NextPage<INoteFormProps> = (props) => {
 		<>
 			<TitleDashboard
 				title={props.note ? "View/Edit Note" : "Add Note"}
-				hrefLink={router.query.fromDashHome === "true" ? "../" : "../notes"}
+				hrefLink={router.query.fromDashHome === "true" ? "../" : "../note"}
 				hrefText={router.query.fromDashHome === "true" ? "Back to home" : "Back to notes"}
 				HrefIcon={IconArrowLeft}
 			/>

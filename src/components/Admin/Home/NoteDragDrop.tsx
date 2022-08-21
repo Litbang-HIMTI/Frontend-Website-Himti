@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
-import { ActionIcon, createStyles, LoadingOverlay, Text, TypographyStylesProvider } from "@mantine/core";
+import { ActionIcon, Container, createStyles, Divider, LoadingOverlay, Text, TypographyStylesProvider } from "@mantine/core";
 import { useId, useListState } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
@@ -9,7 +9,7 @@ import { IconGripVertical, IconEdit, IconPlus } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { SERVER_V1 } from "../../../helper/constants";
 import { INote } from "../../../interfaces/db/Note";
-import { MDRender } from "../../Utils/MDRender";
+import { MDPreview } from "../../Utils/Viewer/Markdown/MDPreview";
 
 const useStyles = createStyles((theme) => ({
 	item: {
@@ -159,8 +159,8 @@ export const NoteDragDrop: NextPage<IDashboardProps> = (props) => {
 													<div>
 														<Text>{item.title}</Text>
 														<TypographyStylesProvider>
-															<Text color="dimmed">
-																<MDRender content={item.content} />
+															<Text component="div" color="dimmed">
+																<MDPreview content={item.content} />
 															</Text>
 														</TypographyStylesProvider>
 													</div>

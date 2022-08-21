@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { ColorSchemeToggle } from "../Utils/ColorSchemeToggle";
+import { ColorSchemeToggle } from "../Utils/Looks/ColorSchemeToggle";
 import { Header } from "../Template/Header";
 import Link from "next/link";
 
