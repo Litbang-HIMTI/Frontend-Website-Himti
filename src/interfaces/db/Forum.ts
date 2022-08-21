@@ -8,21 +8,24 @@ export interface IForum {
 	title: string;
 	content: string;
 	category: IForumCategory[];
-	locked?: boolean;
-	pinned?: boolean;
-	showAtHome?: boolean;
+	locked: boolean;
+	pinned: boolean;
+	showAtHome: boolean;
 	editedBy?: IUser[];
 	createdAt: Date;
 	updatedAt: Date;
+	commentCount: number;
 }
 
-export type validForumSort = "title" | "description" | "locked" | "pinned" | "author" | "createdAt";
+export type validForumSort = "title" | "category" | "author" | "commentCount" | "locked" | "pinned" | "showAtHome" | "createdAt";
 export interface ForumSort {
 	title: (a: IForum, b: IForum) => number;
-	description: (a: IForum, b: IForum) => number;
+	category: (a: IForum, b: IForum) => number;
+	author: (a: IForum, b: IForum) => number;
+	commentCount: (a: IForum, b: IForum) => number;
 	locked: (a: IForum, b: IForum) => number;
 	pinned: (a: IForum, b: IForum) => number;
-	author: (a: IForum, b: IForum) => number;
+	showAtHome: (a: IForum, b: IForum) => number;
 	createdAt: (a: IForum, b: IForum) => number;
 }
 

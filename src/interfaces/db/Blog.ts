@@ -21,15 +21,15 @@ export interface IBlogRevision extends IBlog {
 	revision: number;
 	blogId: IBlog | string;
 }
-
-export type validBlogSort = "author" | "title" | "visibility" | "tags" | "pinned" | "showAtHome" | "createdAt";
+// description in hover title
+export type validBlogSort = "title" | "visibility" | "tags" | "pinned" | "showAtHome" | "author" | "createdAt";
 export interface BlogSort {
-	author: (a: IBlog, b: IBlog) => number;
 	title: (a: IBlog, b: IBlog) => number;
 	visibility: (a: IBlog, b: IBlog) => number;
 	tags: (a: IBlog, b: IBlog) => number;
 	pinned: (a: IBlog, b: IBlog) => number;
 	showAtHome: (a: IBlog, b: IBlog) => number;
+	author: (a: IBlog, b: IBlog) => number;
 	createdAt: (a: IBlog, b: IBlog) => number;
 }
 

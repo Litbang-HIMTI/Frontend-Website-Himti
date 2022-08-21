@@ -321,6 +321,7 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 										}
 									}}
 									mt={8}
+									min={0}
 								/>
 								<TextInput
 									placeholder="Search by author field"
