@@ -1,15 +1,63 @@
 import { ChangeEvent, useCallback } from "react";
+import { SERVER_LOCAL_V1 } from "../../../../helper";
 import { ActionIcon, Button, Group, Text, TextInput, Tooltip, useMantineColorScheme, useMantineTheme } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
+import { closeAllModals, openModal } from "@mantine/modals";
+import { Dropzone, IMAGE_MIME_TYPE } from "@mantine/dropzone";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
 import { ContextStore } from "@uiw/react-md-editor";
-import { SERVER_LOCAL_V1 } from "../../../../helper";
 import { MDEditor } from "./MDE_Import";
-import { closeAllModals, openModal } from "@mantine/modals";
-import { Dropzone, IMAGE_MIME_TYPE } from "@mantine/dropzone";
-import { IconUpload, IconPhoto, IconX, IconVideo, IconCirclePlus } from "@tabler/icons";
-import rehypeSanitize from "rehype-sanitize";
+import {
+	bold,
+	divider,
+	hr,
+	italic,
+	strikethrough,
+	title1,
+	title2,
+	title3,
+	title4,
+	unorderedListCommand,
+	orderedListCommand,
+	checkedListCommand,
+	link,
+	quote,
+	code,
+	codeBlock,
+} from "@uiw/react-md-editor/lib/commands";
+import {
+	IconUpload,
+	IconPhoto,
+	IconX,
+	IconStrikethrough,
+	IconVideo,
+	IconCirclePlus,
+	IconSuperscript,
+	IconSubscript,
+	IconBold,
+	IconItalic,
+	IconUnderline,
+	IconSeparator,
+	IconH1,
+	IconH2,
+	IconH3,
+	IconH4,
+	IconLink,
+	IconQuote,
+	IconCode,
+	IconBarcode,
+	IconList,
+	IconListNumbers,
+	IconListCheck,
+	IconLayoutAlignLeft,
+	IconLayoutAlignRight,
+	IconLayoutAlignCenter,
+	IconFloatLeft,
+	IconFloatCenter,
+	IconFloatRight,
+	IconMaximize,
+} from "@tabler/icons";
 
 interface I_RTE {
 	content: string;
@@ -162,7 +210,7 @@ export const MDE = ({ content, setContent, editable }: I_RTE) => {
 												setContent((content: string) => {
 													return (
 														content +
-														`\n\n<iframe class="ql-video" type="text/html" src="http://www.youtube.com/embed/${matchedId[8]}` +
+														`\n\n<iframe  type="text/html" src="http://www.youtube.com/embed/${matchedId[8]}` +
 														`?enablejsapi=1&origin=${window ? window.location.host : ""}" frameborder="0" title="Youtube video embed" style="width: 90%; height: 400px;"/>\n\n`
 													);
 												});
@@ -186,6 +234,34 @@ export const MDE = ({ content, setContent, editable }: I_RTE) => {
 		setContent(value!);
 	};
 
+	const commandLists = [
+		{ name: "bold", icon: IconBold, title: "Insert Bold" },
+		{ name: "italic", icon: IconItalic, title: "Insert Italic" },
+		{ name: "underline", icon: IconUnderline, title: "Insert Underline" },
+		{ name: "strikethrough", icon: IconStrikethrough, title: "Insert Strikethrough" },
+		{ name: "superscript", icon: IconSuperscript, title: "Insert Superscript" },
+		{ name: "subscript", icon: IconSubscript, title: "Insert Subscript" },
+		{ name: "hr", icon: IconSeparator, title: "Insert Horizontal Rule" },
+		{ name: "title1", icon: IconH1, title: "Insert Heading 1" },
+		{ name: "title2", icon: IconH2, title: "Insert Heading 2" },
+		{ name: "title3", icon: IconH3, title: "Insert Heading 3" },
+		{ name: "title4", icon: IconH4, title: "Insert Heading 4" },
+		{ name: "unordered-list", icon: IconList, title: "Insert Unordered List" },
+		{ name: "ordered-list", icon: IconListNumbers, title: "Insert Ordered List" },
+		{ name: "checked-list", icon: IconListCheck, title: "Insert Task List" },
+		{ name: "link", icon: IconLink, title: "Insert Link" },
+		{ name: "quote", icon: IconQuote, title: "Insert Quote" },
+		{ name: "code", icon: IconCode, title: "Insert Code" },
+		{ name: "codeBlock", icon: IconBarcode, title: "Insert Code block" },
+		{ name: "edit", icon: IconLayoutAlignLeft, title: "Edit Code" },
+		{ name: "live", icon: IconLayoutAlignCenter, title: "Live Code" },
+		{ name: "preview", icon: IconLayoutAlignRight, title: "Preview Code" },
+		{ name: "fullscreen", icon: IconMaximize, title: "Fullscreen" },
+		{ name: "alignLeft", icon: IconFloatLeft, title: "Align left" },
+		{ name: "alignRight", icon: IconFloatRight, title: "Align right" },
+		{ name: "alignCenter", icon: IconFloatCenter, title: "Align center" },
+	];
+
 	return (
 		<div data-color-mode={colorScheme}>
 			<MDEditor
@@ -199,10 +275,30 @@ export const MDE = ({ content, setContent, editable }: I_RTE) => {
 				}}
 				components={{
 					toolbar: (command, disabled, executeCommand) => {
-						if (command.keyCommand === "image") {
+						if (commandLists.find((item) => item.name === command.name)) {
+							const index = commandLists.findIndex((item) => item.name === command.name);
+							const Icon = commandLists[index].icon;
+
 							return (
 								<>
-									<Tooltip label="Upload image (file)" withinPortal>
+									<Tooltip label={commandLists[index].title} withinPortal>
+										<Button
+											disabled={disabled}
+											onClick={() => {
+												executeCommand(command, command.groupName);
+											}}
+										>
+											<Icon size={13} />
+										</Button>
+									</Tooltip>
+								</>
+							);
+						}
+
+						if (command.name === "image") {
+							return (
+								<>
+									<Tooltip label="Upload image (file/link)" withinPortal>
 										<Button
 											disabled={disabled}
 											onClick={() => {
@@ -232,6 +328,93 @@ export const MDE = ({ content, setContent, editable }: I_RTE) => {
 						// [rehypeSanitize] // disable iframe
 					],
 				}}
+				commands={[
+					bold,
+					italic,
+					{
+						name: "underline",
+						keyCommand: "underline",
+						icon: <IconUnderline size={13} />,
+						shortcuts: "mod+u",
+						execute: (state, api) => {
+							const modifyText = `<u>${state.selectedText}</u>`;
+							api.replaceSelection(modifyText);
+						},
+					},
+					strikethrough,
+					{
+						name: "superscript",
+						keyCommand: "superscript",
+						icon: <IconSuperscript size={13} />,
+						execute: (state, api) => {
+							const modifyText = `<sup>${state.selectedText}</sup>`;
+							api.replaceSelection(modifyText);
+						},
+					},
+					{
+						name: "subscript",
+						keyCommand: "subscript",
+						icon: <IconSubscript size={13} />,
+						execute: (state, api) => {
+							const modifyText = `<sub>${state.selectedText}</sub>`;
+							api.replaceSelection(modifyText);
+						},
+					},
+					// -------------
+					divider,
+					quote,
+					code,
+					codeBlock,
+					// -------------
+					divider,
+					unorderedListCommand,
+					orderedListCommand,
+					checkedListCommand,
+					{
+						name: "alignLeft",
+						keyCommand: "alignLeft",
+						icon: <IconFloatLeft size={13} />,
+						execute: (state, api) => {
+							const modifyText = `<div style="text-align: left;">${state.selectedText}</div>`;
+							api.replaceSelection(modifyText);
+						},
+					},
+					{
+						name: "alignCenter",
+						keyCommand: "alignCenter",
+						icon: <IconFloatCenter size={13} />,
+						execute: (state, api) => {
+							const modifyText = `<div style="text-align: center;">${state.selectedText}</div>`;
+							api.replaceSelection(modifyText);
+						},
+					},
+					{
+						name: "alignRight",
+						keyCommand: "alignRight",
+						icon: <IconFloatRight size={13} />,
+						execute: (state, api) => {
+							const modifyText = `<div style="text-align: right;">${state.selectedText}</div>`;
+							api.replaceSelection(modifyText);
+						},
+					},
+					// -------------
+					divider,
+					hr,
+					title1,
+					title2,
+					title3,
+					title4,
+					// -------------
+					divider,
+					link,
+					{
+						// this will be replaced by the one in the components prop
+						name: "image",
+						keyCommand: "image",
+						buttonProps: { "aria-label": "Insert image" },
+						icon: <IconPhoto size={13} />,
+					},
+				]}
 			/>
 		</div>
 	);
