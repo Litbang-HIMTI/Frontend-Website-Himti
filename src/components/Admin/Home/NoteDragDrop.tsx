@@ -156,7 +156,7 @@ export const NoteDragDrop: NextPage<IDashboardProps> = (props) => {
 													<div {...provided.dragHandleProps} className={classes.dragHandle}>
 														<IconGripVertical size={18} stroke={1.5} />
 													</div>
-													<div>
+													<div className="md-wrapper">
 														<Text>{item.title}</Text>
 														<TypographyStylesProvider>
 															<Text component="div" color="dimmed">
