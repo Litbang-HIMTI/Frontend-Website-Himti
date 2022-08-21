@@ -508,7 +508,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 										if (sortBy === "organizer") setReverseSortDirection(!reverseSortDirection);
 										setSortBy("organizer");
 									}}
-									width="10%"
+									width="12%"
 								>
 									Organizer
 								</Th>
@@ -520,7 +520,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 										if (sortBy === "tags") setReverseSortDirection(!reverseSortDirection);
 										setSortBy("tags");
 									}}
-									width="10%"
+									width="11%"
 								>
 									Tags
 								</Th>
@@ -556,7 +556,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 										if (sortBy === "showAtHome") setReverseSortDirection(!reverseSortDirection);
 										setSortBy("showAtHome");
 									}}
-									width="15%"
+									width="12%"
 								>
 									Show at home
 								</Th>
