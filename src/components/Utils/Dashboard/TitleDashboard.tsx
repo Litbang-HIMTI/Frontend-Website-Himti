@@ -10,6 +10,7 @@ export const TitleDashboard = ({ title, hrefLink, hrefText, HrefIcon = IconFileP
 	const getPath = () => {
 		return router.asPath
 			.split("?")[0]
+			.split("#")[0]
 			.split("/")
 			.slice(1)
 			.map((item) => {
