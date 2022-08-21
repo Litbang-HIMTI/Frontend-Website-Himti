@@ -82,7 +82,7 @@ const blogMenu = (theme: MantineTheme, _type: string) => {
 			</Link>
 			<Link href={`/admin/blog/create`}>
 				<a>
-					<Menu.Item icon={<IconCirclePlus size={14} stroke={1.5} color={theme.colors.red[6]} />}>Create new post</Menu.Item>
+					<Menu.Item icon={<IconCirclePlus size={14} stroke={1.5} color={theme.colors.red[6]} />}>Create new Post</Menu.Item>
 				</a>
 			</Link>
 			<Link href={`/admin/blog/revision`}>
@@ -143,7 +143,7 @@ const forumMenu = (theme: MantineTheme, _type: string) => {
 			</Link>
 			<Link href={`/admin/forum/create`}>
 				<a>
-					<Menu.Item icon={<IconCirclePlus size={14} stroke={1.5} color={theme.colors.red[6]} />}>Create new Event</Menu.Item>
+					<Menu.Item icon={<IconCirclePlus size={14} stroke={1.5} color={theme.colors.red[6]} />}>Create new Forum Post</Menu.Item>
 				</a>
 			</Link>
 			<Link href={`/admin/forum/category`}>
