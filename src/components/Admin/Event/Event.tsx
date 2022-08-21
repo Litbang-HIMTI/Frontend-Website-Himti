@@ -29,35 +29,37 @@ import { openConfirmModal } from "@mantine/modals";
 import { useLocalStorage } from "@mantine/hooks";
 import { IconSearch, IconEdit, IconTrash, IconPin, IconPinnedOff, IconUser, IconLetterA, IconTags, IconDeviceWatch, IconRefresh, IconEye, IconHome, IconHomeOff } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { IBlogRevision, validBlogSort, BlogSort, BlogQRes } from "../../../interfaces/db";
+import { IEventRevision, validEventSort, EventSort, EventQRes } from "../../../interfaces/db";
 import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../helper";
 import { Th, useTableStyles, TitleDashboard } from "../../Utils/Dashboard";
 
-interface IBlogProps extends IDashboardProps {
+interface IEventProps extends IDashboardProps {
 	revision?: boolean;
 }
 
-export const Blog: NextPage<IBlogProps> = (props) => {
+export const Event: NextPage<IEventProps> = (props) => {
 	const { classes } = useTableStyles();
 	const router = useRouter();
 
 	const [curPage, setCurPage] = useState(1);
 	const [pages, setPages] = useState(1);
-	const [perPage, setPerPage] = useLocalStorage({ key: "perPage-blog", defaultValue: 25 });
+	const [perPage, setPerPage] = useLocalStorage({ key: "perPage-event", defaultValue: 25 });
 
 	const [searchAll, setSearchAll] = useState("");
 	const [searchTitle, setSearchTitle] = useState("");
 	const [searchVisibility, setSearchVisibility] = useState<"public" | "draft" | "private" | "all">("all");
+	const [searchOrganizer, setSearchOrganizer] = useState<string[]>([]);
 	const [searchTags, setSearchTags] = useState<string[]>([]);
 	const [searchAuthor, setSearchAuthor] = useState("");
 	const [searchIsPinned, setSearchIsPinned] = useState<"true" | "false" | "all">("all");
 	const [searchShowAtHome, setSearchShowAtHome] = useState<"true" | "false" | "all">("all");
 	const [searchCreatedAt, setSearchCreatedAt] = useState("");
 
-	const [dataAllPage, setDataAllPage] = useState<IBlogRevision[]>([]);
-	const [dataPage, setDataPage] = useState<IBlogRevision[]>([]);
-	const [sortBy, setSortBy] = useState<validBlogSort | null>(null);
+	const [dataAllPage, setDataAllPage] = useState<IEventRevision[]>([]);
+	const [dataPage, setDataPage] = useState<IEventRevision[]>([]);
+	const [sortBy, setSortBy] = useState<validEventSort | null>(null);
 	const [availableTags, setAvailableTags] = useState<string[]>([]);
+	const [availableOrganization, setAvailableOrganization] = useState<string[]>([]);
 
 	const [reverseSortDirection, setReverseSortDirection] = useState(false);
 	const [loadingDataPage, setLoadingDataPage] = useState(true);
@@ -94,8 +96,8 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 	const handleDelete = (id: string) => {
 		openConfirmModal({
 			title: "Delete confirmation",
-			children: <Text size="sm">Are you sure you want to delete this blog post? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
-			labels: { confirm: "Yes, delete blog post", cancel: "No, cancel" },
+			children: <Text size="sm">Are you sure you want to delete this event? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
+			labels: { confirm: "Yes, delete event", cancel: "No, cancel" },
 			confirmProps: { color: "red" },
 			onCancel: () => {},
 			onConfirm: () => deleteData(id),
@@ -104,7 +106,7 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// display
-	const searchAllHelper = (item: IBlogRevision, query: string) => {
+	const searchAllHelper = (item: IEventRevision, query: string) => {
 		return (
 			item.title.toLowerCase().includes(query.toLowerCase()) ||
 			item.author[0]?.username.toLowerCase().includes(query.toLowerCase()) ||
@@ -122,6 +124,7 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 			(searchAll !== "" ||
 				searchTitle !== "" ||
 				searchVisibility !== "all" ||
+				(searchOrganizer.length > 0 && searchOrganizer[0]) ||
 				(searchTags.length > 0 && searchTags[0]) ||
 				searchAuthor !== "" ||
 				searchIsPinned !== "all" ||
@@ -130,7 +133,7 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 		);
 	};
 
-	const searchData = (dataPage: IBlogRevision[], dataAll: IBlogRevision[]) => {
+	const searchData = (dataPage: IEventRevision[], dataAll: IEventRevision[]) => {
 		// verify searching
 		if (isSearching()) dataPage = dataAll;
 
@@ -139,6 +142,7 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 		} else if (tabIndex === 1) {
 			if (searchTitle !== "") dataPage = dataPage.filter((item) => item.title.toLowerCase().includes(searchTitle.toLowerCase()));
 			if (searchVisibility !== "all") dataPage = dataPage.filter((item) => item.visibility.toLowerCase().includes(searchVisibility.toLowerCase()));
+			if (searchOrganizer.length > 0 && searchOrganizer[0]) dataPage = dataPage.filter((item) => item.organizer?.some((org) => searchOrganizer.includes(org)));
 			if (searchTags.length > 0 && searchTags[0]) dataPage = dataPage.filter((item) => item.tags?.some((tag) => searchTags.includes(tag)));
 			if (searchAuthor !== "") dataPage = dataPage.filter((item) => item.author[0]?.username.toLowerCase().includes(searchAuthor.toLowerCase()));
 			if (searchIsPinned !== "all") dataPage = dataPage.filter((item) => item.pinned.toString() === searchIsPinned);
@@ -149,13 +153,14 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 		return dataPage;
 	};
 
-	const sortSearchData = (type: validBlogSort | null, dataPage: IBlogRevision[], dataAll: IBlogRevision[]) => {
+	const sortSearchData = (type: validEventSort | null, dataPage: IEventRevision[], dataAll: IEventRevision[]) => {
 		if (!type) return searchData(dataPage, dataAll);
 
 		if (isSearching()) dataPage = dataAll.length > 0 ? dataAll : dataPage;
-		const sortMap: BlogSort = {
+		const sortMap: EventSort = {
 			title: (a, b) => (a.title.toLowerCase() > b.title.toLowerCase() ? 1 : -1),
 			visibility: (a, b) => (a.visibility.toLowerCase() > b.visibility.toLowerCase() ? 1 : -1),
+			organizer: (a, b) => (a.organizer && b.organizer && a.organizer.join(" ").toLowerCase() > b.organizer.join(" ").toLowerCase() ? 1 : -1),
 			tags: (a, b) => (a.tags && b.tags && a.tags.join(" ").toLowerCase() > b.tags.join(" ").toLowerCase() ? 1 : -1),
 			author: (a, b) => (a.author[0]?.username.toLowerCase() > b.author[0]?.username.toLowerCase() ? 1 : -1),
 			pinned: (a, b) => (a.pinned > b.pinned ? 1 : -1),
@@ -174,7 +179,7 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 	// delete
 	const deleteData = async (_id: string) => {
 		try {
-			const req = await fetch(`${SERVER_V1}/${props.revision ? "blog/revision" : "blog"}/${_id}`, {
+			const req = await fetch(`${SERVER_V1}/${props.revision ? "event/revision" : "event"}/${_id}`, {
 				method: "DELETE",
 				headers: {
 					"Content-Type": "application/json",
@@ -182,7 +187,7 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 				credentials: "include",
 			});
 
-			const { message, success }: BlogQRes = await req.json();
+			const { message, success }: EventQRes = await req.json();
 			if (req.status === 200 && success) {
 				// slice data
 				setDataPage((prev) => {
@@ -205,7 +210,7 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 	const fillDataAll = async () => {
 		try {
 			setLoadingDataAll(true);
-			const req = await fetch(SERVER_V1 + `/${props.revision ? "blog/revision" : "blog"}`, {
+			const req = await fetch(SERVER_V1 + `/${props.revision ? "event/revision" : "event"}`, {
 				method: "GET",
 				headers: {
 					"Content-Type": "application/json",
@@ -213,7 +218,7 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 				credentials: "include",
 			});
 
-			const { data, message }: BlogQRes = await req.json();
+			const { data, message }: EventQRes = await req.json();
 			if (req.status !== 200) {
 				setLoadingDataAll(false);
 				return showNotification({ title: "Error indexing all data for search", message, color: "red" });
@@ -223,6 +228,11 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 			const tagsOnly = data.reduce((acc: string[], item) => [...acc, ...(item.tags || [])], []);
 			const tagsOnlyUnique = tagsOnly.filter((item, index) => tagsOnly.indexOf(item) === index);
 			setAvailableTags(tagsOnlyUnique);
+
+			// get organization
+			const organizationOnly = data.reduce((acc: string[], item) => [...acc, ...(item.organizer || [])], []);
+			const organizationOnlyUnique = organizationOnly.filter((item, index) => organizationOnly.indexOf(item) === index);
+			setAvailableOrganization(organizationOnlyUnique);
 
 			setDataAllPage(data);
 			setLoadingDataAll(false);
@@ -236,7 +246,7 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 	const fillData = async (perPage: number, curPageQ: number) => {
 		try {
 			setLoadingDataPage(true);
-			const req = await fetch(SERVER_V1 + `/${props.revision ? "blog/revision" : "blog"}?perPage=${perPage}&page=${curPageQ}`, {
+			const req = await fetch(SERVER_V1 + `/${props.revision ? "event/revision" : "event"}?perPage=${perPage}&page=${curPageQ}`, {
 				method: "GET",
 				headers: {
 					"Content-Type": "application/json",
@@ -244,7 +254,7 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 				credentials: "include",
 			});
 
-			const { data, message, page, pages }: BlogQRes = await req.json();
+			const { data, message, page, pages }: EventQRes = await req.json();
 			if (req.status !== 200) {
 				setLoadingDataPage(false);
 				return showNotification({ title: "Error getting page data", message, color: "red" });
@@ -268,6 +278,7 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 		setSearchAll(params.get("qAll") || "");
 		setSearchTitle(params.get("title") || "");
 		setSearchVisibility((params.get("visibility") as any) || "all");
+		setSearchOrganizer([params.get("organization")!] || []);
 		setSearchTags([params.get("tags")!] || []);
 		setSearchAuthor(params.get("author") || "");
 		setSearchIsPinned((params.get("pinned") as any) || "all");
@@ -287,7 +298,7 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 	return (
 		<>
 			<TitleDashboard
-				title={`${props.revision ? "Blog Posts Revision" : "Blog Posts"}`}
+				title={`${props.revision ? "Event Posts Revision" : "Event Posts"}`}
 				hrefLink={`${props.revision ? props.pathname?.split("?")[0] + "/revision" : props.pathname?.split("?")[0]}  /create`}
 				hrefText="Add new"
 			/>
@@ -349,6 +360,18 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 										{ value: "private", label: "Private" },
 									]}
 									mt={8}
+								/>
+
+								<MultiSelect
+									label="Organizer"
+									name="organizer"
+									placeholder="Search by organizer field"
+									icon={<IconTags size={14} stroke={1.5} />}
+									value={searchOrganizer}
+									onChange={(e) => handleSelectQueryChange(e.join(" "), setSearchOrganizer, "organizer", e)}
+									data={availableOrganization}
+									mt={8}
+									searchable
 								/>
 
 								<MultiSelect
@@ -479,13 +502,25 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 								</Th>
 								<Th
 									classes={classes}
+									sorted={sortBy === "organizer"}
+									reversed={reverseSortDirection}
+									onSort={() => {
+										if (sortBy === "organizer") setReverseSortDirection(!reverseSortDirection);
+										setSortBy("organizer");
+									}}
+									width="10%"
+								>
+									Organizer
+								</Th>
+								<Th
+									classes={classes}
 									sorted={sortBy === "tags"}
 									reversed={reverseSortDirection}
 									onSort={() => {
 										if (sortBy === "tags") setReverseSortDirection(!reverseSortDirection);
 										setSortBy("tags");
 									}}
-									width="15%"
+									width="10%"
 								>
 									Tags
 								</Th>
@@ -521,7 +556,7 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 										if (sortBy === "showAtHome") setReverseSortDirection(!reverseSortDirection);
 										setSortBy("showAtHome");
 									}}
-									width="10%"
+									width="15%"
 								>
 									Show at home
 								</Th>
@@ -553,7 +588,7 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 								sortSearchData(sortBy, dataPage, dataAllPage).map((row) => (
 									<tr key={row._id}>
 										<td>
-											<Link href={`/blog/${row.title.replaceAll(" ", "-")}-${row._id}`}>
+											<Link href={`/event/${row.title.replaceAll(" ", "-")}-${row._id}`}>
 												<a>
 													<Text component="span" variant="link">
 														{row.title}
@@ -562,6 +597,24 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 											</Link>
 										</td>
 										<td>{row.visibility}</td>
+										<td>
+											{row.organizer && row.organizer.length > 0
+												? row.organizer.map((organizer, i) => {
+														return (
+															<span key={i}>
+																<Link href={`${props.pathname?.split("?")[0]}/organizer?qAll=${organizer}`}>
+																	<a>
+																		<Text component="span" variant="link">
+																			{organizer}
+																		</Text>
+																	</a>
+																</Link>
+																{i < row.organizer!.length - 1 ? ", " : ""}
+															</span>
+														);
+												  })
+												: "Deleted"}
+										</td>
 										<td>
 											{row.tags && row.tags.length > 0
 												? row.tags.map((tags, i) => {

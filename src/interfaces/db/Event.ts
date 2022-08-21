@@ -15,28 +15,30 @@ export interface IEvent {
 	tags?: string[];
 	location?: string;
 	link?: string;
-	organizer?: string;
+	organizer?: string[];
 	email?: string;
-	pinned?: boolean;
-	showAtHome?: boolean;
+	pinned: boolean;
+	showAtHome: boolean;
 	editedBy?: IUser[];
 	createdAt: Date;
 	updatedAt: Date;
 }
 
 export interface IEventRevision extends IEvent {
-	revision: number;
-	eventId: IEvent | string;
+	revision?: number;
+	eventId?: IEvent | string;
 }
+
 // description in hover title
-export type validEventSort = "title" | "visibility" | "tags" | "pinned" | "showAtHome" | "author" | "createdAt";
+export type validEventSort = "title" | "visibility" | "organizer" | "tags" | "author" | "pinned" | "showAtHome" | "createdAt";
 export interface EventSort {
 	title: (a: IEvent, b: IEvent) => number;
 	visibility: (a: IEvent, b: IEvent) => number;
+	organizer: (a: IEvent, b: IEvent) => number;
 	tags: (a: IEvent, b: IEvent) => number;
+	author: (a: IEvent, b: IEvent) => number;
 	pinned: (a: IEvent, b: IEvent) => number;
 	showAtHome: (a: IEvent, b: IEvent) => number;
-	author: (a: IEvent, b: IEvent) => number;
 	createdAt: (a: IEvent, b: IEvent) => number;
 }
 

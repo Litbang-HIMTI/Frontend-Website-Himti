@@ -19,9 +19,10 @@ export interface IBlog {
 }
 
 export interface IBlogRevision extends IBlog {
-	revision: number;
-	blogId: IBlog | string;
+	revision?: number;
+	blogId?: IBlog | string;
 }
+
 // description in hover title
 export type validBlogSort = "title" | "visibility" | "tags" | "author" | "pinned" | "showAtHome" | "createdAt";
 export interface BlogSort {
