@@ -584,7 +584,7 @@ export const Forum: NextPage<IDashboardProps> = (props) => {
 								sortSearchData(sortBy, dataPage, dataAllPage).map((row) => (
 									<tr key={row._id}>
 										<td>
-											<Link href={`/forum/${row.title}-${row._id}`}>
+											<Link href={`/forum/${row.title.replaceAll(" ", "-")}-${row._id}`}>
 												<a>
 													<Text component="span" variant="link">
 														{row.title}

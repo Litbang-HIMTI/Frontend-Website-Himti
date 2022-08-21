@@ -550,7 +550,7 @@ export const Blog: NextPage<IDashboardProps> = (props) => {
 								sortSearchData(sortBy, dataPage, dataAllPage).map((row) => (
 									<tr key={row._id}>
 										<td>
-											<Link href={`/blog/${row.title}-${row._id}`}>
+											<Link href={`/blog/${row.title.replaceAll(" ", "-")}-${row._id}`}>
 												<a>
 													<Text component="span" variant="link">
 														{row.title}
