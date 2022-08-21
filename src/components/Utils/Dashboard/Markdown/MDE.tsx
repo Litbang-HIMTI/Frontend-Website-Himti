@@ -273,7 +273,8 @@ export const MDE = ({ content, setContent, editable }: I_RTE) => {
 					disabled: editable,
 					placeholder: "Write your content here",
 				}}
-				preview={editable ? "preview" : "live"}
+				// preview={editable ? "preview" : "live"}
+				hideToolbar={editable} // better enable/disable
 				components={{
 					toolbar: (command, disabled, executeCommand) => {
 						if (commandLists.find((item) => item.name === command.name)) {
