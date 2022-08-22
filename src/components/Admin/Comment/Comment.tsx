@@ -446,7 +446,7 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 										</td>
 										<td>
 											{row.updatedAt !== row.createdAt ? (
-												<Tooltip label={`Last edited at: ${formatDateWithTz(row.updatedAt, tz)}`}>
+												<Tooltip withArrow label={`Last edited at: ${formatDateWithTz(row.updatedAt, tz)}`}>
 													<span>{formatDateWithTz(row.createdAt, tz)}</span>
 												</Tooltip>
 											) : (

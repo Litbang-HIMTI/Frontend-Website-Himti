@@ -570,7 +570,7 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 										<td>
 											<Tooltip withArrow label={row.description} multiline>
 												<span>
-													<Link href={props.revision ? `../blog/${row._id}/revision` : `/blog/${row.title.replaceAll(" ", "-")}-${row._id}`}>
+													<Link href={props.revision ? `../blog/${row.blogId}/revision` : `/blog/${row.title.replaceAll(" ", "-")}-${row._id}`}>
 														<a>
 															<Text component="span" variant="link">
 																{row.title}

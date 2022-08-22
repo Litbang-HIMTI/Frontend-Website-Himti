@@ -287,7 +287,7 @@ export const BlogForm: NextPage<IBlogFormProps> = (props) => {
 
 	return (
 		<>
-			<TitleDashboard title={props.blog ? "View/Edit Forum Post" : "Add Forum Post"} hrefLink={"../forum"} hrefText={"Back to forum posts"} HrefIcon={IconArrowLeft} />
+			<TitleDashboard title={props.blog ? "View/Edit Blog Post" : "Add Blog Post"} hrefLink={"../blog"} hrefText={"Back to blog posts"} HrefIcon={IconArrowLeft} />
 
 			<Box component="div" sx={{ position: "relative" }}>
 				<LoadingOverlay visible={loading} overlayBlur={3} />
@@ -383,11 +383,13 @@ export const BlogForm: NextPage<IBlogFormProps> = (props) => {
 					<MDE content={content} setContent={setContent} editable={!editable} />
 					<Group>
 						<Group mt="md">
-							<Link href={props.pathname?.split("?")[0] + "/revision"}>
+							<Link href={props.pathname?.split("?")[0] + "/revision?fromEdit=true"}>
 								<a>
 									<Button>
-										<IconHistory />
-										View Revision History
+										<IconHistory size={20} />
+										<Text component="span" ml={4}>
+											View Revision History
+										</Text>
 									</Button>
 								</a>
 							</Link>
