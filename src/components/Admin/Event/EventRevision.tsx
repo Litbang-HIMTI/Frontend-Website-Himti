@@ -2,22 +2,22 @@ import { useState, useEffect } from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { showNotification } from "@mantine/notifications";
-import { Box, Button, Group, LoadingOverlay, Text, Select, useMantineColorScheme, Divider, Center, List, Grid } from "@mantine/core";
+import { Box, Button, Group, LoadingOverlay, Text, Select, useMantineColorScheme, Grid, List, Center } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { formatDateWithTz, SERVER_V1 } from "../../../helper";
-import { IBlog, IBlogRevision } from "../../../interfaces/db";
+import { IEvent, IEventRevision } from "../../../interfaces/db";
 import { TitleDashboard } from "../../Utils/Dashboard";
 import { openConfirmModal } from "@mantine/modals";
 import ReactDiffViewer from "react-diff-viewer";
 import Link from "next/link";
 
-interface IBlogRevisionProps extends IDashboardProps {
-	blog?: IBlog;
-	blogRevision?: IBlogRevision[];
+interface IEventRevisionProps extends IDashboardProps {
+	event?: IEvent;
+	eventRevision?: IEventRevision[];
 }
 
-export const BlogRevision: NextPage<IBlogRevisionProps> = (props) => {
+export const EventRevision: NextPage<IEventRevisionProps> = (props) => {
 	const { colorScheme } = useMantineColorScheme();
 	const router = useRouter();
 	const [tz, setTz] = useState<string>("UTC");
@@ -27,8 +27,8 @@ export const BlogRevision: NextPage<IBlogRevisionProps> = (props) => {
 	const [compareIndex, setCompareIndex] = useState<number>(0);
 	const [revisionSelect, setRevisionSelect] = useState<any[]>([]);
 	const [compareSelect, setCompareSelect] = useState<any[]>([]);
-	const [revisionData, setRevisionData] = useState<IBlogRevision[]>([]);
-	const [compareData, setCompareData] = useState<IBlogRevision[]>([]);
+	const [revisionData, setRevisionData] = useState<IEventRevision[]>([]);
+	const [compareData, setCompareData] = useState<IEventRevision[]>([]);
 
 	// ------------------------------------------------------------
 	// handler
@@ -56,7 +56,7 @@ export const BlogRevision: NextPage<IBlogRevisionProps> = (props) => {
 	const deleteForm = async () => {
 		setLoading(true);
 		try {
-			const req = await fetch(`${SERVER_V1}/blog/revision/${revisionData![selectedIndex]._id}`, {
+			const req = await fetch(`${SERVER_V1}/event/revision/${revisionData![selectedIndex]._id}`, {
 				method: "DELETE",
 				headers: {
 					"Content-Type": "application/json",
@@ -72,7 +72,7 @@ export const BlogRevision: NextPage<IBlogRevisionProps> = (props) => {
 				const newRevision = revisionData!.filter((item, index) => index !== selectedIndex);
 				setRevisionSelect(newRevision.map((item, index) => ({ label: `Revision ${item.revision} - ${formatDateWithTz(item.createdAt, tz)}`, value: index.toString() })));
 				setCompareSelect(
-					[props.blog!, ...newRevision].map((revision: IBlogRevision, index) => {
+					[props.event!, ...newRevision].map((revision: IEventRevision, index) => {
 						return {
 							label: `${revision.revision ? `Revision ${revision.revision}` : "Current Post"} - ${formatDateWithTz(revision.createdAt, tz)}`,
 							value: index.toString(),
@@ -80,7 +80,7 @@ export const BlogRevision: NextPage<IBlogRevisionProps> = (props) => {
 					})
 				);
 				setRevisionData(newRevision);
-				setCompareData([props.blog!, ...newRevision]);
+				setCompareData([props.event!, ...newRevision]);
 				setSelectedIndex(0);
 				setCompareIndex(0);
 				setLoading(false);
@@ -99,8 +99,8 @@ export const BlogRevision: NextPage<IBlogRevisionProps> = (props) => {
 
 		try {
 			const selectedRevision = revisionData![selectedIndex];
-			const { _id, blogId, revision, __v, author, ...restOfData } = selectedRevision;
-			const req = await fetch(`${SERVER_V1}/blog/${props.blog!._id}`, {
+			const { _id, eventId, revision, __v, author, ...restOfData } = selectedRevision;
+			const req = await fetch(`${SERVER_V1}/event/${props.event!._id}`, {
 				method: "PUT",
 				credentials: "include",
 				headers: {
@@ -114,7 +114,7 @@ export const BlogRevision: NextPage<IBlogRevisionProps> = (props) => {
 
 			if (req.status === 201 || req.status === 200) {
 				showNotification({ title: "Success", message: message + ". Redirecting...", disallowClose: true });
-				setTimeout(() => router.push(`../${props.blog?._id}`), 1500);
+				setTimeout(() => router.push(`../${props.event?._id}`), 1500);
 			} else {
 				setLoading(false);
 				showNotification({ title: "Error", message, disallowClose: true, color: "red" });
@@ -129,22 +129,22 @@ export const BlogRevision: NextPage<IBlogRevisionProps> = (props) => {
 	// page open
 	useEffect(() => {
 		setTz(Intl.DateTimeFormat().resolvedOptions().timeZone);
-		setRevisionData(props.blogRevision!);
-		setCompareData([props.blog!, ...props.blogRevision!]); // set revision data with props.blog and props.blogRevision combined
+		setRevisionData(props.eventRevision!);
+		setCompareData([props.event!, ...props.eventRevision!]);
 		setRevisionSelect(
-			props.blogRevision && props.blogRevision.length > 0
-				? props.blogRevision.map((revision, index) => {
+			props.eventRevision && props.eventRevision.length > 0
+				? props.eventRevision.map((revision, index) => {
 						return {
-							label: `Revision ${revision.revision} - ${formatDateWithTz(revision.createdAt, Intl.DateTimeFormat().resolvedOptions().timeZone)}`,
+							label: `Revision ${revision.revision} - ${formatDateWithTz(revision.createdAt, tz)}`,
 							value: index.toString(),
 						};
 				  })
 				: [{ label: "No Revision", value: "null" }]
 		);
 		setCompareSelect(
-			[props.blog!, ...props.blogRevision!].map((revision: IBlogRevision, index) => {
+			[props.event!, ...props.eventRevision!].map((revision: IEventRevision, index) => {
 				return {
-					label: `${revision.revision ? `Revision ${revision.revision}` : "Current Post"} - ${formatDateWithTz(revision.createdAt, Intl.DateTimeFormat().resolvedOptions().timeZone)}`,
+					label: `${revision.revision ? `Revision ${revision.revision}` : "Current Post"} - ${formatDateWithTz(revision.createdAt, tz)}`,
 					value: index.toString(),
 				};
 			})
@@ -154,9 +154,9 @@ export const BlogRevision: NextPage<IBlogRevisionProps> = (props) => {
 	return (
 		<div style={{ position: "relative" }}>
 			<TitleDashboard
-				title={"Blog Revision History"}
-				hrefLink={router.query.fromEdit === "true" ? `../${props.blog?._id}` : "../../blog"}
-				hrefText={router.query.fromEdit === "true" ? "Back to edit" : "Back to blog posts"}
+				title={"Event Revision History"}
+				hrefLink={router.query.fromEdit === "true" ? `../${props.event?._id}` : "../../event"}
+				hrefText={router.query.fromEdit === "true" ? "Back to edit" : "Back to event posts"}
 				HrefIcon={IconArrowLeft}
 			/>
 			<LoadingOverlay visible={loading} overlayBlur={3} />
@@ -182,19 +182,19 @@ export const BlogRevision: NextPage<IBlogRevisionProps> = (props) => {
 						/>
 					</Group>
 
-					{props.blog && revisionData && revisionData.length > 0 && (
+					{props.event && revisionData && revisionData.length > 0 && (
 						<Group position="right" ml={"auto"} mt={16}>
 							<Button
 								color="red"
 								onClick={handleDelete}
-								disabled={isNaN(selectedIndex) || formatDateWithTz(revisionData[selectedIndex]?.createdAt, tz) === formatDateWithTz(props.blog!.updatedAt, tz)}
+								disabled={isNaN(selectedIndex) || formatDateWithTz(revisionData[selectedIndex]?.createdAt, tz) === formatDateWithTz(props.event!.updatedAt, tz)}
 							>
 								Delete selected Revision
 							</Button>
 							<Button
 								color="blue"
 								onClick={handleReplace}
-								disabled={isNaN(selectedIndex) || formatDateWithTz(revisionData[selectedIndex]?.createdAt, tz) === formatDateWithTz(props.blog!.updatedAt, tz)}
+								disabled={isNaN(selectedIndex) || formatDateWithTz(revisionData[selectedIndex]?.createdAt, tz) === formatDateWithTz(props.event!.updatedAt, tz)}
 							>
 								Restore Selected Revision
 							</Button>
@@ -202,7 +202,7 @@ export const BlogRevision: NextPage<IBlogRevisionProps> = (props) => {
 					)}
 				</Group>
 
-				{props.blog && revisionData && compareData && revisionData.length > 0 ? (
+				{props.event && revisionData && compareData && revisionData.length > 0 ? (
 					<Box mt="md">
 						<ReactDiffViewer
 							useDarkTheme={colorScheme === "dark"}
@@ -221,12 +221,12 @@ export const BlogRevision: NextPage<IBlogRevisionProps> = (props) => {
 						<Grid mt="md" grow>
 							<Grid.Col span={4}>
 								<List spacing="sm">
-									<List.Item>Created at: {formatDateWithTz(revisionData[selectedIndex].createdAt, tz)}</List.Item>
-									<List.Item>
+									<List.Item mt="sm">Created at: {formatDateWithTz(revisionData[selectedIndex].createdAt, tz)}</List.Item>
+									<List.Item mt="sm">
 										Author:{" "}
 										{revisionData[selectedIndex] && revisionData[selectedIndex].author && revisionData[selectedIndex].author[0] ? revisionData[selectedIndex].author[0].username : "Deleted"}
 									</List.Item>
-									<List.Item>
+									<List.Item mt="sm">
 										Thumbnail:{" "}
 										<Text component="span" variant="link">
 											{revisionData[selectedIndex].thumbnail ? (
@@ -239,9 +239,30 @@ export const BlogRevision: NextPage<IBlogRevisionProps> = (props) => {
 										</Text>
 									</List.Item>
 									<List.Item>
+										Organizer:
+										<Text component="span" ml={4}>
+											{revisionData[selectedIndex].organizer && revisionData[selectedIndex].organizer!.length > 0
+												? revisionData[selectedIndex].organizer?.map((organizer, i) => {
+														return (
+															<span key={i}>
+																<Link href={`../organizer?qAll=${organizer}`}>
+																	<a>
+																		<Text component="span" variant="link">
+																			{organizer}
+																		</Text>
+																	</a>
+																</Link>
+																{i < revisionData[selectedIndex].organizer!.length - 1 ? ", " : ""}
+															</span>
+														);
+												  })
+												: "Deleted"}
+										</Text>
+									</List.Item>
+									<List.Item>
 										Tags:
 										<Text component="span" ml={4}>
-											{revisionData[selectedIndex].tags && revisionData![selectedIndex].tags!.length > 0
+											{revisionData[selectedIndex].tags && revisionData[selectedIndex].tags!.length > 0
 												? revisionData[selectedIndex].tags?.map((tags, i) => {
 														return (
 															<span key={i}>
@@ -252,7 +273,7 @@ export const BlogRevision: NextPage<IBlogRevisionProps> = (props) => {
 																		</Text>
 																	</a>
 																</Link>
-																{i < revisionData![selectedIndex].tags!.length - 1 ? ", " : ""}
+																{i < revisionData[selectedIndex].tags!.length - 1 ? ", " : ""}
 															</span>
 														);
 												  })
@@ -260,6 +281,12 @@ export const BlogRevision: NextPage<IBlogRevisionProps> = (props) => {
 										</Text>
 									</List.Item>
 									<List.Item>Visibility: {revisionData[selectedIndex].visibility}</List.Item>
+									<List.Item>Price: {revisionData[selectedIndex].price}</List.Item>
+									<List.Item>Start Date: {formatDateWithTz(revisionData[selectedIndex].startDate, tz)}</List.Item>
+									<List.Item>End Date: {formatDateWithTz(revisionData[selectedIndex].endDate, tz)}</List.Item>
+									<List.Item>Location: {revisionData[selectedIndex].location ? revisionData[selectedIndex].location : "None"}</List.Item>
+									<List.Item>Link: {revisionData[selectedIndex].link ? revisionData[selectedIndex].link : "None"}</List.Item>
+									<List.Item>Email: {revisionData[selectedIndex].email ? revisionData[selectedIndex].email : "None"}</List.Item>
 								</List>
 							</Grid.Col>
 
@@ -282,9 +309,30 @@ export const BlogRevision: NextPage<IBlogRevisionProps> = (props) => {
 										</Text>
 									</List.Item>
 									<List.Item>
+										Organizer:
+										<Text component="span" ml={4}>
+											{compareData[compareIndex].organizer && compareData[selectedIndex].organizer!.length > 0
+												? compareData[compareIndex].organizer?.map((organizer, i) => {
+														return (
+															<span key={i}>
+																<Link href={`../organizer?qAll=${organizer}`}>
+																	<a>
+																		<Text component="span" variant="link">
+																			{organizer}
+																		</Text>
+																	</a>
+																</Link>
+																{i < compareData[selectedIndex].organizer!.length - 1 ? ", " : ""}
+															</span>
+														);
+												  })
+												: "Deleted"}
+										</Text>
+									</List.Item>
+									<List.Item>
 										Tags:
 										<Text component="span" ml={4}>
-											{compareData[compareIndex].tags && revisionData![selectedIndex].tags!.length > 0
+											{compareData[compareIndex].tags && compareData[selectedIndex].tags!.length > 0
 												? compareData[compareIndex].tags?.map((tags, i) => {
 														return (
 															<span key={i}>
@@ -295,7 +343,7 @@ export const BlogRevision: NextPage<IBlogRevisionProps> = (props) => {
 																		</Text>
 																	</a>
 																</Link>
-																{i < revisionData![selectedIndex].tags!.length - 1 ? ", " : ""}
+																{i < compareData[selectedIndex].tags!.length - 1 ? ", " : ""}
 															</span>
 														);
 												  })
@@ -303,6 +351,12 @@ export const BlogRevision: NextPage<IBlogRevisionProps> = (props) => {
 										</Text>
 									</List.Item>
 									<List.Item>Visibility: {compareData[compareIndex].visibility}</List.Item>
+									<List.Item>Price: {compareData[compareIndex].price}</List.Item>
+									<List.Item>Start Date: {formatDateWithTz(compareData[compareIndex].startDate, tz)}</List.Item>
+									<List.Item>End Date: {formatDateWithTz(compareData[compareIndex].endDate, tz)}</List.Item>
+									<List.Item>Location: {compareData[compareIndex].location ? compareData[compareIndex].location : "None"}</List.Item>
+									<List.Item>Link: {compareData[compareIndex].link ? compareData[compareIndex].link : "None"}</List.Item>
+									<List.Item>Email: {compareData[compareIndex].email ? compareData[compareIndex].email : "None"}</List.Item>
 								</List>
 							</Grid.Col>
 						</Grid>
