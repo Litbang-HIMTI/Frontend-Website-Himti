@@ -135,7 +135,7 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 			props.blogRevision && props.blogRevision.length > 0
 				? props.blogRevision.map((revision, index) => {
 						return {
-							label: `Revision ${revision.revision} - ${formatDateWithTz(revision.createdAt, tz)}`,
+							label: `Revision ${revision.revision} - ${formatDateWithTz(revision.createdAt, Intl.DateTimeFormat().resolvedOptions().timeZone)}`,
 							value: index.toString(),
 						};
 				  })
@@ -144,7 +144,7 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 		setCompareSelect(
 			[props.blog!, ...props.blogRevision!].map((revision: IBlogRevision, index) => {
 				return {
-					label: `${revision.revision ? `Revision ${revision.revision}` : "Current Post"} - ${formatDateWithTz(revision.createdAt, tz)}`,
+					label: `${revision.revision ? `Revision ${revision.revision}` : "Current Post"} - ${formatDateWithTz(revision.createdAt, Intl.DateTimeFormat().resolvedOptions().timeZone)}`,
 					value: index.toString(),
 				};
 			})

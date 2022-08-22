@@ -632,7 +632,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 															</span>
 														);
 												  })
-												: "Deleted"}
+												: "None"}
 										</td>
 										<td>
 											{row.tags && row.tags.length > 0
