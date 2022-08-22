@@ -202,18 +202,18 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 					)}
 				</Group>
 
-				{props.blog && revisionData && revisionData.length > 0 ? (
+				{props.blog && revisionData && compareData && revisionData.length > 0 ? (
 					<Box mt="md">
 						<ReactDiffViewer
 							useDarkTheme={colorScheme === "dark"}
 							oldValue={revisionData[selectedIndex].content}
-							leftTitle={`Revision ${revisionData[selectedIndex].revision}\nTitle: ` + revisionData[selectedIndex].title + "\n\nDescription:\n" + revisionData[selectedIndex].description}
+							leftTitle={`Revision${revisionData[selectedIndex].revision}\nTitle: ` + revisionData[selectedIndex].title + "\n\nDescription:\n" + revisionData[selectedIndex].description}
 							newValue={compareData[compareIndex].content}
 							rightTitle={
-								`${compareData[compareIndex].revision ? `Revision ${compareData[compareIndex].revision}\n` : `Current`}\nTitle: ` +
-								props.blog?.title +
+								`${compareData[compareIndex].revision ? `Revision ${compareData[compareIndex].revision}` : `Current`}\nTitle: ` +
+								compareData[compareIndex]?.title +
 								"\n\nDescription:\n" +
-								props.blog?.description
+								compareData[compareIndex]?.description
 							}
 							splitView={true}
 						/>
