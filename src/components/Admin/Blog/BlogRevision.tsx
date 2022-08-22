@@ -24,6 +24,7 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 	const [selectedIndex, setSelectedIndex] = useState<number>(0);
 	const [tz, setTz] = useState<string>("UTC");
 	const [revisionSelect, setRevisionSelect] = useState<any[]>([]);
+	const [revisionData, setRevisionData] = useState<IBlogRevision[]>([]);
 
 	// ------------------------------------------------------------
 	// handler
@@ -51,7 +52,7 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 	const deleteForm = async () => {
 		setLoading(true);
 		try {
-			const req = await fetch(`${SERVER_V1}/blog/revision/${props.blogRevision![selectedIndex]._id}`, {
+			const req = await fetch(`${SERVER_V1}/blog/revision/${revisionData![selectedIndex]._id}`, {
 				method: "DELETE",
 				headers: {
 					"Content-Type": "application/json",
@@ -64,8 +65,9 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 				showNotification({ title: "Revision deleted", message: message, disallowClose: true });
 
 				// remove from list
-				const newRevision = props.blogRevision!.filter((item, index) => index !== selectedIndex);
-				setRevisionSelect(newRevision.map((item, index) => ({ label: `Revision ${item.revision} - ${formatDateWithTz(item.createdAt, tz)}`, value: index })));
+				const newRevision = revisionData!.filter((item, index) => index !== selectedIndex);
+				setRevisionSelect(newRevision.map((item, index) => ({ label: `Revision ${item.revision} - ${formatDateWithTz(item.createdAt, tz)}`, value: index.toString() })));
+				setRevisionData(newRevision);
 				setSelectedIndex(0);
 				setLoading(false);
 			} else {
@@ -82,7 +84,7 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 		setLoading(true);
 
 		try {
-			const selectedRevision = props.blogRevision![selectedIndex];
+			const selectedRevision = revisionData![selectedIndex];
 			const { _id, blogId, revision, __v, author, ...restOfData } = selectedRevision;
 			const req = await fetch(`${SERVER_V1}/blog/${props.blog!._id}`, {
 				method: "PUT",
@@ -113,6 +115,7 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 	// page open
 	useEffect(() => {
 		setTz(Intl.DateTimeFormat().resolvedOptions().timeZone);
+		setRevisionData(props.blogRevision!);
 		setRevisionSelect(
 			props.blogRevision && props.blogRevision.length > 0
 				? props.blogRevision.map((revision, index) => {
@@ -148,32 +151,34 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 						/>
 					</Group>
 
-					<Group position="right" ml={"auto"} mt={16}>
-						<Button
-							color="red"
-							onClick={handleDelete}
-							disabled={isNaN(selectedIndex) || formatDateWithTz(props.blogRevision![selectedIndex].createdAt, tz) === formatDateWithTz(props.blog!.updatedAt, tz)}
-						>
-							Delete selected Revision
-						</Button>
-						<Button
-							color="blue"
-							onClick={handleReplace}
-							disabled={isNaN(selectedIndex) || formatDateWithTz(props.blogRevision![selectedIndex].createdAt, tz) === formatDateWithTz(props.blog!.updatedAt, tz)}
-						>
-							Restore Selected Revision
-						</Button>
-					</Group>
+					{props.blog && revisionData && revisionData.length > 0 && (
+						<Group position="right" ml={"auto"} mt={16}>
+							<Button
+								color="red"
+								onClick={handleDelete}
+								disabled={isNaN(selectedIndex) || formatDateWithTz(revisionData[selectedIndex]?.createdAt, tz) === formatDateWithTz(props.blog!.updatedAt, tz)}
+							>
+								Delete selected Revision
+							</Button>
+							<Button
+								color="blue"
+								onClick={handleReplace}
+								disabled={isNaN(selectedIndex) || formatDateWithTz(revisionData[selectedIndex]?.createdAt, tz) === formatDateWithTz(props.blog!.updatedAt, tz)}
+							>
+								Restore Selected Revision
+							</Button>
+						</Group>
+					)}
 				</Group>
 
-				{props.blog && props.blogRevision && props.blogRevision.length > 0 ? (
+				{props.blog && revisionData && revisionData.length > 0 ? (
 					<Box mt="md">
 						<ReactDiffViewer
 							useDarkTheme={colorScheme === "dark"}
-							oldValue={props.blogRevision[selectedIndex].content}
-							leftTitle={`Revision ${props.blogRevision[selectedIndex].revision} Title: ` + props.blogRevision[selectedIndex].title}
+							oldValue={revisionData[selectedIndex].content}
+							leftTitle={`Revision ${revisionData[selectedIndex].revision}\nTitle: ` + revisionData[selectedIndex].title + "\n\nDescription:\n" + revisionData[selectedIndex].description}
 							newValue={props.blog?.content}
-							rightTitle={`Current Title: ` + props.blog?.title}
+							rightTitle={`Current\nTitle: ` + props.blog?.title + "\n\nDescription:\n" + props.blog?.description}
 							splitView={true}
 						/>
 
@@ -181,20 +186,18 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 							<Group>
 								<Box>
 									<Text size="sm" mt="sm">
-										Created at: {formatDateWithTz(props.blogRevision[selectedIndex].createdAt, tz)}
+										Created at: {formatDateWithTz(revisionData[selectedIndex].createdAt, tz)}
 									</Text>
 									<Text size="sm" mt="sm">
 										Author:{" "}
-										{props.blogRevision[selectedIndex] && props.blogRevision[selectedIndex].author && props.blogRevision[selectedIndex].author[0]
-											? props.blogRevision[selectedIndex].author[0].username
-											: "Deleted"}
+										{revisionData[selectedIndex] && revisionData[selectedIndex].author && revisionData[selectedIndex].author[0] ? revisionData[selectedIndex].author[0].username : "Deleted"}
 									</Text>
 									<Text size="sm" mt="sm">
 										Thumbnail:{" "}
 										<Text component="span" variant="link">
-											{props.blogRevision[selectedIndex].thumbnail ? (
-												<Link href={props.blogRevision[selectedIndex].thumbnail!}>
-													<a>{props.blogRevision[selectedIndex].thumbnail}</a>
+											{revisionData[selectedIndex].thumbnail ? (
+												<Link href={revisionData[selectedIndex].thumbnail!}>
+													<a>{revisionData[selectedIndex].thumbnail}</a>
 												</Link>
 											) : (
 												"None"
@@ -204,8 +207,8 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 									<Text size="sm" mt="sm">
 										Tags:
 										<Text component="span" ml={4}>
-											{props.blogRevision[selectedIndex].tags && props.blogRevision![selectedIndex].tags!.length > 0
-												? props.blogRevision[selectedIndex].tags?.map((tags, i) => {
+											{revisionData[selectedIndex].tags && revisionData![selectedIndex].tags!.length > 0
+												? revisionData[selectedIndex].tags?.map((tags, i) => {
 														return (
 															<span key={i}>
 																<Link href={`../tags?qAll=${tags}`}>
@@ -215,7 +218,7 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 																		</Text>
 																	</a>
 																</Link>
-																{i < props.blogRevision![selectedIndex].tags!.length - 1 ? ", " : ""}
+																{i < revisionData![selectedIndex].tags!.length - 1 ? ", " : ""}
 															</span>
 														);
 												  })
@@ -223,7 +226,7 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 										</Text>
 									</Text>
 									<Text size="sm" mt="sm">
-										Visibility: {props.blogRevision[selectedIndex].visibility}
+										Visibility: {revisionData[selectedIndex].visibility}
 									</Text>
 								</Box>
 							</Group>
