@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { showNotification } from "@mantine/notifications";
-import { Box, Button, Group, LoadingOverlay, Text, Select, useMantineColorScheme, Divider, Center, List, Grid } from "@mantine/core";
+import { Box, Button, Group, LoadingOverlay, Text, Select, useMantineColorScheme, Center, List, Grid } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { formatDateWithTz, SERVER_V1 } from "../../../helper";
