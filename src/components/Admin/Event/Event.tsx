@@ -27,7 +27,22 @@ import { keys } from "@mantine/utils";
 import { showNotification } from "@mantine/notifications";
 import { openConfirmModal } from "@mantine/modals";
 import { useLocalStorage } from "@mantine/hooks";
-import { IconSearch, IconEdit, IconTrash, IconPin, IconPinnedOff, IconUser, IconLetterA, IconTags, IconDeviceWatch, IconRefresh, IconEye, IconHome, IconHomeOff } from "@tabler/icons";
+import {
+	IconSearch,
+	IconEdit,
+	IconTrash,
+	IconPin,
+	IconPinnedOff,
+	IconUser,
+	IconLetterA,
+	IconTags,
+	IconDeviceWatch,
+	IconRefresh,
+	IconEye,
+	IconHome,
+	IconHomeOff,
+	IconHistory,
+} from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { IEventRevision, validEventSort, EventSort, EventQRes } from "../../../interfaces/db";
 import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../helper";
@@ -299,7 +314,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 		<>
 			<TitleDashboard
 				title={`${props.revision ? "Event Posts Revision" : "Event Posts"}`}
-				hrefLink={`${props.revision ? props.pathname?.split("?")[0] + "/revision" : props.pathname?.split("?")[0]}  /create`}
+				hrefLink={`${props.revision ? props.pathname?.split("?")[0] + "/revision" : props.pathname?.split("?")[0]}/create`}
 				hrefText="Add new"
 			/>
 			<div>
@@ -588,13 +603,17 @@ export const Event: NextPage<IEventProps> = (props) => {
 								sortSearchData(sortBy, dataPage, dataAllPage).map((row) => (
 									<tr key={row._id}>
 										<td>
-											<Link href={`/event/${row.title.replaceAll(" ", "-")}-${row._id}`}>
-												<a>
-													<Text component="span" variant="link">
-														{row.title}
-													</Text>
-												</a>
-											</Link>
+											<Tooltip withArrow label={row.description} multiline>
+												<span>
+													<Link href={`/event/${row.title.replaceAll(" ", "-")}-${row._id}`}>
+														<a>
+															<Text component="span" variant="link">
+																{row.title}
+															</Text>
+														</a>
+													</Link>
+												</span>
+											</Tooltip>
 										</td>
 										<td>{row.visibility}</td>
 										<td>
@@ -602,7 +621,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 												? row.organizer.map((organizer, i) => {
 														return (
 															<span key={i}>
-																<Link href={`${props.pathname?.split("?")[0]}/organizer?qAll=${organizer}`}>
+																<Link href={`${props.revision ? "../event" : props.pathname?.split("?")[0]}/organizer?qAll=${organizer}`}>
 																	<a>
 																		<Text component="span" variant="link">
 																			{organizer}
@@ -620,7 +639,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 												? row.tags.map((tags, i) => {
 														return (
 															<span key={i}>
-																<Link href={`${props.pathname?.split("?")[0]}/tags?qAll=${tags}`}>
+																<Link href={`${props.revision ? "../event" : props.pathname?.split("?")[0]}/tags?qAll=${tags}`}>
 																	<a>
 																		<Text component="span" variant="link">
 																			{tags}
@@ -636,7 +655,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 										<td>
 											{row.editedBy && row.editedBy[0] ? (
 												<>
-													<Tooltip label={`Last edited by: ${row.editedBy[0].username}`}>
+													<Tooltip withArrow label={`Last edited by: ${row.editedBy[0].username}`}>
 														<span>{row.author[0] ? row.author[0].username : "Deleted"}</span>
 													</Tooltip>
 												</>
@@ -648,13 +667,13 @@ export const Event: NextPage<IEventProps> = (props) => {
 										</td>
 										<td>
 											{row.pinned ? (
-												<Tooltip label="Pinned">
+												<Tooltip withArrow label="Pinned">
 													<span>
 														<IconPin />
 													</span>
 												</Tooltip>
 											) : (
-												<Tooltip label="Not pinned">
+												<Tooltip withArrow label="Not pinned">
 													<span>
 														<IconPinnedOff />
 													</span>
@@ -663,13 +682,13 @@ export const Event: NextPage<IEventProps> = (props) => {
 										</td>
 										<td>
 											{row.showAtHome ? (
-												<Tooltip label="Shown at home">
+												<Tooltip withArrow label="Shown at home">
 													<span>
 														<IconHome />
 													</span>
 												</Tooltip>
 											) : (
-												<Tooltip label="Not shown at home">
+												<Tooltip withArrow label="Not shown at home">
 													<span>
 														<IconHomeOff />
 													</span>
@@ -678,7 +697,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 										</td>
 										<td>
 											{row.updatedAt !== row.createdAt ? (
-												<Tooltip label={`Last edited at: ${formatDateWithTz(row.updatedAt, tz)}`}>
+												<Tooltip withArrow label={`Last edited at: ${formatDateWithTz(row.updatedAt, tz)}`}>
 													<span>{formatDateWithTz(row.createdAt, tz)}</span>
 												</Tooltip>
 											) : (
@@ -687,16 +706,39 @@ export const Event: NextPage<IEventProps> = (props) => {
 										</td>
 										<td style={{ padding: "1rem .5rem" }}>
 											<div className="dash-flex">
-												<Link href={`${props.pathname?.split("?")[0]}/${row._id}`}>
-													<a>
-														<ActionIcon>
-															<IconEdit size={14} stroke={1.5} />
+												{!props.revision && (
+													<>
+														<Tooltip withArrow label="Edit">
+															<span>
+																<Link href={`${props.pathname?.split("?")[0]}/${row._id}`}>
+																	<a>
+																		<ActionIcon>
+																			<IconEdit size={14} stroke={1.5} />
+																		</ActionIcon>
+																	</a>
+																</Link>
+															</span>
+														</Tooltip>
+														<Tooltip withArrow label="View revisions">
+															<span>
+																<Link href={`${props.pathname?.split("?")[0]}/${row._id}/revision`}>
+																	<a>
+																		<ActionIcon>
+																			<IconHistory size={14} stroke={1.5} />
+																		</ActionIcon>
+																	</a>
+																</Link>
+															</span>
+														</Tooltip>
+													</>
+												)}
+												<Tooltip withArrow label="Delete">
+													<span>
+														<ActionIcon onClick={() => handleDelete(row._id)}>
+															<IconTrash size={14} stroke={1.5} />
 														</ActionIcon>
-													</a>
-												</Link>
-												<ActionIcon onClick={() => handleDelete(row._id)}>
-													<IconTrash size={14} stroke={1.5} />
-												</ActionIcon>
+													</span>
+												</Tooltip>
 											</div>
 										</td>
 									</tr>

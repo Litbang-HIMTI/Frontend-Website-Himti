@@ -1,23 +1,23 @@
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import { AppShell } from "@mantine/core";
-import { ForumForm } from "../../../src/components/Admin/Forum";
+import { BlogForm } from "../../../src/components/Admin/Blog";
 import { DashboardNav } from "../../../src/components/Admin/Nav";
 import { IDashboardProps } from "../../../src/interfaces/props/Dashboard";
-import { SERVER_V1, validateForumMod } from "../../../src/helper";
+import { SERVER_V1, validateEditor } from "../../../src/helper";
 
-const edit: NextPage<IDashboardProps> = (props) => {
+const create: NextPage<IDashboardProps> = (props) => {
 	return (
 		<>
 			<Head>
 				<meta charSet="UTF-8" />
 				<meta httpEquiv="X-UA-Compatible" content="IE=edge" />
 				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-				<title>Forum View/Edit | Himti UIN Jakarta</title>
+				<title>Blog Create | Himti UIN Jakarta</title>
 			</Head>
 			<AppShell header={<DashboardNav {...props} />}>
 				<main className="dashboard content-wrap">
-					<ForumForm {...props} />
+					<BlogForm {...props} />
 				</main>
 			</AppShell>
 		</>
@@ -39,29 +39,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 	// validate role
 	const parsed = await checkLoggedIn.json();
-	if (!validateForumMod(parsed.data)) return { notFound: true };
-
-	// get forum data
-	const fetchForum = await fetch(`${SERVER_V1}/forum/${context.params!._id}`, {
-		method: "GET",
-		headers: {
-			"Content-Type": "application/json",
-			Cookie: "connect.sid=" + context.req.cookies["connect.sid"],
-		},
-		credentials: "include",
-	});
-
-	if (fetchForum.status !== 200) return { notFound: true };
-	const { data } = await fetchForum.json();
+	if (!validateEditor(parsed.data)) return { notFound: true };
 
 	return {
 		props: {
 			pathname: context.resolvedUrl,
 			user: parsed.data,
 			token: context.req.cookies["connect.sid"],
-			forum: data,
 		},
 	};
 };
 
-export default edit;
+export default create;

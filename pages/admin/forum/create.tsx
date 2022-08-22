@@ -6,7 +6,7 @@ import { DashboardNav } from "../../../src/components/Admin/Nav";
 import { IDashboardProps } from "../../../src/interfaces/props/Dashboard";
 import { SERVER_V1, validateForumMod } from "../../../src/helper";
 
-const forum: NextPage<IDashboardProps> = (props) => {
+const create: NextPage<IDashboardProps> = (props) => {
 	return (
 		<>
 			<Head>
@@ -50,4 +50,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 	};
 };
 
-export default forum;
+export default create;
