@@ -293,7 +293,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 		setSearchAll(params.get("qAll") || "");
 		setSearchTitle(params.get("title") || "");
 		setSearchVisibility((params.get("visibility") as any) || "all");
-		setSearchOrganizer([params.get("organization")!] || []);
+		setSearchOrganizer([params.get("organizer")!] || []);
 		setSearchTags([params.get("tags")!] || []);
 		setSearchAuthor(params.get("author") || "");
 		setSearchIsPinned((params.get("pinned") as any) || "all");
