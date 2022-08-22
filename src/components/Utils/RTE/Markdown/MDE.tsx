@@ -1,7 +1,7 @@
 import { ChangeEvent, useCallback } from "react";
 import { SERVER_LOCAL_V1 } from "../../../../helper";
 import { ActionIcon, Button, Group, Text, TextInput, Tooltip, useMantineColorScheme, useMantineTheme } from "@mantine/core";
-import { showNotification } from "@mantine/notifications";
+import { showNotification, updateNotification } from "@mantine/notifications";
 import { closeAllModals, openModal } from "@mantine/modals";
 import { Dropzone, IMAGE_MIME_TYPE } from "@mantine/dropzone";
 import "@uiw/react-md-editor/markdown-editor.css";
@@ -75,7 +75,7 @@ export const MDE = ({ content, setContent, editable }: I_RTE) => {
 			const reader = new FileReader();
 			reader.readAsDataURL(file);
 			reader.onload = () => {
-				showNotification({ title: "Loading", message: "Parsing image", disallowClose: true });
+				showNotification({ id: `Loading-data`, title: "Loading", message: "Parsing image. Please wait...", disallowClose: true, loading: true, autoClose: false });
 				resolve(reader.result);
 			};
 			reader.onerror = (error) => {
@@ -90,6 +90,7 @@ export const MDE = ({ content, setContent, editable }: I_RTE) => {
 				const formData = {
 					file: await toBase64(file),
 				};
+				updateNotification({ id: "Loading-data", title: "Loading", message: "Uploading. Please wait...", disallowClose: true, loading: true, autoClose: false });
 
 				fetch(`${SERVER_LOCAL_V1}/img/upload`, {
 					method: "POST",
@@ -97,7 +98,15 @@ export const MDE = ({ content, setContent, editable }: I_RTE) => {
 				})
 					.then((response) => response.json())
 					.then((result) => {
-						showNotification({ title: "Success", message: `Image uploaded at ${result.data.secure_url}`, color: "green", disallowClose: true });
+						updateNotification({
+							id: "Loading-data",
+							title: "Success",
+							message: `Image uploaded at ${result.data.secure_url}`,
+							color: "green",
+							disallowClose: true,
+							loading: false,
+							autoClose: 5000,
+						});
 						resolve(result.data.secure_url);
 					})
 					.catch(() => {
