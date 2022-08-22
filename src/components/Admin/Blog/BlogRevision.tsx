@@ -20,11 +20,15 @@ interface IBlogFormProps extends IDashboardProps {
 export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 	const { colorScheme } = useMantineColorScheme();
 	const router = useRouter();
-	const [loading, setLoading] = useState<boolean>(false);
-	const [selectedIndex, setSelectedIndex] = useState<number>(0);
 	const [tz, setTz] = useState<string>("UTC");
+	const [loading, setLoading] = useState<boolean>(false);
+
+	const [selectedIndex, setSelectedIndex] = useState<number>(0);
+	const [compareIndex, setCompareIndex] = useState<number>(0);
 	const [revisionSelect, setRevisionSelect] = useState<any[]>([]);
+	const [compareSelect, setCompareSelect] = useState<any[]>([]);
 	const [revisionData, setRevisionData] = useState<IBlogRevision[]>([]);
+	const [compareData, setCompareData] = useState<IBlogRevision[]>([]);
 
 	// ------------------------------------------------------------
 	// handler
@@ -67,8 +71,18 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 				// remove from list
 				const newRevision = revisionData!.filter((item, index) => index !== selectedIndex);
 				setRevisionSelect(newRevision.map((item, index) => ({ label: `Revision ${item.revision} - ${formatDateWithTz(item.createdAt, tz)}`, value: index.toString() })));
+				setCompareSelect(
+					[props.blog!, ...newRevision].map((revision: IBlogRevision, index) => {
+						return {
+							label: `${revision.revision ? `Revision ${revision.revision}` : "Current Post"} - ${formatDateWithTz(revision.createdAt, tz)}`,
+							value: index.toString(),
+						};
+					})
+				);
 				setRevisionData(newRevision);
+				setCompareData([props.blog!, ...newRevision]);
 				setSelectedIndex(0);
+				setCompareIndex(0);
 				setLoading(false);
 			} else {
 				setLoading(false);
@@ -116,6 +130,7 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 	useEffect(() => {
 		setTz(Intl.DateTimeFormat().resolvedOptions().timeZone);
 		setRevisionData(props.blogRevision!);
+		setCompareData([props.blog!, ...props.blogRevision!]); // set revision data with props.blog and props.blogRevision combined
 		setRevisionSelect(
 			props.blogRevision && props.blogRevision.length > 0
 				? props.blogRevision.map((revision, index) => {
@@ -125,6 +140,14 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 						};
 				  })
 				: [{ label: "No Revision", value: "null" }]
+		);
+		setCompareSelect(
+			[props.blog!, ...props.blogRevision!].map((revision: IBlogRevision, index) => {
+				return {
+					label: `${revision.revision ? `Revision ${revision.revision}` : "Current Post"} - ${formatDateWithTz(revision.createdAt, tz)}`,
+					value: index.toString(),
+				};
+			})
 		);
 	}, []);
 
@@ -147,6 +170,14 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 							value={selectedIndex.toString()}
 							onChange={(value) => setSelectedIndex(value ? parseInt(value) : 0)}
 							data={revisionSelect}
+							sx={{ minWidth: "300px" }}
+						/>
+						<Select
+							label="Compare with"
+							placeholder="Compare with"
+							value={compareIndex.toString()}
+							onChange={(value) => setCompareIndex(value ? parseInt(value) : 0)}
+							data={compareSelect}
 							sx={{ minWidth: "300px" }}
 						/>
 					</Group>
@@ -177,8 +208,13 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 							useDarkTheme={colorScheme === "dark"}
 							oldValue={revisionData[selectedIndex].content}
 							leftTitle={`Revision ${revisionData[selectedIndex].revision}\nTitle: ` + revisionData[selectedIndex].title + "\n\nDescription:\n" + revisionData[selectedIndex].description}
-							newValue={props.blog?.content}
-							rightTitle={`Current\nTitle: ` + props.blog?.title + "\n\nDescription:\n" + props.blog?.description}
+							newValue={compareData[compareIndex].content}
+							rightTitle={
+								`${compareData[compareIndex].revision ? `Revision ${compareData[compareIndex].revision}\n` : `Current`}\nTitle: ` +
+								props.blog?.title +
+								"\n\nDescription:\n" +
+								props.blog?.description
+							}
 							splitView={true}
 						/>
 
@@ -238,17 +274,17 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 							<Group position="right" ml="auto">
 								<Box>
 									<Text size="sm" mt="sm">
-										Last updated at: {formatDateWithTz(props.blog?.updatedAt!, tz)}
+										Created at: {formatDateWithTz(compareData[compareIndex].createdAt, tz)}
 									</Text>
 									<Text size="sm" mt="sm">
-										Author: {props.blog && props.blog.editedBy && props.blog.editedBy[0] ? props.blog.editedBy[0].username : "Deleted"}
+										Author: {compareData[compareIndex] && compareData[compareIndex].author && compareData[compareIndex].author[0] ? compareData[compareIndex].author[0].username : "Deleted"}
 									</Text>
 									<Text size="sm" mt="sm">
 										Thumbnail:{" "}
 										<Text component="span" variant="link">
-											{props.blog?.thumbnail ? (
-												<Link href={props.blog?.thumbnail!}>
-													<a>{props.blog?.thumbnail}</a>
+											{compareData[compareIndex].thumbnail ? (
+												<Link href={compareData[compareIndex].thumbnail!}>
+													<a>{compareData[compareIndex].thumbnail}</a>
 												</Link>
 											) : (
 												"None"
@@ -258,8 +294,8 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 									<Text size="sm" mt="sm">
 										Tags:
 										<Text component="span" ml={4}>
-											{props.blog.tags && props.blog.tags.length > 0
-												? props.blog.tags.map((tags, i) => {
+											{compareData[compareIndex].tags && revisionData![selectedIndex].tags!.length > 0
+												? compareData[compareIndex].tags?.map((tags, i) => {
 														return (
 															<span key={i}>
 																<Link href={`../tags?qAll=${tags}`}>
@@ -269,7 +305,7 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 																		</Text>
 																	</a>
 																</Link>
-																{i < props.blog!.tags!.length - 1 ? ", " : ""}
+																{i < revisionData![selectedIndex].tags!.length - 1 ? ", " : ""}
 															</span>
 														);
 												  })
@@ -277,7 +313,7 @@ export const BlogRevision: NextPage<IBlogFormProps> = (props) => {
 										</Text>
 									</Text>
 									<Text size="sm" mt="sm">
-										Visibility: {props.blog?.visibility}
+										Visibility: {compareData[compareIndex].visibility}
 									</Text>
 								</Box>
 							</Group>
