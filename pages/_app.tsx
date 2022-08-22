@@ -33,7 +33,7 @@ export default function App(props: AppProps & { colorScheme: ColorScheme }) {
 					withNormalizeCSS
 				>
 					<ModalsProvider>
-						<NotificationsProvider>
+						<NotificationsProvider position="top-right">
 							<RouterTransition />
 							<Component {...pageProps} />
 						</NotificationsProvider>
