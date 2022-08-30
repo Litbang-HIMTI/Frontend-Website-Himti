@@ -9,9 +9,9 @@ import { useLocalStorage } from "@mantine/hooks";
 import { IconSearch, IconEdit, IconTrash } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { IGroup, validGroupSort, GroupSort } from "../../../interfaces/db";
-import { addQueryParam, removeQueryParam, formatDateWithTz, handleAdminTabChange } from "../../../helper";
+import { deleteData, fillDataPage, fillDataAll, handleInputQueryChange, handleAdminTabChange } from "../../../helper/admin";
+import { formatDateWithTz } from "../../../helper/global/format";
 import { Th, useTableStyles } from "../../Utils/Dashboard";
-import { deleteData, fillDataPage, fillDataAll } from "../../../helper/admin/fetchData";
 import { TableView } from "../Reusable/TableView";
 
 export const UserGroup: NextPage<IDashboardProps> = (props) => {
@@ -38,12 +38,6 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// handler
-	const handleInputQueryChange = (e: React.ChangeEvent<HTMLInputElement>, setFunc: (value: string) => void, param: string) => {
-		setFunc(e.target.value);
-		if (e.target.value === "") removeQueryParam(router, param);
-		else addQueryParam(router, param, e.target.value);
-	};
-
 	const handleDelete = (id: string) => {
 		openConfirmModal({
 			title: "Delete confirmation",
@@ -159,7 +153,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 								mb="md"
 								icon={<IconSearch size={14} stroke={1.5} />}
 								value={searchAll}
-								onChange={(e) => handleInputQueryChange(e, setSearchAll, e.target.name)}
+								onChange={(e) => handleInputQueryChange(e, setSearchAll, e.target.name, router)}
 								mt={16}
 							/>
 						</Collapse>

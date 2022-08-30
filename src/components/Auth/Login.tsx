@@ -38,7 +38,7 @@ export const Login: NextPage<loginProps> = (props) => {
 		setLoading(true);
 		if (submitted) return;
 		const { username, password } = form.values;
-		showNotification({ id: "login-notif", title: "Loading...", message: "You have logged in successfully. Redirecting...", loading: true, disallowClose: true, autoClose: false });
+		showNotification({ id: "login-notif", title: "Loading", message: "Logging in...", loading: true, disallowClose: true, autoClose: false });
 		try {
 			const loginFetch = await fetch(`${SERVER_V1}/auth`, {
 				method: "POST",

@@ -9,9 +9,9 @@ import { useLocalStorage } from "@mantine/hooks";
 import { IconSearch, IconEdit, IconTrash, IconLego, IconLink, IconExternalLink, IconDeviceWatch, IconNumber9 } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { IShortlink, validShortlinkSort, ShortlinkSort } from "../../../interfaces/db";
-import { addQueryParam, removeQueryParam, formatDateWithTz, handleAdminTabChange } from "../../../helper";
+import { deleteData, fillDataPage, fillDataAll, handleAdminTabChange, handleInputQueryChange } from "../../../helper/admin";
+import { formatDateWithTz, addQueryParam, removeQueryParam } from "../../../helper/global";
 import { Th, useTableStyles } from "../../Utils/Dashboard";
-import { deleteData, fillDataPage, fillDataAll } from "../../../helper/admin/fetchData";
 import { TableView } from "../Reusable/TableView";
 
 export const Shortlink: NextPage<IDashboardProps> = (props) => {
@@ -43,12 +43,6 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// handler
-	const handleInputQueryChange = (e: React.ChangeEvent<HTMLInputElement>, setFunc: (value: string) => void, param: string) => {
-		setFunc(e.target.value);
-		if (e.target.value === "") removeQueryParam(router, param);
-		else addQueryParam(router, param, e.target.value);
-	};
-
 	const handleDelete = (id: string) => {
 		openConfirmModal({
 			title: "Delete confirmation",
@@ -187,7 +181,7 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 									mb="md"
 									icon={<IconSearch size={14} stroke={1.5} />}
 									value={searchAll}
-									onChange={(e) => handleInputQueryChange(e, setSearchAll, e.target.name)}
+									onChange={(e) => handleInputQueryChange(e, setSearchAll, e.target.name, router)}
 									mt={16}
 								/>
 							</Collapse>
@@ -204,7 +198,7 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 									label="Shorten"
 									icon={<IconExternalLink size={14} stroke={1.5} />}
 									value={searchShorten}
-									onChange={(e) => handleInputQueryChange(e, setSearchShorten, e.target.name)}
+									onChange={(e) => handleInputQueryChange(e, setSearchShorten, e.target.name, router)}
 									mt={16}
 								/>
 								<TextInput
@@ -214,7 +208,7 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 									label="Original URL"
 									icon={<IconLink size={14} stroke={1.5} />}
 									value={searchUrl}
-									onChange={(e) => handleInputQueryChange(e, setSearchUrl, e.target.name)}
+									onChange={(e) => handleInputQueryChange(e, setSearchUrl, e.target.name, router)}
 									mt={8}
 								/>
 								<NumberInput
@@ -243,7 +237,7 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 									label="Author"
 									icon={<IconLego size={14} stroke={1.5} />}
 									value={searchAuthor}
-									onChange={(e) => handleInputQueryChange(e, setSearchAuthor, e.target.name)}
+									onChange={(e) => handleInputQueryChange(e, setSearchAuthor, e.target.name, router)}
 									mt={8}
 								/>
 								<TextInput
@@ -253,7 +247,7 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 									name="createdAt"
 									icon={<IconDeviceWatch size={14} stroke={1.5} />}
 									value={searchCreatedAt}
-									onChange={(e) => handleInputQueryChange(e, setSearchCreatedAt, e.target.name)}
+									onChange={(e) => handleInputQueryChange(e, setSearchCreatedAt, e.target.name, router)}
 									mt={8}
 								/>
 							</Collapse>
