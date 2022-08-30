@@ -7,7 +7,7 @@ import { showNotification } from "@mantine/notifications";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { IconGripVertical, IconEdit, IconPlus } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { SERVER_V1 } from "../../../helper/constants";
+import { SERVER_V1 } from "../../../helper/global/constants";
 import { INote } from "../../../interfaces/db/Note";
 import { MDPreview } from "../../Utils/Viewer/Markdown/MDPreview";
 

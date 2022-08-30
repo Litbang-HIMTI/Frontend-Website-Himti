@@ -1,7 +1,7 @@
 import { showNotification, updateNotification } from "@mantine/notifications";
 import { IconCheck, IconX } from "@tabler/icons";
 import { SetStateAction } from "react";
-import { SERVER_V1 } from "../constants";
+import { SERVER_V1 } from "../global/constants";
 
 export type IDeleteData = (_id: string, api_url: string, setDataPage: (value: SetStateAction<any[]>) => void, setDataAllPage: (value: SetStateAction<any[]>) => void) => Promise<void>;
 export type IFillDataAll = (api_url: string, setLoadingDataAll: (value: SetStateAction<boolean>) => void, setDataAllPage: (value: SetStateAction<any[]>) => void) => Promise<void>;

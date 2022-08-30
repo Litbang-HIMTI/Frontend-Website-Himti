@@ -9,7 +9,7 @@ import { useLocalStorage } from "@mantine/hooks";
 import { IconSearch, IconEdit, IconTrash, IconLego, IconLink, IconExternalLink, IconDeviceWatch, IconNumber9 } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { IShortlink, validShortlinkSort, ShortlinkSort } from "../../../interfaces/db";
-import { addQueryParam, removeQueryParam, formatDateWithTz, handleTabChange } from "../../../helper";
+import { addQueryParam, removeQueryParam, formatDateWithTz, handleAdminTabChange } from "../../../helper";
 import { Th, useTableStyles } from "../../Utils/Dashboard";
 import { deleteData, fillDataPage, fillDataAll } from "../../../helper/admin/fetchData";
 import { TableView } from "../Reusable/TableView";
@@ -163,7 +163,7 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 				setDataAllPage={setDataAllPage}
 				// tabs
 				tabIndex={tabIndex}
-				handle_tabs_change={(val) => handleTabChange(val, setTabIndex, router)}
+				handle_tabs_change={(val) => handleAdminTabChange(val, setTabIndex, router)}
 				tabs_header_length={2}
 				tabs_element_header={() => (
 					<>

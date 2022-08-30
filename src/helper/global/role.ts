@@ -1,4 +1,4 @@
-import { IUser, TRoles } from "../interfaces/db/User";
+import { IUser, TRoles } from "../../interfaces/db/User";
 
 // validate role
 const validStaff: TRoles[] = ["admin", "editor", "forum_moderator", "shortlink_moderator"];

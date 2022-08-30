@@ -27,7 +27,7 @@ import { useLocalStorage } from "@mantine/hooks";
 import { IconSearch, IconEdit, IconTrash, IconLego, IconLetterA, IconLicense, IconDeviceWatch, IconRefresh } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { INote, validNoteSort, NoteSort } from "../../../interfaces/db";
-import { addQueryParam, removeQueryParam, formatDateWithTz, handleTabChange, handlePageChange } from "../../../helper";
+import { addQueryParam, removeQueryParam, formatDateWithTz, handleAdminTabChange, handleAdminPageChange } from "../../../helper";
 import { Th, useTableStyles, TitleDashboard } from "../../Utils/Dashboard";
 import { MDPreview } from "../../Utils/Viewer/Markdown/MDPreview";
 import { deleteData, fillDataPage, fillDataAll } from "../../../helper/admin/fetchData";
@@ -155,7 +155,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 			<TitleDashboard title="Notes" hrefLink={`${props.pathname?.split("?")[0]}/create`} hrefText="Add new" />
 
 			<div>
-				<Tabs value={tabIndex.toString() || "0"} onTabChange={(val) => handleTabChange(val, setTabIndex, router)}>
+				<Tabs value={tabIndex.toString() || "0"} onTabChange={(val) => handleAdminTabChange(val, setTabIndex, router)}>
 					<Tabs.List>
 						<Tabs.Tab value="0" color="green">
 							Search
@@ -405,7 +405,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 					<Pagination
 						total={pages}
 						page={curPage}
-						onChange={(thePage) => handlePageChange(thePage, perPage, fillDataPage, router, api_url, setLoadingDataPage, setCurPage, setPages, setDataPage)}
+						onChange={(thePage) => handleAdminPageChange(thePage, perPage, fillDataPage, router, api_url, setLoadingDataPage, setCurPage, setPages, setDataPage)}
 					/>
 				)}
 			</Center>

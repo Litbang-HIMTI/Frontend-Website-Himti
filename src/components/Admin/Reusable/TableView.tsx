@@ -4,7 +4,7 @@ import { FC, SetStateAction } from "react";
 import { Table, ScrollArea, Text, Center, Tabs, Button, LoadingOverlay, Divider, Collapse, NumberInput, TabsValue, Pagination } from "@mantine/core";
 import { IconRefresh } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { handlePageChange } from "../../../helper";
+import { handleAdminPageChange } from "../../../helper";
 import { TitleDashboard } from "../../Utils/Dashboard";
 import { fillDataPage, fillDataAll } from "../../../helper/admin/fetchData";
 
@@ -112,7 +112,7 @@ export const TableView: NextPage<ITableView> = (props) => {
 						total={props.pages}
 						page={props.curPage}
 						onChange={(thePage) =>
-							handlePageChange(thePage, props.perPage, fillDataPage, props.router, props.api_url, props.setLoadingDataPage, props.setCurPage, props.setPages, props.setDataPage)
+							handleAdminPageChange(thePage, props.perPage, fillDataPage, props.router, props.api_url, props.setLoadingDataPage, props.setCurPage, props.setPages, props.setDataPage)
 						}
 					/>
 				)}

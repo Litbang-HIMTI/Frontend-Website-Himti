@@ -7,7 +7,7 @@ import { IconArrowLeft, IconAlertCircle } from "@tabler/icons";
 import { TextInput, PasswordInput, Center, Anchor, Paper, Container, Group, Button, Alert, LoadingOverlay } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
-import { SERVER_V1 } from "../../helper/constants";
+import { SERVER_V1 } from "../../helper/global/constants";
 
 interface loginProps {
 	query?: any;

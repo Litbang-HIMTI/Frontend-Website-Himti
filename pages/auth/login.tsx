@@ -1,6 +1,6 @@
 import { GetServerSideProps, NextPage } from "next";
 import { Login } from "../../src/components/Auth/Login";
-import { SERVER_V1 } from "../../src/helper/constants";
+import { SERVER_V1 } from "../../src/helper/global/constants";
 
 const indexLogin: NextPage = (props) => {
 	return <Login {...props} />;
