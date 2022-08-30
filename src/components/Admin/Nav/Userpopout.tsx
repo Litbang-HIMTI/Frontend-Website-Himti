@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Menu, Group, Text, ActionIcon, MantineTheme } from "@mantine/core";
 import { IconLogout, IconSettings, IconChevronRight, IconDots, IconUser, IconNotebook, IconCalendarEvent, IconMessage, IconMessages } from "@tabler/icons";
 import { IUser } from "../../../interfaces/db/User";
-import { validateEditor, validateForumMod, validateAdmin } from "../../../helper/role";
+import { validateEditor, validateForumMod, validateAdmin } from "../../../helper/global/role";
 
 interface navProps {
 	pathname?: string;
@@ -24,7 +24,7 @@ export const UserPopout: NextPage<navProps> = (props) => {
 				</Menu.Target>
 				<Menu.Dropdown>
 					{validateAdmin(props.user!) ? (
-						<Link href={`/${props.pathname?.split("/")[1]}/user/${props.user?.username}`}>
+						<Link href={`/${props.pathname?.split("/")[1]}/user/${props.user?._id}`}>
 							<a>
 								<Menu.Item rightSection={<IconChevronRight size={14} stroke={1.5} />}>
 									<Group>

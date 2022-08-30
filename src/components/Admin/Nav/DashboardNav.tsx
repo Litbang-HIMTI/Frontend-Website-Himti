@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Navbar, Center, Tooltip, createStyles, Stack, useMantineColorScheme, Menu, ActionIcon, useMantineTheme, MantineTheme, LoadingOverlay, Skeleton } from "@mantine/core";
+import { Navbar, Center, Tooltip, createStyles, Stack, useMantineColorScheme, Menu, ActionIcon, useMantineTheme, MantineTheme, Skeleton } from "@mantine/core";
 import {
 	IconSun,
 	IconMoonStars,
@@ -26,7 +26,7 @@ import {
 } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { UserPopout } from "./Userpopout";
-import { validateAdmin, validateEditor, validateForumMod, validateShortlinkMod, validateStaff } from "../../../helper/role";
+import { validateAdmin, validateEditor, validateForumMod, validateShortlinkMod, validateStaff } from "../../../helper/global/role";
 
 const useStyles = createStyles((theme) => ({
 	link: {

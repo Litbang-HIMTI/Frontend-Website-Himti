@@ -3,10 +3,10 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { IconArrowLeft, IconAlertCircle } from "@tabler/icons";
+import { IconArrowLeft, IconAlertCircle, IconX, IconCheck } from "@tabler/icons";
 import { TextInput, PasswordInput, Center, Anchor, Paper, Container, Group, Button, Alert, LoadingOverlay } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { showNotification } from "@mantine/notifications";
+import { showNotification, updateNotification } from "@mantine/notifications";
 import { SERVER_V1 } from "../../helper/global/constants";
 
 interface loginProps {
@@ -38,7 +38,7 @@ export const Login: NextPage<loginProps> = (props) => {
 		setLoading(true);
 		if (submitted) return;
 		const { username, password } = form.values;
-		// fetch local api server to get around CORS
+		showNotification({ id: "login-notif", title: "Loading...", message: "You have logged in successfully. Redirecting...", loading: true, disallowClose: true, autoClose: false });
 		try {
 			const loginFetch = await fetch(`${SERVER_V1}/auth`, {
 				method: "POST",
@@ -54,11 +54,13 @@ export const Login: NextPage<loginProps> = (props) => {
 
 			if (loginFetch.status === 200) {
 				setSubmitted(true);
-				showNotification({
+				updateNotification({
+					id: "login-notif",
 					title: "Success",
 					message: "You have logged in successfully. Redirecting...",
-					disallowClose: true,
-					autoClose: 1500,
+					loading: false,
+					autoClose: 2000,
+					icon: <IconCheck size={16} />,
 				});
 
 				setTimeout(() => {
@@ -68,22 +70,11 @@ export const Login: NextPage<loginProps> = (props) => {
 				setLoading(false);
 				const { message } = await loginFetch.json();
 
-				showNotification({
-					title: "Error",
-					message,
-					disallowClose: false,
-					autoClose: 4000,
-					color: "red",
-				});
+				updateNotification({ id: "login-notif", title: "Error", message, loading: false, disallowClose: false, autoClose: 4000, color: "red", icon: <IconX size={16} /> });
 			}
 		} catch (error: any) {
 			setLoading(false);
-			showNotification({
-				title: "Error",
-				message: error.message,
-				autoClose: 4000,
-				color: "red",
-			});
+			updateNotification({ id: "login-notif", title: "Error", message: error.message, loading: false, disallowClose: false, autoClose: 4000, color: "red", icon: <IconX size={16} /> });
 		}
 	};
 
