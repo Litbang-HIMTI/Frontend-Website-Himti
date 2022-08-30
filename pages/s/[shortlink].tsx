@@ -70,17 +70,21 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 	const shortlinkData = await checkShortLink.json();
 	const { data }: { data: IShortlink } = shortlinkData;
 
-	const siteData = await processSite(data.url);
-	const siteMetadata = extractSiteMetadata(siteData?.body, data.url);
+	try {
+		const siteData = await processSite(data.url);
+		const siteMetadata = extractSiteMetadata(siteData?.body, data.url);
 
-	// TODO: CEK METADATANYA KALO DAH DI DEPLOY
-	return {
-		redirect: {
-			permanent: false,
-			destination: data.url,
-		},
-		props: siteMetadata,
-	};
+		// TODO: CEK METADATANYA KALO DAH DI DEPLOY
+		return {
+			redirect: {
+				permanent: false,
+				destination: data.url,
+			},
+			props: siteMetadata,
+		};
+	} catch (error) {
+		return { notFound: true };
+	}
 };
 
 export default indexShortlink;
