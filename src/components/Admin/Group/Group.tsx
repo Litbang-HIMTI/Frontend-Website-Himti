@@ -17,23 +17,23 @@ import {
 	Divider,
 	Collapse,
 	NumberInput,
-	TabsValue,
 	Pagination,
 	Tooltip,
 } from "@mantine/core";
 import { keys } from "@mantine/utils";
-import { showNotification } from "@mantine/notifications";
 import { openConfirmModal } from "@mantine/modals";
 import { useLocalStorage } from "@mantine/hooks";
 import { IconSearch, IconEdit, IconTrash, IconRefresh } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { IGroup, validGroupSort, GroupSort, GroupQRes } from "../../../interfaces/db";
-import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../helper";
+import { IGroup, validGroupSort, GroupSort } from "../../../interfaces/db";
+import { addQueryParam, removeQueryParam, formatDateWithTz, handleTabChange, handlePageChange } from "../../../helper";
 import { Th, useTableStyles, TitleDashboard } from "../../Utils/Dashboard";
+import { deleteData, fillDataPage, fillDataAll } from "../../../helper/admin/fetchData";
 
 export const UserGroup: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useTableStyles();
 	const router = useRouter();
+	const api_url = "group";
 
 	const [curPage, setCurPage] = useState(1);
 	const [pages, setPages] = useState(1);
@@ -60,17 +60,6 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 		else addQueryParam(router, param, e.target.value);
 	};
 
-	const handleTabChange = (index: TabsValue) => {
-		setTabIndex(index ? parseInt(index) : 0);
-		addQueryParam(router, "tab", index ? index : "0");
-	};
-
-	const pageChange = (page: number) => {
-		setCurPage(page);
-		addQueryParam(router, "page", page.toString());
-		fillData(perPage, page);
-	};
-
 	const handleDelete = (id: string) => {
 		openConfirmModal({
 			title: "Delete confirmation",
@@ -78,7 +67,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 			labels: { confirm: "Yes, delete group", cancel: "No, cancel" },
 			confirmProps: { color: "red" },
 			onCancel: () => {},
-			onConfirm: () => deleteData(id),
+			onConfirm: () => deleteData(id, api_url, setDataPage, setDataAllPage),
 		});
 	};
 
@@ -124,89 +113,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 	};
 
 	// -----------------------------------------------------------
-	// delete
-	const deleteData = async (_id: string) => {
-		try {
-			const req = await fetch(`${SERVER_V1}/group/${_id}`, {
-				method: "DELETE",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				credentials: "include",
-			});
-
-			const { success, message }: GroupQRes = await req.json();
-			if (req.status === 200 && success) {
-				// slice data
-				setDataPage((prev) => {
-					return prev.filter((item) => item._id !== _id);
-				});
-				setDataAllPage((prev) => {
-					return prev.filter((item) => item._id !== _id);
-				});
-
-				showNotification({ title: "Success", message });
-			} else {
-				showNotification({ title: "Error", message, color: "red" });
-			}
-		} catch (error: any) {
-			showNotification({ title: "Error", message: error.message, color: "red" });
-		}
-	};
-
 	// fetch
-	const fillDataAll = async () => {
-		try {
-			setLoadingDataAll(true);
-			const req = await fetch(SERVER_V1 + `/group`, {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				credentials: "include",
-			});
-
-			const { data, message }: GroupQRes = await req.json();
-			if (req.status !== 200) {
-				setLoadingDataAll(false);
-				return showNotification({ title: "Error indexing all data for search", message, color: "red" });
-			}
-
-			setDataAllPage(data);
-			setLoadingDataAll(false);
-		} catch (error: any) {
-			setLoadingDataAll(false);
-			showNotification({ title: "Error indexing all data for search", message: error.message, color: "red" });
-		}
-	};
-
-	const fillData = async (perPage: number, curPageQ: number) => {
-		try {
-			setLoadingDataPage(true);
-			const req = await fetch(SERVER_V1 + `/group?perPage=${perPage}&page=${curPageQ}`, {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				credentials: "include",
-			});
-
-			const { data, message, page, pages }: GroupQRes = await req.json();
-			if (req.status !== 200) {
-				setLoadingDataPage(false);
-				return showNotification({ title: "Error getting page data", message, color: "red" });
-			}
-
-			setCurPage(page);
-			setPages(pages ? pages : 1);
-			setDataPage(data);
-			setLoadingDataPage(false);
-		} catch (error: any) {
-			setLoadingDataPage(false);
-			showNotification({ title: "Error getting page data", message: error.message, color: "red" });
-		}
-	};
-
 	const fetchUrlParams = () => {
 		const { query } = router;
 		const params = new URLSearchParams(query as unknown as string);
@@ -219,8 +126,8 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 	useEffect(() => {
 		fetchUrlParams();
 		setTz(Intl.DateTimeFormat().resolvedOptions().timeZone);
-		fillData(perPage, curPage);
-		fillDataAll();
+		fillDataPage(api_url, perPage, curPage, setLoadingDataPage, setCurPage, setPages, setDataPage);
+		fillDataAll(api_url, setLoadingDataAll, setDataAllPage);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -229,7 +136,7 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 			<TitleDashboard title="Group" hrefLink={`${props.pathname?.split("?")[0]}/create`} hrefText="Add new" />
 
 			<div>
-				<Tabs value={tabIndex.toString() || "0"} onTabChange={handleTabChange}>
+				<Tabs value={tabIndex.toString() || "0"} onTabChange={(val) => handleTabChange(val, setTabIndex, router)}>
 					<Tabs.List>
 						<Tabs.Tab value="0" color="green">
 							Search
@@ -280,8 +187,8 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 								compact
 								leftIcon={<IconRefresh size={20} />}
 								onClick={() => {
-									fillData(perPage, curPage);
-									fillDataAll();
+									fillDataPage(api_url, perPage, curPage, setLoadingDataPage, setCurPage, setPages, setDataPage);
+									fillDataAll(api_url, setLoadingDataAll, setDataAllPage);
 								}}
 								mt={16}
 							>
@@ -418,7 +325,15 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 					</Table>
 				</ScrollArea>
 			</div>
-			<Center mt={16}>{!isSearching() && <Pagination total={pages} page={curPage} onChange={pageChange} />}</Center>
+			<Center mt={16}>
+				{!isSearching() && (
+					<Pagination
+						total={pages}
+						page={curPage}
+						onChange={(thePage) => handlePageChange(thePage, perPage, fillDataPage, router, api_url, setLoadingDataPage, setCurPage, setPages, setDataPage)}
+					/>
+				)}
+			</Center>
 		</>
 	);
 };
