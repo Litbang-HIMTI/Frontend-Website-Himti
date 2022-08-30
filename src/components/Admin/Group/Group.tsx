@@ -1,33 +1,16 @@
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { JSXElementConstructor, useEffect, useState } from "react";
-import {
-	Table,
-	ScrollArea,
-	UnstyledButton,
-	Group,
-	Text,
-	Center,
-	TextInput,
-	ActionIcon,
-	Tabs,
-	Button,
-	LoadingOverlay,
-	Divider,
-	Collapse,
-	NumberInput,
-	Pagination,
-	Tooltip,
-} from "@mantine/core";
+import { useEffect, useState } from "react";
+import { UnstyledButton, Group, Text, TextInput, ActionIcon, Tabs, Collapse, Tooltip } from "@mantine/core";
 import { keys } from "@mantine/utils";
 import { openConfirmModal } from "@mantine/modals";
 import { useLocalStorage } from "@mantine/hooks";
-import { IconSearch, IconEdit, IconTrash, IconRefresh } from "@tabler/icons";
+import { IconSearch, IconEdit, IconTrash } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { IGroup, validGroupSort, GroupSort } from "../../../interfaces/db";
-import { addQueryParam, removeQueryParam, formatDateWithTz, handleTabChange, handlePageChange } from "../../../helper";
-import { Th, useTableStyles, TitleDashboard } from "../../Utils/Dashboard";
+import { addQueryParam, removeQueryParam, formatDateWithTz, handleTabChange } from "../../../helper";
+import { Th, useTableStyles } from "../../Utils/Dashboard";
 import { deleteData, fillDataPage, fillDataAll } from "../../../helper/admin/fetchData";
 import { TableView } from "../Reusable/TableView";
 

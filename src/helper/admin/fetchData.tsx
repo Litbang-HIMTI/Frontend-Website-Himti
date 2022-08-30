@@ -1,5 +1,5 @@
 import { showNotification, updateNotification } from "@mantine/notifications";
-import { IconCheck, IconCross } from "@tabler/icons";
+import { IconCheck, IconX } from "@tabler/icons";
 import { SetStateAction } from "react";
 import { SERVER_V1 } from "../constants";
 
@@ -33,10 +33,10 @@ export const deleteData: IDeleteData = async (_id, api_url, setDataPage, setData
 			setDataAllPage((prev) => prev.filter((item) => item._id !== _id));
 			updateNotification({ id: "delete-notif", title: "Success", message, loading: false, disallowClose: false, icon: <IconCheck size={16} />, autoClose: 2500 });
 		} else {
-			updateNotification({ id: "delete-notif", title: "Error", message, color: "red", loading: false, disallowClose: false, icon: <IconCross size={16} /> });
+			updateNotification({ id: "delete-notif", title: "Error", message, color: "red", loading: false, disallowClose: false, icon: <IconX size={16} /> });
 		}
 	} catch (error: any) {
-		updateNotification({ id: "delete-notif", title: "Error", message: error.message, color: "red", loading: false, disallowClose: false, icon: <IconCross size={16} /> });
+		updateNotification({ id: "delete-notif", title: "Error", message: error.message, color: "red", loading: false, disallowClose: false, icon: <IconX size={16} /> });
 	}
 };
 
@@ -57,11 +57,11 @@ export const fillDataAll: IFillDataAll = async (api_url, setLoadingDataAll, setD
 			setLoadingDataAll(false);
 		} else {
 			setLoadingDataAll(false);
-			return showNotification({ title: "Error indexing all data for search", message, color: "red", icon: <IconCross size={16} /> });
+			return showNotification({ title: "Error indexing all data for search", message, color: "red", icon: <IconX size={16} /> });
 		}
 	} catch (error: any) {
 		setLoadingDataAll(false);
-		showNotification({ title: "Error indexing all data for search", message: error.message, color: "red", icon: <IconCross size={16} /> });
+		showNotification({ title: "Error indexing all data for search", message: error.message, color: "red", icon: <IconX size={16} /> });
 	}
 };
 
@@ -84,10 +84,10 @@ export const fillDataPage: IFillDataPage = async (api_url, perPage, curPageQ, se
 			setLoadingDataPage(false);
 		} else {
 			setLoadingDataPage(false);
-			return showNotification({ title: "Error getting page data", message, color: "red", icon: <IconCross size={16} /> });
+			return showNotification({ title: "Error getting page data", message, color: "red", icon: <IconX size={16} /> });
 		}
 	} catch (error: any) {
 		setLoadingDataPage(false);
-		showNotification({ title: "Error getting page data", message: error.message, color: "red", icon: <IconCross size={16} /> });
+		showNotification({ title: "Error getting page data", message: error.message, color: "red", icon: <IconX size={16} /> });
 	}
 };

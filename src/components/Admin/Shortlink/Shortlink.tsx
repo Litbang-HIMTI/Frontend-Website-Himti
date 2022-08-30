@@ -2,35 +2,17 @@ import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import {
-	Table,
-	ScrollArea,
-	UnstyledButton,
-	Group,
-	Text,
-	Center,
-	TextInput,
-	Tooltip,
-	ActionIcon,
-	Tabs,
-	Button,
-	LoadingOverlay,
-	Divider,
-	Collapse,
-	NumberInput,
-	TabsValue,
-	Pagination,
-} from "@mantine/core";
+import { UnstyledButton, Group, Text, TextInput, Tooltip, ActionIcon, Tabs, Collapse, NumberInput } from "@mantine/core";
 import { keys } from "@mantine/utils";
-import { showNotification } from "@mantine/notifications";
 import { openConfirmModal } from "@mantine/modals";
 import { useLocalStorage } from "@mantine/hooks";
-import { IconSearch, IconEdit, IconTrash, IconLego, IconLink, IconExternalLink, IconDeviceWatch, IconRefresh, IconNumber9 } from "@tabler/icons";
+import { IconSearch, IconEdit, IconTrash, IconLego, IconLink, IconExternalLink, IconDeviceWatch, IconNumber9 } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { IShortlink, validShortlinkSort, ShortlinkSort, ShortlinkQRes } from "../../../interfaces/db";
-import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz, handleTabChange, handlePageChange } from "../../../helper";
-import { Th, useTableStyles, TitleDashboard } from "../../Utils/Dashboard";
+import { IShortlink, validShortlinkSort, ShortlinkSort } from "../../../interfaces/db";
+import { addQueryParam, removeQueryParam, formatDateWithTz, handleTabChange } from "../../../helper";
+import { Th, useTableStyles } from "../../Utils/Dashboard";
 import { deleteData, fillDataPage, fillDataAll } from "../../../helper/admin/fetchData";
+import { TableView } from "../Reusable/TableView";
 
 export const Shortlink: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useTableStyles();
@@ -158,28 +140,48 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 
 	return (
 		<>
-			<TitleDashboard title="Shortlinks" hrefLink={`${props.pathname?.split("?")[0]}/create`} hrefText="Add new" />
-
-			<div>
-				<Tabs value={tabIndex.toString() || "0"} onTabChange={(val) => handleTabChange(val, setTabIndex, router)}>
-					<Tabs.List>
+			<TableView
+				{...props}
+				api_url={api_url}
+				title={"Shortlinks"}
+				isSearching={isSearching()}
+				router={router}
+				// loading
+				loadingDataAll={loadingDataAll}
+				loadingDataPage={loadingDataPage}
+				setLoadingDataAll={setLoadingDataAll}
+				setLoadingDataPage={setLoadingDataPage}
+				// page
+				pages={pages}
+				curPage={curPage}
+				perPage={perPage}
+				setCurPage={setCurPage}
+				setPerPage={setPerPage}
+				setPages={setPages}
+				// data
+				setDataPage={setDataPage}
+				setDataAllPage={setDataAllPage}
+				// tabs
+				tabIndex={tabIndex}
+				handle_tabs_change={(val) => handleTabChange(val, setTabIndex, router)}
+				tabs_header_length={2}
+				tabs_element_header={() => (
+					<>
 						<Tabs.Tab value="0" color="green">
 							Search
 						</Tabs.Tab>
 						<Tabs.Tab value="1" color="lime">
 							Advanced Search
 						</Tabs.Tab>
-						<Tabs.Tab value="2" color="blue">
-							Setting
-						</Tabs.Tab>
-					</Tabs.List>
-
-					<div className="dash-relative">
-						<LoadingOverlay visible={loadingDataAll} overlayBlur={3} />
+					</>
+				)}
+				tabs_element_body={() => (
+					<>
 						<Tabs.Panel value="0" pt="xs">
 							<Collapse in={tabIndex === 0}>
 								<Text color="dimmed">Quick search by any field</Text>
 								<TextInput
+									key={1}
 									placeholder="Search by any field"
 									name="qAll"
 									mb="md"
@@ -196,6 +198,7 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 								<Text color="dimmed">Search more accurately by searching for each field</Text>
 
 								<TextInput
+									key={1}
 									placeholder="Search by shorten url"
 									name="shorten"
 									label="Shorten"
@@ -205,6 +208,7 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 									mt={16}
 								/>
 								<TextInput
+									key={2}
 									placeholder="Search by original url"
 									name="originalUrl"
 									label="Original URL"
@@ -214,6 +218,7 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 									mt={8}
 								/>
 								<NumberInput
+									key={3}
 									placeholder="Search by clicks field"
 									name="clicks"
 									label="Clicks"
@@ -232,6 +237,7 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 									min={0}
 								/>
 								<TextInput
+									key={4}
 									placeholder="Search by author field"
 									name="author"
 									label="Author"
@@ -241,6 +247,7 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 									mt={8}
 								/>
 								<TextInput
+									key={5}
 									placeholder="Search by createdAt field"
 									label="Created At"
 									name="createdAt"
@@ -251,199 +258,150 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 								/>
 							</Collapse>
 						</Tabs.Panel>
-					</div>
-					<Tabs.Panel value="2" pt="xs" className="dash-textinput-gap">
-						<Collapse in={tabIndex === 2}>
-							<Text color="dimmed">Customize data load setting</Text>
-
-							<NumberInput
-								label="Item per page"
-								placeholder="Item per page"
-								description="How many item per page in the dashboard (default: 25, min: 5, max: 100). Search is not affected by this setting."
-								value={perPage}
-								stepHoldDelay={500}
-								stepHoldInterval={100}
-								min={5}
-								max={100}
-								onChange={(value) => {
-									if (!value) return;
-									setPerPage(value);
-								}}
-								mt={8}
-							/>
-
-							<Button
-								compact
-								leftIcon={<IconRefresh size={20} />}
-								onClick={() => {
-									fillDataPage(api_url, perPage, curPage, setLoadingDataPage, setCurPage, setPages, setDataPage);
-									fillDataAll(api_url, setLoadingDataAll, setDataAllPage);
-								}}
-								mt={16}
-							>
-								Reload the table
-							</Button>
-						</Collapse>
-					</Tabs.Panel>
-				</Tabs>
-			</div>
-
-			<Divider mt={16} mb={16} />
-
-			<div className="dash-relative">
-				<LoadingOverlay visible={loadingDataPage} overlayBlur={3} />
-				<ScrollArea mt={30}>
-					<Table horizontalSpacing="md" verticalSpacing="xs" sx={{ tableLayout: "fixed", width: "100%" }} highlightOnHover>
-						<thead>
-							<tr>
-								<Th
-									classes={classes}
-									sorted={sortBy === "shorten"}
-									reversed={reverseSortDirection}
-									onSort={() => {
-										if (sortBy === "shorten") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("shorten");
-									}}
-									width="20%"
-								>
-									Shorten
-								</Th>
-								<Th
-									classes={classes}
-									sorted={sortBy === "url"}
-									reversed={reverseSortDirection}
-									onSort={() => {
-										if (sortBy === "url") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("url");
-									}}
-									width="30%"
-								>
-									Original
-								</Th>
-								<Th
-									classes={classes}
-									sorted={sortBy === "clickCount"}
-									reversed={reverseSortDirection}
-									onSort={() => {
-										if (sortBy === "clickCount") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("clickCount");
-									}}
-									width="10%"
-								>
-									Clicks
-								</Th>
-								<Th
-									classes={classes}
-									sorted={sortBy === "author"}
-									reversed={reverseSortDirection}
-									onSort={() => {
-										if (sortBy === "author") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("author");
-									}}
-									width="15%"
-								>
-									Author
-								</Th>
-								<Th
-									classes={classes}
-									sorted={sortBy === "createdAt"}
-									reversed={reverseSortDirection}
-									onSort={() => {
-										if (sortBy === "createdAt") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("createdAt");
-									}}
-									width="15%"
-								>
-									Created At
-								</Th>
-								<th className={classes.th} style={{ width: "10%" }}>
-									<UnstyledButton className={classes.control}>
-										<Group position="apart">
-											<Text weight={500} size="sm">
-												Action
-											</Text>
-										</Group>
-									</UnstyledButton>
-								</th>
-							</tr>
-						</thead>
-						<tbody>
-							{dataPage && dataPage.length > 0 && sortSearchData(sortBy, dataPage, dataAllPage).length > 0 ? (
-								sortSearchData(sortBy, dataPage, dataAllPage).map((row) => (
-									<tr key={row._id}>
-										<td>
-											<a href={`/s/${row.shorten}`} target="_blank">
-												<Text variant="link">{row.shorten}</Text>
-											</a>
-										</td>
-										<td>
-											<a href={`${row.url}`} target="_blank" rel="noopener noreferrer">
-												<Text variant="link">{row.url}</Text>
-											</a>
-										</td>
-										<td>{row.clickCount}</td>
-										<td>
-											{row.editedBy && row.editedBy[0] ? (
-												<>
-													<Tooltip label={`Last edited by: ${row.editedBy[0].username}`}>
-														<span>{row.author[0] ? row.author[0].username : "Deleted"}</span>
-													</Tooltip>
-												</>
-											) : row.author[0] ? (
-												row.author[0].username
-											) : (
-												"Deleted"
-											)}
-										</td>
-										<td>
-											{row.updatedAt !== row.createdAt ? (
-												<Tooltip label={`Last edited at: ${formatDateWithTz(row.updatedAt, tz)}`}>
-													<span>{formatDateWithTz(row.createdAt, tz)}</span>
-												</Tooltip>
-											) : (
-												<>{formatDateWithTz(row.createdAt, tz)}</>
-											)}
-										</td>
-										<td style={{ padding: "1rem .5rem" }}>
-											<div className="dash-flex">
-												<Link href={`${props.pathname?.split("?")[0]}/${row._id}`}>
-													<a>
-														<ActionIcon>
-															<IconEdit size={14} stroke={1.5} />
-														</ActionIcon>
-													</a>
-												</Link>
-												<ActionIcon onClick={() => handleDelete(row._id)}>
-													<IconTrash size={14} stroke={1.5} />
-												</ActionIcon>
-											</div>
-										</td>
-									</tr>
-								))
-							) : (
-								<>
-									<tr>
-										<td colSpan={6}>
-											<Text weight={500} align="center">
-												Nothing found
-											</Text>
-										</td>
-									</tr>
-								</>
-							)}
-						</tbody>
-					</Table>
-				</ScrollArea>
-			</div>
-			<Center mt={16}>
-				{!isSearching() && (
-					<Pagination
-						total={pages}
-						page={curPage}
-						onChange={(thePage) => handlePageChange(thePage, perPage, fillDataPage, router, api_url, setLoadingDataPage, setCurPage, setPages, setDataPage)}
-					/>
+					</>
 				)}
-			</Center>
+				// table
+				th_element={() => (
+					<>
+						<Th
+							classes={classes}
+							sorted={sortBy === "shorten"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "shorten") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("shorten");
+							}}
+							width="20%"
+						>
+							Shorten
+						</Th>
+						<Th
+							classes={classes}
+							sorted={sortBy === "url"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "url") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("url");
+							}}
+							width="30%"
+						>
+							Original
+						</Th>
+						<Th
+							classes={classes}
+							sorted={sortBy === "clickCount"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "clickCount") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("clickCount");
+							}}
+							width="10%"
+						>
+							Clicks
+						</Th>
+						<Th
+							classes={classes}
+							sorted={sortBy === "author"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "author") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("author");
+							}}
+							width="15%"
+						>
+							Author
+						</Th>
+						<Th
+							classes={classes}
+							sorted={sortBy === "createdAt"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "createdAt") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("createdAt");
+							}}
+							width="15%"
+						>
+							Created At
+						</Th>
+						<th className={classes.th} style={{ width: "10%" }}>
+							<UnstyledButton className={classes.control}>
+								<Group position="apart">
+									<Text weight={500} size="sm">
+										Action
+									</Text>
+								</Group>
+							</UnstyledButton>
+						</th>
+					</>
+				)}
+				tr_element={() => (
+					<>
+						{dataPage && dataPage.length > 0 && sortSearchData(sortBy, dataPage, dataAllPage).length > 0 ? (
+							sortSearchData(sortBy, dataPage, dataAllPage).map((row) => (
+								<tr key={row._id}>
+									<td>
+										<a href={`/s/${row.shorten}`} target="_blank">
+											<Text variant="link">{row.shorten}</Text>
+										</a>
+									</td>
+									<td>
+										<a href={`${row.url}`} target="_blank" rel="noopener noreferrer">
+											<Text variant="link">{row.url}</Text>
+										</a>
+									</td>
+									<td>{row.clickCount}</td>
+									<td>
+										{row.editedBy && row.editedBy[0] ? (
+											<>
+												<Tooltip label={`Last edited by: ${row.editedBy[0].username}`}>
+													<span>{row.author[0] ? row.author[0].username : "Deleted"}</span>
+												</Tooltip>
+											</>
+										) : row.author[0] ? (
+											row.author[0].username
+										) : (
+											"Deleted"
+										)}
+									</td>
+									<td>
+										{row.updatedAt !== row.createdAt ? (
+											<Tooltip label={`Last edited at: ${formatDateWithTz(row.updatedAt, tz)}`}>
+												<span>{formatDateWithTz(row.createdAt, tz)}</span>
+											</Tooltip>
+										) : (
+											<>{formatDateWithTz(row.createdAt, tz)}</>
+										)}
+									</td>
+									<td style={{ padding: "1rem .5rem" }}>
+										<div className="dash-flex">
+											<Link href={`${props.pathname?.split("?")[0]}/${row._id}`}>
+												<a>
+													<ActionIcon>
+														<IconEdit size={14} stroke={1.5} />
+													</ActionIcon>
+												</a>
+											</Link>
+											<ActionIcon onClick={() => handleDelete(row._id)}>
+												<IconTrash size={14} stroke={1.5} />
+											</ActionIcon>
+										</div>
+									</td>
+								</tr>
+							))
+						) : (
+							<>
+								<tr>
+									<td colSpan={6}>
+										<Text weight={500} align="center">
+											Nothing found
+										</Text>
+									</td>
+								</tr>
+							</>
+						)}
+					</>
+				)}
+			/>
 		</>
 	);
 };

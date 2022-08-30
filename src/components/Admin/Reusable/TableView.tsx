@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import { NextRouter } from "next/router";
-import { ElementType, JSXElementConstructor, SetStateAction } from "react";
+import { FC, SetStateAction } from "react";
 import { Table, ScrollArea, Text, Center, Tabs, Button, LoadingOverlay, Divider, Collapse, NumberInput, TabsValue, Pagination } from "@mantine/core";
 import { IconRefresh } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
@@ -32,11 +32,11 @@ interface ITableView extends IDashboardProps {
 	tabIndex: number;
 	handle_tabs_change: (value: TabsValue) => void;
 	tabs_header_length: number;
-	tabs_element_header: JSXElementConstructor<any>;
-	tabs_element_body: JSXElementConstructor<any>;
+	tabs_element_header: FC;
+	tabs_element_body: FC;
 	// table
-	th_element: JSXElementConstructor<any>;
-	tr_element: JSXElementConstructor<any>;
+	th_element: FC;
+	tr_element: FC;
 }
 
 export const TableView: NextPage<ITableView> = (props) => {
@@ -47,7 +47,7 @@ export const TableView: NextPage<ITableView> = (props) => {
 			<div>
 				<Tabs value={props.tabIndex.toString() || "0"} onTabChange={props.handle_tabs_change}>
 					<Tabs.List>
-						<props.tabs_element_header />
+						{props.tabs_element_header(props)}
 						<Tabs.Tab value={props.tabs_header_length.toString()} color="blue">
 							Setting
 						</Tabs.Tab>
@@ -55,7 +55,7 @@ export const TableView: NextPage<ITableView> = (props) => {
 
 					<div className="dash-relative">
 						<LoadingOverlay visible={props.loadingDataAll} overlayBlur={3} />
-						<props.tabs_element_body />
+						{props.tabs_element_body(props)}
 					</div>
 
 					<Tabs.Panel value={props.tabs_header_length.toString()} pt="xs" className="dash-textinput-gap">
@@ -100,13 +100,9 @@ export const TableView: NextPage<ITableView> = (props) => {
 				<ScrollArea mt={30}>
 					<Table horizontalSpacing="md" verticalSpacing="xs" sx={{ tableLayout: "fixed", width: "100%" }} highlightOnHover>
 						<thead>
-							<tr>
-								<props.th_element />
-							</tr>
+							<tr>{props.th_element(props)}</tr>
 						</thead>
-						<tbody>
-							<props.tr_element />
-						</tbody>
+						<tbody>{props.tr_element(props)}</tbody>
 					</Table>
 				</ScrollArea>
 			</div>
