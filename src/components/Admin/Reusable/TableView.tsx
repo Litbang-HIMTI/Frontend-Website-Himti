@@ -10,6 +10,7 @@ import { fillDataPage, fillDataAll } from "../../../helper/admin/fetchData";
 
 interface ITableView extends IDashboardProps {
 	title: string;
+	isCreatable?: boolean;
 	api_url: string;
 	isSearching: boolean;
 	router: NextRouter;
@@ -42,7 +43,7 @@ interface ITableView extends IDashboardProps {
 export const TableView: NextPage<ITableView> = (props) => {
 	return (
 		<>
-			<TitleDashboard title={props.title} hrefLink={`${props.pathname?.split("?")[0]}/create`} hrefText="Add new" />
+			<TitleDashboard title={props.title} hrefLink={props.isCreatable ? `${props.pathname?.split("?")[0]}/create` : undefined} hrefText="Add new" />
 
 			<div>
 				<Tabs value={props.tabIndex.toString() || "0"} onTabChange={props.handle_tabs_change}>

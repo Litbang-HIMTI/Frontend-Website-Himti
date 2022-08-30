@@ -6,3 +6,9 @@ export const handleInputQueryChange = (e: React.ChangeEvent<HTMLInputElement>, s
 	if (e.target.value === "") removeQueryParam(router, param);
 	else addQueryParam(router, param, e.target.value);
 };
+
+export const handleSelectQueryChange = (value: string, setFunc: (value: any) => void, param: string, router: NextRouter, realValue?: any) => {
+	setFunc(realValue ? realValue : value);
+	if (value === "") removeQueryParam(router, param);
+	else addQueryParam(router, param, value);
+};

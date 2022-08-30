@@ -2,51 +2,17 @@ import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import {
-	Table,
-	ScrollArea,
-	UnstyledButton,
-	Group,
-	Text,
-	Center,
-	TextInput,
-	Tooltip,
-	ActionIcon,
-	Tabs,
-	Button,
-	LoadingOverlay,
-	Divider,
-	Collapse,
-	NumberInput,
-	TabsValue,
-	Pagination,
-	Select,
-	MultiSelect,
-} from "@mantine/core";
+import { UnstyledButton, Group, Text, TextInput, Tooltip, ActionIcon, Tabs, Collapse, Select, MultiSelect } from "@mantine/core";
 import { keys } from "@mantine/utils";
-import { showNotification } from "@mantine/notifications";
 import { openConfirmModal } from "@mantine/modals";
 import { useLocalStorage } from "@mantine/hooks";
-import {
-	IconSearch,
-	IconEdit,
-	IconTrash,
-	IconPin,
-	IconPinnedOff,
-	IconUser,
-	IconLetterA,
-	IconTags,
-	IconDeviceWatch,
-	IconRefresh,
-	IconEye,
-	IconHome,
-	IconHomeOff,
-	IconHistory,
-} from "@tabler/icons";
+import { IconSearch, IconEdit, IconTrash, IconPin, IconPinnedOff, IconUser, IconLetterA, IconTags, IconDeviceWatch, IconEye, IconHome, IconHomeOff, IconHistory } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { IEventRevision, validEventSort, EventSort, EventQRes } from "../../../interfaces/db";
-import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../helper";
-import { Th, useTableStyles, TitleDashboard } from "../../Utils/Dashboard";
+import { IEventRevision, validEventSort, EventSort } from "../../../interfaces/db";
+import { deleteData, fillDataPage, fillDataAll, handleAdminTabChange, handleInputQueryChange, handleSelectQueryChange } from "../../../helper/admin";
+import { formatDateWithTz } from "../../../helper/global";
+import { Th, useTableStyles } from "../../Utils/Dashboard";
+import { TableView } from "../Reusable/TableView";
 
 interface IEventProps extends IDashboardProps {
 	revision?: boolean;
@@ -55,6 +21,7 @@ interface IEventProps extends IDashboardProps {
 export const Event: NextPage<IEventProps> = (props) => {
 	const { classes } = useTableStyles();
 	const router = useRouter();
+	const api_url = props.revision ? "event/revision" : "event";
 
 	const [curPage, setCurPage] = useState(1);
 	const [pages, setPages] = useState(1);
@@ -85,29 +52,6 @@ export const Event: NextPage<IEventProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// handler
-	const handleInputQueryChange = (e: React.ChangeEvent<HTMLInputElement>, setFunc: (value: string) => void, param: string) => {
-		setFunc(e.target.value);
-		if (e.target.value === "") removeQueryParam(router, param);
-		else addQueryParam(router, param, e.target.value);
-	};
-
-	const handleSelectQueryChange = (value: string, setFunc: (value: any) => void, param: string, realValue?: any) => {
-		setFunc(realValue ? realValue : value);
-		if (value === "") removeQueryParam(router, param);
-		else addQueryParam(router, param, value);
-	};
-
-	const handleTabChange = (index: TabsValue) => {
-		setTabIndex(index ? parseInt(index) : 0);
-		addQueryParam(router, "tab", index ? index : "0");
-	};
-
-	const pageChange = (page: number) => {
-		setCurPage(page);
-		addQueryParam(router, "page", page.toString());
-		fillData(perPage, page);
-	};
-
 	const handleDelete = (id: string) => {
 		openConfirmModal({
 			title: "Delete confirmation",
@@ -115,7 +59,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 			labels: { confirm: "Yes, delete event", cancel: "No, cancel" },
 			confirmProps: { color: "red" },
 			onCancel: () => {},
-			onConfirm: () => deleteData(id),
+			onConfirm: () => deleteData(id, api_url, setDataPage, setDataAllPage),
 		});
 	};
 
@@ -136,15 +80,11 @@ export const Event: NextPage<IEventProps> = (props) => {
 		return (
 			tabIndex !== 2 &&
 			dataAllPage.length > 0 &&
-			(searchAll !== "" ||
-				searchTitle !== "" ||
-				searchVisibility !== "all" ||
-				(searchOrganizer.length > 0 && searchOrganizer[0]) ||
-				(searchTags.length > 0 && searchTags[0]) ||
-				searchAuthor !== "" ||
-				searchIsPinned !== "all" ||
-				searchShowAtHome !== "all" ||
-				searchCreatedAt !== "")
+			searchOrganizer.length > 0 &&
+			searchOrganizer[0] !== undefined &&
+			searchTags.length > 0 &&
+			searchTags[0] !== undefined &&
+			(searchAll !== "" || searchTitle !== "" || searchVisibility !== "all" || searchAuthor !== "" || searchIsPinned !== "all" || searchShowAtHome !== "all" || searchCreatedAt !== "")
 		);
 	};
 
@@ -191,100 +131,6 @@ export const Event: NextPage<IEventProps> = (props) => {
 	};
 
 	// -----------------------------------------------------------
-	// delete
-	const deleteData = async (_id: string) => {
-		try {
-			const req = await fetch(`${SERVER_V1}/${props.revision ? "event/revision" : "event"}/${_id}`, {
-				method: "DELETE",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				credentials: "include",
-			});
-
-			const { message, success }: EventQRes = await req.json();
-			if (req.status === 200 && success) {
-				// slice data
-				setDataPage((prev) => {
-					return prev.filter((item) => item._id !== _id);
-				});
-				setDataAllPage((prev) => {
-					return prev.filter((item) => item._id !== _id);
-				});
-
-				showNotification({ title: "Success", message });
-			} else {
-				showNotification({ title: "Error", message, color: "red" });
-			}
-		} catch (error: any) {
-			showNotification({ title: "Error", message: error.message, color: "red" });
-		}
-	};
-
-	// fetch
-	const fillDataAll = async () => {
-		try {
-			setLoadingDataAll(true);
-			const req = await fetch(SERVER_V1 + `/${props.revision ? "event/revision" : "event"}`, {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				credentials: "include",
-			});
-
-			const { data, message }: EventQRes = await req.json();
-			if (req.status !== 200) {
-				setLoadingDataAll(false);
-				return showNotification({ title: "Error indexing all data for search", message, color: "red" });
-			}
-
-			// get tags
-			const tagsOnly = data.reduce((acc: string[], item) => [...acc, ...(item.tags || [])], []);
-			const tagsOnlyUnique = tagsOnly.filter((item, index) => tagsOnly.indexOf(item) === index);
-			setAvailableTags(tagsOnlyUnique);
-
-			// get organization
-			const organizationOnly = data.reduce((acc: string[], item) => [...acc, ...(item.organizer || [])], []);
-			const organizationOnlyUnique = organizationOnly.filter((item, index) => organizationOnly.indexOf(item) === index);
-			setAvailableOrganization(organizationOnlyUnique);
-
-			setDataAllPage(data);
-			setLoadingDataAll(false);
-		} catch (error: any) {
-			setLoadingDataAll(false);
-			showNotification({ title: "Error indexing all data for search", message: error.message, color: "red" });
-			setAvailableTags(["Fail to load tags"]);
-		}
-	};
-
-	const fillData = async (perPage: number, curPageQ: number) => {
-		try {
-			setLoadingDataPage(true);
-			const req = await fetch(SERVER_V1 + `/${props.revision ? "event/revision" : "event"}?perPage=${perPage}&page=${curPageQ}`, {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				credentials: "include",
-			});
-
-			const { data, message, page, pages }: EventQRes = await req.json();
-			if (req.status !== 200) {
-				setLoadingDataPage(false);
-				return showNotification({ title: "Error getting page data", message, color: "red" });
-			}
-
-			setCurPage(page);
-			setPages(pages ? pages : 1);
-			setDataPage(data);
-			setLoadingDataPage(false);
-		} catch (error: any) {
-			setLoadingDataPage(false);
-			showNotification({ title: "Error getting page data", message: error.message, color: "red" });
-		}
-	};
-
 	const fetchUrlParams = () => {
 		const { query } = router;
 		const params = new URLSearchParams(query as unknown as string);
@@ -302,37 +148,66 @@ export const Event: NextPage<IEventProps> = (props) => {
 		setTabIndex(parseInt(params.get("tab") || "0"));
 	};
 
+	const fillExtraData = (data: IEventRevision[]) => {
+		// get tags
+		const tagsOnly = data.reduce((acc: string[], item) => [...acc, ...(item.tags || [])], []);
+		const tagsOnlyUnique = tagsOnly.filter((item, index) => tagsOnly.indexOf(item) === index);
+		setAvailableTags(tagsOnlyUnique);
+
+		// get organization
+		const organizationOnly = data.reduce((acc: string[], item) => [...acc, ...(item.organizer || [])], []);
+		const organizationOnlyUnique = organizationOnly.filter((item, index) => organizationOnly.indexOf(item) === index);
+		setAvailableOrganization(organizationOnlyUnique);
+	};
+
 	useEffect(() => {
 		fetchUrlParams();
 		setTz(Intl.DateTimeFormat().resolvedOptions().timeZone);
-		fillData(perPage, curPage);
-		fillDataAll();
+		fillDataPage(api_url, perPage, curPage, setLoadingDataPage, setCurPage, setPages, setDataPage);
+		fillDataAll(api_url, setLoadingDataAll, setDataAllPage, fillExtraData);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (
 		<>
-			<TitleDashboard
-				title={`${props.revision ? "Event Posts Revision" : "Event Posts"}`}
-				hrefLink={`${props.revision ? props.pathname?.split("?")[0] + "/revision" : props.pathname?.split("?")[0]}/create`}
-				hrefText="Add new"
-			/>
-			<div>
-				<Tabs value={tabIndex.toString() || "0"} onTabChange={handleTabChange}>
-					<Tabs.List>
+			<TableView
+				{...props}
+				api_url={api_url}
+				isCreatable={!props.revision}
+				title={props.revision ? "Event Posts Revision" : "Event Posts"}
+				isSearching={isSearching()}
+				router={router}
+				// loading
+				loadingDataAll={loadingDataAll}
+				loadingDataPage={loadingDataPage}
+				setLoadingDataAll={setLoadingDataAll}
+				setLoadingDataPage={setLoadingDataPage}
+				// page
+				pages={pages}
+				curPage={curPage}
+				perPage={perPage}
+				setCurPage={setCurPage}
+				setPerPage={setPerPage}
+				setPages={setPages}
+				// data
+				setDataPage={setDataPage}
+				setDataAllPage={setDataAllPage}
+				// tabs
+				tabIndex={tabIndex}
+				handle_tabs_change={(val) => handleAdminTabChange(val, setTabIndex, router)}
+				tabs_header_length={2}
+				tabs_element_header={() => (
+					<>
 						<Tabs.Tab value="0" color="green">
 							Search
 						</Tabs.Tab>
 						<Tabs.Tab value="1" color="lime">
 							Advanced Search
 						</Tabs.Tab>
-						<Tabs.Tab value="2" color="blue">
-							Setting
-						</Tabs.Tab>
-					</Tabs.List>
-
-					<div className="dash-relative">
-						<LoadingOverlay visible={loadingDataAll} overlayBlur={3} />
+					</>
+				)}
+				tabs_element_body={() => (
+					<>
 						<Tabs.Panel value="0" pt="xs">
 							<Collapse in={tabIndex === 0}>
 								<Text color="dimmed">Quick search by any field</Text>
@@ -342,7 +217,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 									mb="md"
 									icon={<IconSearch size={14} stroke={1.5} />}
 									value={searchAll}
-									onChange={(e) => handleInputQueryChange(e, setSearchAll, e.target.name)}
+									onChange={(e) => handleInputQueryChange(e, setSearchAll, e.target.name, router)}
 									mt={16}
 								/>
 							</Collapse>
@@ -358,7 +233,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 									label="Title"
 									icon={<IconLetterA size={14} stroke={1.5} />}
 									value={searchTitle}
-									onChange={(e) => handleInputQueryChange(e, setSearchTitle, e.target.name)}
+									onChange={(e) => handleInputQueryChange(e, setSearchTitle, e.target.name, router)}
 									mt={16}
 								/>
 
@@ -367,7 +242,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 									name="visibility"
 									icon={<IconEye size={14} stroke={1.5} />}
 									value={searchVisibility}
-									onChange={(e) => handleSelectQueryChange(e || "", setSearchVisibility, "visibility")}
+									onChange={(e) => handleSelectQueryChange(e || "", setSearchVisibility, "visibility", router)}
 									data={[
 										{ value: "all", label: "All" },
 										{ value: "public", label: "Public" },
@@ -383,7 +258,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 									placeholder="Search by organizer field"
 									icon={<IconTags size={14} stroke={1.5} />}
 									value={searchOrganizer}
-									onChange={(e) => handleSelectQueryChange(e.join(" "), setSearchOrganizer, "organizer", e)}
+									onChange={(e) => handleSelectQueryChange(e.join(" "), setSearchOrganizer, "organizer", router, e)}
 									data={availableOrganization}
 									mt={8}
 									searchable
@@ -395,7 +270,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 									placeholder="Search by tags field"
 									icon={<IconTags size={14} stroke={1.5} />}
 									value={searchTags}
-									onChange={(e) => handleSelectQueryChange(e.join(" "), setSearchTags, "tags", e)}
+									onChange={(e) => handleSelectQueryChange(e.join(" "), setSearchTags, "tags", router, e)}
 									data={availableTags}
 									mt={8}
 									searchable
@@ -407,7 +282,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 									label="Author"
 									icon={<IconUser size={14} stroke={1.5} />}
 									value={searchAuthor}
-									onChange={(e) => handleInputQueryChange(e, setSearchAuthor, e.target.name)}
+									onChange={(e) => handleInputQueryChange(e, setSearchAuthor, e.target.name, router)}
 									mt={8}
 								/>
 
@@ -416,7 +291,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 									name="pinned"
 									icon={<IconPin size={14} stroke={1.5} />}
 									value={searchIsPinned}
-									onChange={(e) => handleSelectQueryChange(e || "", setSearchIsPinned, "pinned")}
+									onChange={(e) => handleSelectQueryChange(e || "", setSearchIsPinned, "pinned", router)}
 									data={[
 										{ value: "all", label: "All" },
 										{ value: "true", label: "True" },
@@ -429,7 +304,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 									name="showAtHome"
 									icon={<IconHome size={14} stroke={1.5} />}
 									value={searchShowAtHome}
-									onChange={(e) => handleSelectQueryChange(e || "", setSearchShowAtHome, "showAtHome")}
+									onChange={(e) => handleSelectQueryChange(e || "", setSearchShowAtHome, "showAtHome", router)}
 									data={[
 										{ value: "all", label: "All" },
 										{ value: "true", label: "True" },
@@ -443,322 +318,283 @@ export const Event: NextPage<IEventProps> = (props) => {
 									name="createdAt"
 									icon={<IconDeviceWatch size={14} stroke={1.5} />}
 									value={searchCreatedAt}
-									onChange={(e) => handleInputQueryChange(e, setSearchCreatedAt, e.target.name)}
+									onChange={(e) => handleInputQueryChange(e, setSearchCreatedAt, e.target.name, router)}
 									mt={8}
 								/>
 							</Collapse>
 						</Tabs.Panel>
-					</div>
-					<Tabs.Panel value="2" pt="xs" className="dash-textinput-gap">
-						<Collapse in={tabIndex === 2}>
-							<Text color="dimmed">Customize data load setting</Text>
-
-							<NumberInput
-								label="Item per page"
-								placeholder="Item per page"
-								description="How many item per page in the dashboard (default: 25, min: 5, max: 100). Search is not affected by this setting."
-								value={perPage}
-								stepHoldDelay={500}
-								stepHoldInterval={100}
-								min={5}
-								max={100}
-								onChange={(value) => {
-									if (!value) return;
-									setPerPage(value);
-								}}
-								mt={8}
-							/>
-
-							<Button
-								compact
-								leftIcon={<IconRefresh size={20} />}
-								onClick={() => {
-									fillData(perPage, curPage);
-									fillDataAll();
-								}}
-								mt={16}
-							>
-								Reload the table
-							</Button>
-						</Collapse>
-					</Tabs.Panel>
-				</Tabs>
-			</div>
-			<Divider mt={16} mb={16} />
-			<div className="dash-relative">
-				<LoadingOverlay visible={loadingDataPage} overlayBlur={3} />
-				<ScrollArea mt={30}>
-					<Table horizontalSpacing="md" verticalSpacing="xs" sx={{ tableLayout: "fixed", width: "100%" }} highlightOnHover>
-						<thead>
-							<tr>
-								<Th
-									classes={classes}
-									sorted={sortBy === "title"}
-									reversed={reverseSortDirection}
-									onSort={() => {
-										if (sortBy === "title") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("title");
-									}}
-									width="15%"
-								>
-									Title
-								</Th>
-								<Th
-									classes={classes}
-									sorted={sortBy === "visibility"}
-									reversed={reverseSortDirection}
-									onSort={() => {
-										if (sortBy === "visibility") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("visibility");
-									}}
-									width="10%"
-								>
-									Visibility
-								</Th>
-								<Th
-									classes={classes}
-									sorted={sortBy === "organizer"}
-									reversed={reverseSortDirection}
-									onSort={() => {
-										if (sortBy === "organizer") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("organizer");
-									}}
-									width="12%"
-								>
-									Organizer
-								</Th>
-								<Th
-									classes={classes}
-									sorted={sortBy === "tags"}
-									reversed={reverseSortDirection}
-									onSort={() => {
-										if (sortBy === "tags") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("tags");
-									}}
-									width="11%"
-								>
-									Tags
-								</Th>
-								<Th
-									classes={classes}
-									sorted={sortBy === "author"}
-									reversed={reverseSortDirection}
-									onSort={() => {
-										if (sortBy === "author") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("author");
-									}}
-									width="10%"
-								>
-									Author
-								</Th>
-								<Th
-									classes={classes}
-									sorted={sortBy === "pinned"}
-									reversed={reverseSortDirection}
-									onSort={() => {
-										if (sortBy === "pinned") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("pinned");
-									}}
-									width="10%"
-								>
-									Pinned
-								</Th>
-								<Th
-									classes={classes}
-									sorted={sortBy === "showAtHome"}
-									reversed={reverseSortDirection}
-									onSort={() => {
-										if (sortBy === "showAtHome") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("showAtHome");
-									}}
-									width="12%"
-								>
-									Show at home
-								</Th>
-								<Th
-									classes={classes}
-									sorted={sortBy === "createdAt"}
-									reversed={reverseSortDirection}
-									onSort={() => {
-										if (sortBy === "createdAt") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("createdAt");
-									}}
-									width="10%"
-								>
-									Created At
-								</Th>
-								<th className={classes.th} style={{ width: "10%" }}>
-									<UnstyledButton className={classes.control}>
-										<Group position="apart">
-											<Text weight={500} size="sm">
-												Action
-											</Text>
-										</Group>
-									</UnstyledButton>
-								</th>
-							</tr>
-						</thead>
-						<tbody>
-							{dataPage && dataPage.length > 0 && sortSearchData(sortBy, dataPage, dataAllPage).length > 0 ? (
-								sortSearchData(sortBy, dataPage, dataAllPage).map((row) => (
-									<tr key={row._id}>
-										<td>
-											<Tooltip withArrow label={row.description} multiline>
+					</>
+				)}
+				// table
+				th_element={() => (
+					<>
+						<Th
+							classes={classes}
+							sorted={sortBy === "title"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "title") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("title");
+							}}
+							width="15%"
+						>
+							Title
+						</Th>
+						<Th
+							classes={classes}
+							sorted={sortBy === "visibility"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "visibility") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("visibility");
+							}}
+							width="10%"
+						>
+							Visibility
+						</Th>
+						<Th
+							classes={classes}
+							sorted={sortBy === "organizer"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "organizer") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("organizer");
+							}}
+							width="12%"
+						>
+							Organizer
+						</Th>
+						<Th
+							classes={classes}
+							sorted={sortBy === "tags"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "tags") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("tags");
+							}}
+							width="11%"
+						>
+							Tags
+						</Th>
+						<Th
+							classes={classes}
+							sorted={sortBy === "author"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "author") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("author");
+							}}
+							width="10%"
+						>
+							Author
+						</Th>
+						<Th
+							classes={classes}
+							sorted={sortBy === "pinned"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "pinned") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("pinned");
+							}}
+							width="10%"
+						>
+							Pinned
+						</Th>
+						<Th
+							classes={classes}
+							sorted={sortBy === "showAtHome"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "showAtHome") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("showAtHome");
+							}}
+							width="12%"
+						>
+							Show at home
+						</Th>
+						<Th
+							classes={classes}
+							sorted={sortBy === "createdAt"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "createdAt") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("createdAt");
+							}}
+							width="10%"
+						>
+							Created At
+						</Th>
+						<th className={classes.th} style={{ width: "10%" }}>
+							<UnstyledButton className={classes.control}>
+								<Group position="apart">
+									<Text weight={500} size="sm">
+										Action
+									</Text>
+								</Group>
+							</UnstyledButton>
+						</th>
+					</>
+				)}
+				tr_element={() => (
+					<>
+						{dataPage && dataPage.length > 0 && sortSearchData(sortBy, dataPage, dataAllPage).length > 0 ? (
+							sortSearchData(sortBy, dataPage, dataAllPage).map((row) => (
+								<tr key={row._id}>
+									<td>
+										<Tooltip withArrow label={row.description} multiline>
+											<span>
+												<Link href={`/event/${row.title.replaceAll(" ", "-")}-${row._id}`}>
+													<a>
+														<Text component="span" variant="link">
+															{row.title}
+														</Text>
+													</a>
+												</Link>
+											</span>
+										</Tooltip>
+									</td>
+									<td>{row.visibility}</td>
+									<td>
+										{row.organizer && row.organizer.length > 0
+											? row.organizer.map((organizer, i) => {
+													return (
+														<span key={i}>
+															<Link href={`${props.revision ? "../event" : props.pathname?.split("?")[0]}/organizer?qAll=${organizer}`}>
+																<a>
+																	<Text component="span" variant="link">
+																		{organizer}
+																	</Text>
+																</a>
+															</Link>
+															{i < row.organizer!.length - 1 ? ", " : ""}
+														</span>
+													);
+											  })
+											: "None"}
+									</td>
+									<td>
+										{row.tags && row.tags.length > 0
+											? row.tags.map((tags, i) => {
+													return (
+														<span key={i}>
+															<Link href={`${props.revision ? "../event" : props.pathname?.split("?")[0]}/tags?qAll=${tags}`}>
+																<a>
+																	<Text component="span" variant="link">
+																		{tags}
+																	</Text>
+																</a>
+															</Link>
+															{i < row.tags!.length - 1 ? ", " : ""}
+														</span>
+													);
+											  })
+											: "Deleted"}
+									</td>
+									<td>
+										{row.editedBy && row.editedBy[0] ? (
+											<>
+												<Tooltip withArrow label={`Last edited by: ${row.editedBy[0].username}`}>
+													<span>{row.author[0] ? row.author[0].username : "Deleted"}</span>
+												</Tooltip>
+											</>
+										) : row.author[0] ? (
+											row.author[0].username
+										) : (
+											"Deleted"
+										)}
+									</td>
+									<td>
+										{row.pinned ? (
+											<Tooltip withArrow label="Pinned">
 												<span>
-													<Link href={`/event/${row.title.replaceAll(" ", "-")}-${row._id}`}>
-														<a>
-															<Text component="span" variant="link">
-																{row.title}
-															</Text>
-														</a>
-													</Link>
+													<IconPin />
 												</span>
 											</Tooltip>
-										</td>
-										<td>{row.visibility}</td>
-										<td>
-											{row.organizer && row.organizer.length > 0
-												? row.organizer.map((organizer, i) => {
-														return (
-															<span key={i}>
-																<Link href={`${props.revision ? "../event" : props.pathname?.split("?")[0]}/organizer?qAll=${organizer}`}>
-																	<a>
-																		<Text component="span" variant="link">
-																			{organizer}
-																		</Text>
-																	</a>
-																</Link>
-																{i < row.organizer!.length - 1 ? ", " : ""}
-															</span>
-														);
-												  })
-												: "None"}
-										</td>
-										<td>
-											{row.tags && row.tags.length > 0
-												? row.tags.map((tags, i) => {
-														return (
-															<span key={i}>
-																<Link href={`${props.revision ? "../event" : props.pathname?.split("?")[0]}/tags?qAll=${tags}`}>
-																	<a>
-																		<Text component="span" variant="link">
-																			{tags}
-																		</Text>
-																	</a>
-																</Link>
-																{i < row.tags!.length - 1 ? ", " : ""}
-															</span>
-														);
-												  })
-												: "Deleted"}
-										</td>
-										<td>
-											{row.editedBy && row.editedBy[0] ? (
+										) : (
+											<Tooltip withArrow label="Not pinned">
+												<span>
+													<IconPinnedOff />
+												</span>
+											</Tooltip>
+										)}
+									</td>
+									<td>
+										{row.showAtHome ? (
+											<Tooltip withArrow label="Shown at home">
+												<span>
+													<IconHome />
+												</span>
+											</Tooltip>
+										) : (
+											<Tooltip withArrow label="Not shown at home">
+												<span>
+													<IconHomeOff />
+												</span>
+											</Tooltip>
+										)}
+									</td>
+									<td>
+										{row.updatedAt !== row.createdAt ? (
+											<Tooltip withArrow label={`Last edited at: ${formatDateWithTz(row.updatedAt, tz)}`}>
+												<span>{formatDateWithTz(row.createdAt, tz)}</span>
+											</Tooltip>
+										) : (
+											<>{formatDateWithTz(row.createdAt, tz)}</>
+										)}
+									</td>
+									<td style={{ padding: "1rem .5rem" }}>
+										<div className="dash-flex">
+											{!props.revision && (
 												<>
-													<Tooltip withArrow label={`Last edited by: ${row.editedBy[0].username}`}>
-														<span>{row.author[0] ? row.author[0].username : "Deleted"}</span>
+													<Tooltip withArrow label="Edit">
+														<span>
+															<Link href={`${props.pathname?.split("?")[0]}/${row._id}`}>
+																<a>
+																	<ActionIcon>
+																		<IconEdit size={14} stroke={1.5} />
+																	</ActionIcon>
+																</a>
+															</Link>
+														</span>
+													</Tooltip>
+													<Tooltip withArrow label="View revisions">
+														<span>
+															<Link href={`${props.pathname?.split("?")[0]}/${row._id}/revision`}>
+																<a>
+																	<ActionIcon>
+																		<IconHistory size={14} stroke={1.5} />
+																	</ActionIcon>
+																</a>
+															</Link>
+														</span>
 													</Tooltip>
 												</>
-											) : row.author[0] ? (
-												row.author[0].username
-											) : (
-												"Deleted"
 											)}
-										</td>
-										<td>
-											{row.pinned ? (
-												<Tooltip withArrow label="Pinned">
-													<span>
-														<IconPin />
-													</span>
-												</Tooltip>
-											) : (
-												<Tooltip withArrow label="Not pinned">
-													<span>
-														<IconPinnedOff />
-													</span>
-												</Tooltip>
-											)}
-										</td>
-										<td>
-											{row.showAtHome ? (
-												<Tooltip withArrow label="Shown at home">
-													<span>
-														<IconHome />
-													</span>
-												</Tooltip>
-											) : (
-												<Tooltip withArrow label="Not shown at home">
-													<span>
-														<IconHomeOff />
-													</span>
-												</Tooltip>
-											)}
-										</td>
-										<td>
-											{row.updatedAt !== row.createdAt ? (
-												<Tooltip withArrow label={`Last edited at: ${formatDateWithTz(row.updatedAt, tz)}`}>
-													<span>{formatDateWithTz(row.createdAt, tz)}</span>
-												</Tooltip>
-											) : (
-												<>{formatDateWithTz(row.createdAt, tz)}</>
-											)}
-										</td>
-										<td style={{ padding: "1rem .5rem" }}>
-											<div className="dash-flex">
-												{!props.revision && (
-													<>
-														<Tooltip withArrow label="Edit">
-															<span>
-																<Link href={`${props.pathname?.split("?")[0]}/${row._id}`}>
-																	<a>
-																		<ActionIcon>
-																			<IconEdit size={14} stroke={1.5} />
-																		</ActionIcon>
-																	</a>
-																</Link>
-															</span>
-														</Tooltip>
-														<Tooltip withArrow label="View revisions">
-															<span>
-																<Link href={`${props.pathname?.split("?")[0]}/${row._id}/revision`}>
-																	<a>
-																		<ActionIcon>
-																			<IconHistory size={14} stroke={1.5} />
-																		</ActionIcon>
-																	</a>
-																</Link>
-															</span>
-														</Tooltip>
-													</>
-												)}
-												<Tooltip withArrow label="Delete">
-													<span>
-														<ActionIcon onClick={() => handleDelete(row._id)}>
-															<IconTrash size={14} stroke={1.5} />
-														</ActionIcon>
-													</span>
-												</Tooltip>
-											</div>
-										</td>
-									</tr>
-								))
-							) : (
-								<>
-									<tr>
-										<td colSpan={8}>
-											<Text weight={500} align="center">
-												Nothing found
-											</Text>
-										</td>
-									</tr>
-								</>
-							)}
-						</tbody>
-					</Table>
-				</ScrollArea>
-			</div>
-			<Center mt={16}>{!isSearching() && <Pagination total={pages} page={curPage} onChange={pageChange} />}</Center>
+											<Tooltip withArrow label="Delete">
+												<span>
+													<ActionIcon onClick={() => handleDelete(row._id)}>
+														<IconTrash size={14} stroke={1.5} />
+													</ActionIcon>
+												</span>
+											</Tooltip>
+										</div>
+									</td>
+								</tr>
+							))
+						) : (
+							<>
+								<tr>
+									<td colSpan={9}>
+										<Text weight={500} align="center">
+											Nothing found
+										</Text>
+									</td>
+								</tr>
+							</>
+						)}
+					</>
+				)}
+			/>
 		</>
 	);
 };
