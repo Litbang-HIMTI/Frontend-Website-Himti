@@ -9,7 +9,7 @@ import { useLocalStorage } from "@mantine/hooks";
 import { IconSearch, IconEdit, IconTrash, IconPin, IconPinnedOff, IconUser, IconLetterA, IconTags, IconDeviceWatch, IconEye, IconHome, IconHomeOff, IconHistory } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { IEventRevision, validEventSort, EventSort } from "../../../interfaces/db";
-import { deleteData, fillDataPage, fillDataAll, handleAdminTabChange, handleInputQueryChange, handleSelectQueryChange } from "../../../helper/admin";
+import { deletePrompt, fillDataPage, fillDataAll, handleAdminTabChange, handleInputQueryChange, handleSelectQueryChange } from "../../../helper/admin";
 import { formatDateWithTz } from "../../../helper/global";
 import { Th, useTableStyles } from "../../Utils/Dashboard";
 import { TableView } from "../Reusable/TableView";
@@ -52,17 +52,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// handler
-	const handleDelete = (id: string) => {
-		openConfirmModal({
-			title: "Delete confirmation",
-			children: <Text size="sm">Are you sure you want to delete this event? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
-			labels: { confirm: "Yes, delete event", cancel: "No, cancel" },
-			confirmProps: { color: "red" },
-			onCancel: () => {},
-			onConfirm: () => deleteData(id, api_url, setDataPage, setDataAllPage),
-		});
-	};
-
+	const handleDelete = (id: string) => deletePrompt(id, api_url, setDataPage, setDataAllPage, "event");
 	// -----------------------------------------------------------
 	// display
 	const searchAllHelper = (item: IEventRevision, query: string) => {
@@ -173,7 +163,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 			<TableView
 				{...props}
 				api_url={api_url}
-				isCreatable={!props.revision}
+				nonCreatable={props.revision}
 				title={props.revision ? "Event Posts Revision" : "Event Posts"}
 				isSearching={isSearching()}
 				router={router}

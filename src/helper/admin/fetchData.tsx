@@ -1,9 +1,19 @@
+import { TextInput, Button, Text, Code } from "@mantine/core";
+import { closeAllModals, openConfirmModal, openModal } from "@mantine/modals";
 import { showNotification, updateNotification } from "@mantine/notifications";
 import { IconCheck, IconX } from "@tabler/icons";
 import { SetStateAction } from "react";
 import { SERVER_V1 } from "../global/constants";
+import { randomBytes } from "crypto";
 
 export type IDeleteData = (_id: string, api_url: string, setDataPage: (value: SetStateAction<any[]>) => void, setDataAllPage: (value: SetStateAction<any[]>) => void) => Promise<void>;
+export type IDeletePrompt = (
+	_id: string,
+	api_url: string,
+	setDataPage: (value: SetStateAction<any[]>) => void,
+	setDataAllPage: (value: SetStateAction<any[]>) => void,
+	context: string
+) => Promise<void>;
 export type IFillDataAll = (
 	api_url: string,
 	setLoadingDataAll: (value: SetStateAction<boolean>) => void,
@@ -21,7 +31,52 @@ export type IFillDataPage = (
 	extraCallback?: (data: any) => void
 ) => Promise<void>;
 
-export const deleteData: IDeleteData = async (_id, api_url, setDataPage, setDataAllPage) => {
+export const deletePrompt: IDeletePrompt = async (_id, api_url, setDataPage, setDataAllPage, context) => {
+	const random = randomBytes(8).toString("hex");
+	const validateInput = () => {
+		const inputVal = document.getElementById(`delete-input-${random}`) as HTMLInputElement;
+		if (inputVal.value === random.toString()) {
+			closeAllModals();
+			actuallyDeleteTheData(_id, api_url, setDataPage, setDataAllPage);
+		} else {
+			showNotification({ message: "Invalid code inputted", color: "red", autoClose: 3000 });
+		}
+	};
+
+	openConfirmModal({
+		title: "Delete confirmation",
+		children: (
+			<Text size="sm">
+				<Text component="span" weight={700}>
+					Are you sure
+				</Text>{" "}
+				you want to delete this {context}? This action is <Code>irreversible</Code>, <Code>destructive</Code>, and <Code>there is no way to recover the deleted data</Code>.
+			</Text>
+		),
+		labels: { confirm: `Yes, delete ${context}`, cancel: "No, cancel" },
+		confirmProps: { color: "red" },
+		closeOnConfirm: false,
+		onCancel: () => {},
+		onConfirm: () =>
+			openModal({
+				title: "Second Confirmation",
+				children: (
+					<>
+						<Text size={"sm"}>
+							Please type <Code>{random}</Code> to confirm deletion.
+						</Text>
+
+						<TextInput mt={8} id={`delete-input-${random}`} placeholder="12345" data-autofocus />
+						<Button fullWidth onClick={() => validateInput()} mt="md" color={"red"}>
+							Submit Delete
+						</Button>
+					</>
+				),
+			}),
+	});
+};
+
+const actuallyDeleteTheData: IDeleteData = async (_id, api_url, setDataPage, setDataAllPage) => {
 	showNotification({ id: "delete-notif", title: "Loading", message: "Deleting...", loading: true, disallowClose: true });
 	try {
 		const req = await fetch(`${SERVER_V1}/${api_url}/${_id}`, {

@@ -9,7 +9,7 @@ import { useLocalStorage } from "@mantine/hooks";
 import { IconSearch, IconEdit, IconTrash, IconUsers, IconLetterA, IconBriefcase, IconDeviceWatch } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { IUser, validUserSort, UserSort } from "../../../interfaces/db";
-import { deleteData, fillDataPage, fillDataAll, handleAdminTabChange, handleInputQueryChange } from "../../../helper/admin";
+import { deletePrompt, fillDataPage, fillDataAll, handleAdminTabChange, handleInputQueryChange } from "../../../helper/admin";
 import { formatDateWithTz } from "../../../helper/global/format";
 import { Th, useTableStyles } from "../../Utils/Dashboard";
 import { TableView } from "../Reusable/TableView";
@@ -42,17 +42,7 @@ export const User: NextPage<IDashboardProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// handler
-	const handleDelete = (id: string) => {
-		openConfirmModal({
-			title: "Delete confirmation",
-			children: <Text size="sm">Are you sure you want to delete this user? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
-			labels: { confirm: "Yes, delete user", cancel: "No, cancel" },
-			confirmProps: { color: "red" },
-			onCancel: () => {},
-			onConfirm: () => deleteData(id, api_url, setDataPage, setDataAllPage),
-		});
-	};
-
+	const handleDelete = (id: string) => deletePrompt(id, api_url, setDataPage, setDataAllPage, "user");
 	// -----------------------------------------------------------
 	// display
 	const searchAllHelper = (item: IUser, query: string) => {
