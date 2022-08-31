@@ -58,6 +58,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 	const { shortlink } = context.params!;
 	if (!shortlink || shortlink === "") return { notFound: true };
 
+	// TODO: shortlink berdasarkan rumus algoritma
 	const checkShortLink = await fetch(`${SERVER_V1}/shortlink/${shortlink}?updateClick=1`, {
 		method: "GET",
 		headers: {

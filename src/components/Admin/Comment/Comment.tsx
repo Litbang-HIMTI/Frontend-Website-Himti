@@ -2,38 +2,21 @@ import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import {
-	Table,
-	ScrollArea,
-	UnstyledButton,
-	Group,
-	Text,
-	Center,
-	TextInput,
-	Tooltip,
-	ActionIcon,
-	Tabs,
-	Button,
-	LoadingOverlay,
-	Divider,
-	Collapse,
-	NumberInput,
-	TabsValue,
-	Pagination,
-} from "@mantine/core";
+import { UnstyledButton, Group, Text, TextInput, Tooltip, ActionIcon, Tabs, Collapse } from "@mantine/core";
 import { keys } from "@mantine/utils";
-import { showNotification } from "@mantine/notifications";
-import { openConfirmModal } from "@mantine/modals";
 import { useLocalStorage } from "@mantine/hooks";
-import { IconSearch, IconExternalLink, IconTrash, IconLego, IconMessage, IconLicense, IconDeviceWatch, IconRefresh } from "@tabler/icons";
+import { IconSearch, IconExternalLink, IconTrash, IconLego, IconMessage, IconLicense, IconDeviceWatch } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { IComment, validCommentSort, CommentSort, CommentQRes } from "../../../interfaces/db";
-import { addQueryParam, removeQueryParam, SERVER_V1, formatDateWithTz } from "../../../helper";
-import { Th, useTableStyles, TitleDashboard } from "../../Utils/Dashboard";
+import { IComment, validCommentSort, CommentSort } from "../../../interfaces/db";
+import { deletePrompt, fillDataPage, fillDataAll, handleAdminTabChange, handleInputQueryChange } from "../../../helper/admin";
+import { formatDateWithTz } from "../../../helper/global";
+import { Th, useTableStyles } from "../../Utils/Dashboard";
+import { TableView } from "../Reusable/TableView";
 
 export const Comment: NextPage<IDashboardProps> = (props) => {
 	const { classes } = useTableStyles();
 	const router = useRouter();
+	const api_url = "comment";
 
 	const [curPage, setCurPage] = useState(1);
 	const [pages, setPages] = useState(1);
@@ -58,34 +41,7 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// handler
-	const handleInputQueryChange = (e: React.ChangeEvent<HTMLInputElement>, setFunc: (value: string) => void, param: string) => {
-		setFunc(e.target.value);
-		if (e.target.value === "") removeQueryParam(router, param);
-		else addQueryParam(router, param, e.target.value);
-	};
-
-	const handleTabChange = (index: TabsValue) => {
-		setTabIndex(index ? parseInt(index) : 0);
-		addQueryParam(router, "tab", index ? index : "0");
-	};
-
-	const pageChange = (page: number) => {
-		setCurPage(page);
-		addQueryParam(router, "page", page.toString());
-		fillData(perPage, page);
-	};
-
-	const handleDelete = (id: string) => {
-		openConfirmModal({
-			title: "Delete confirmation",
-			children: <Text size="sm">Are you sure you want to delete this comment? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
-			labels: { confirm: "Yes, delete comment", cancel: "No, cancel" },
-			confirmProps: { color: "red" },
-			onCancel: () => {},
-			onConfirm: () => deleteData(id),
-		});
-	};
-
+	const handleDelete = (id: string) => deletePrompt(id, api_url, setDataPage, setDataAllPage, `comment`);
 	// -----------------------------------------------------------
 	// display
 	const searchAllHelper = (item: IComment, query: string) => {
@@ -138,88 +94,6 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// delete
-	const deleteData = async (_id: string) => {
-		try {
-			const req = await fetch(`${SERVER_V1}/comment/${_id}`, {
-				method: "DELETE",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				credentials: "include",
-			});
-
-			const { success, message }: CommentQRes = await req.json();
-			if (req.status === 200 && success) {
-				// slice data
-				setDataPage((prev) => {
-					return prev.filter((item) => item._id !== _id);
-				});
-				setDataAllPage((prev) => {
-					return prev.filter((item) => item._id !== _id);
-				});
-
-				showNotification({ title: "Success", message });
-			} else {
-				showNotification({ title: "Error", message, color: "red" });
-			}
-		} catch (error: any) {
-			showNotification({ title: "Error", message: error.message, color: "red" });
-		}
-	};
-
-	// fetch
-	const fillDataAll = async () => {
-		try {
-			setLoadingDataAll(true);
-			const req = await fetch(SERVER_V1 + `/comment?content=1`, {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				credentials: "include",
-			});
-
-			const { data, message }: CommentQRes = await req.json();
-			if (req.status !== 200) {
-				setLoadingDataAll(false);
-				return showNotification({ title: "Error indexing all data for search", message, color: "red" });
-			}
-
-			setDataAllPage(data);
-			setLoadingDataAll(false);
-		} catch (error: any) {
-			setLoadingDataAll(false);
-			showNotification({ title: "Error indexing all data for search", message: error.message, color: "red" });
-		}
-	};
-
-	const fillData = async (perPage: number, curPageQ: number) => {
-		try {
-			setLoadingDataPage(true);
-			const req = await fetch(SERVER_V1 + `/comment?perPage=${perPage}&page=${curPageQ}&content=1`, {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				credentials: "include",
-			});
-
-			const { data, message, page, pages }: CommentQRes = await req.json();
-			if (req.status !== 200) {
-				setLoadingDataPage(false);
-				return showNotification({ title: "Error getting page data", message, color: "red" });
-			}
-
-			setCurPage(page);
-			setPages(pages ? pages : 1);
-			setDataPage(data);
-			setLoadingDataPage(false);
-		} catch (error: any) {
-			setLoadingDataPage(false);
-			showNotification({ title: "Error getting page data", message: error.message, color: "red" });
-		}
-	};
-
 	const fetchUrlParams = () => {
 		const { query } = router;
 		const params = new URLSearchParams(query as unknown as string);
@@ -236,31 +110,46 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 	useEffect(() => {
 		fetchUrlParams();
 		setTz(Intl.DateTimeFormat().resolvedOptions().timeZone);
-		fillData(perPage, curPage);
-		fillDataAll();
+		fillDataPage(api_url, perPage, curPage, setLoadingDataPage, setCurPage, setPages, setDataPage);
+		fillDataAll(api_url, setLoadingDataAll, setDataAllPage);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (
 		<>
-			<TitleDashboard title="Comments" />
-
-			<div>
-				<Tabs value={tabIndex.toString() || "0"} onTabChange={handleTabChange}>
-					<Tabs.List>
+			<TableView
+				{...props}
+				api_url={api_url}
+				title={"Comments"}
+				isSearching={isSearching()}
+				router={router} // loading
+				loadingDataAll={loadingDataAll}
+				loadingDataPage={loadingDataPage}
+				setLoadingDataAll={setLoadingDataAll}
+				setLoadingDataPage={setLoadingDataPage} // page
+				pages={pages}
+				curPage={curPage}
+				perPage={perPage}
+				setCurPage={setCurPage}
+				setPerPage={setPerPage}
+				setPages={setPages} // data
+				setDataPage={setDataPage}
+				setDataAllPage={setDataAllPage} // tabs
+				tabIndex={tabIndex}
+				handle_tabs_change={(val) => handleAdminTabChange(val, setTabIndex, router)}
+				tabs_header_length={2}
+				tabs_element_header={() => (
+					<>
 						<Tabs.Tab value="0" color="green">
 							Search
 						</Tabs.Tab>
 						<Tabs.Tab value="1" color="lime">
 							Advanced Search
 						</Tabs.Tab>
-						<Tabs.Tab value="2" color="blue">
-							Setting
-						</Tabs.Tab>
-					</Tabs.List>
-
-					<div className="dash-relative">
-						<LoadingOverlay visible={loadingDataAll} overlayBlur={3} />
+					</>
+				)}
+				tabs_element_body={() => (
+					<>
 						<Tabs.Panel value="0" pt="xs">
 							<Collapse in={tabIndex === 0}>
 								<Text color="dimmed">Quick search by any field</Text>
@@ -270,7 +159,7 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 									mb="md"
 									icon={<IconSearch size={14} stroke={1.5} />}
 									value={searchAll}
-									onChange={(e) => handleInputQueryChange(e, setSearchAll, e.target.name)}
+									onChange={(e) => handleInputQueryChange(e, setSearchAll, e.target.name, router)}
 									mt={16}
 								/>
 							</Collapse>
@@ -285,7 +174,7 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 									label="Author"
 									icon={<IconLego size={14} stroke={1.5} />}
 									value={searchAuthor}
-									onChange={(e) => handleInputQueryChange(e, setSearchAuthor, e.target.name)}
+									onChange={(e) => handleInputQueryChange(e, setSearchAuthor, e.target.name, router)}
 									mt={16}
 								/>
 								<TextInput
@@ -294,7 +183,7 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 									label="Content"
 									icon={<IconLicense size={14} stroke={1.5} />}
 									value={searchContent}
-									onChange={(e) => handleInputQueryChange(e, setSearchContent, e.target.name)}
+									onChange={(e) => handleInputQueryChange(e, setSearchContent, e.target.name, router)}
 									mt={8}
 								/>
 								<TextInput
@@ -303,7 +192,7 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 									label="Forum"
 									icon={<IconMessage size={14} stroke={1.5} />}
 									value={searchForumTitle}
-									onChange={(e) => handleInputQueryChange(e, setSearchForumTitle, e.target.name)}
+									onChange={(e) => handleInputQueryChange(e, setSearchForumTitle, e.target.name, router)}
 									mt={8}
 								/>
 								<TextInput
@@ -312,179 +201,138 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 									name="createdAt"
 									icon={<IconDeviceWatch size={14} stroke={1.5} />}
 									value={searchCreatedAt}
-									onChange={(e) => handleInputQueryChange(e, setSearchCreatedAt, e.target.name)}
+									onChange={(e) => handleInputQueryChange(e, setSearchCreatedAt, e.target.name, router)}
 									mt={8}
 								/>
 							</Collapse>
 						</Tabs.Panel>
-					</div>
-					<Tabs.Panel value="2" pt="xs" className="dash-textinput-gap">
-						<Collapse in={tabIndex === 2}>
-							<Text color="dimmed">Customize data load setting</Text>
-
-							<NumberInput
-								label="Item per page"
-								placeholder="Item per page"
-								description="How many item per page in the dashboard (default: 25, min: 5, max: 100). Search is not affected by this setting."
-								value={perPage}
-								stepHoldDelay={500}
-								stepHoldInterval={100}
-								min={5}
-								max={100}
-								onChange={(value) => {
-									if (!value) return;
-									setPerPage(value);
-								}}
-								mt={8}
-							/>
-
-							<Button
-								compact
-								leftIcon={<IconRefresh size={20} />}
-								onClick={() => {
-									fillData(perPage, curPage);
-									fillDataAll();
-								}}
-								mt={16}
-							>
-								Reload the table
-							</Button>
-						</Collapse>
-					</Tabs.Panel>
-				</Tabs>
-			</div>
-
-			<Divider mt={16} mb={16} />
-
-			<div className="dash-relative">
-				<LoadingOverlay visible={loadingDataPage} overlayBlur={3} />
-				<ScrollArea mt={30}>
-					<Table horizontalSpacing="md" verticalSpacing="xs" sx={{ tableLayout: "fixed", width: "100%" }} highlightOnHover>
-						<thead>
-							<tr>
-								<Th
-									classes={classes}
-									sorted={sortBy === "author"}
-									reversed={reverseSortDirection}
-									onSort={() => {
-										if (sortBy === "author") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("author");
-									}}
-									width="15%"
-								>
-									Author
-								</Th>
-								<Th
-									classes={classes}
-									sorted={sortBy === "content"}
-									reversed={reverseSortDirection}
-									onSort={() => {
-										if (sortBy === "content") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("content");
-									}}
-									width="40%"
-								>
-									Content
-								</Th>
-								<Th
-									classes={classes}
-									sorted={sortBy === "forum"}
-									reversed={reverseSortDirection}
-									onSort={() => {
-										if (sortBy === "forum") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("forum");
-									}}
-									width="18%"
-								>
-									Forum
-								</Th>
-								<Th
-									classes={classes}
-									sorted={sortBy === "createdAt"}
-									reversed={reverseSortDirection}
-									onSort={() => {
-										if (sortBy === "createdAt") setReverseSortDirection(!reverseSortDirection);
-										setSortBy("createdAt");
-									}}
-									width="17%"
-								>
-									Created At
-								</Th>
-								<th className={classes.th} style={{ width: "10%" }}>
-									<UnstyledButton className={classes.control}>
-										<Group position="apart">
-											<Text weight={500} size="sm">
-												Action
-											</Text>
-										</Group>
-									</UnstyledButton>
-								</th>
-							</tr>
-						</thead>
-						<tbody>
-							{dataPage && dataPage.length > 0 && sortSearchData(sortBy, dataPage, dataAllPage).length > 0 ? (
-								sortSearchData(sortBy, dataPage, dataAllPage).map((row) => (
-									<tr key={row._id}>
-										<td>
-											<Link href={`user/${row._id}`}>
+					</>
+				)}
+				// table
+				th_element={() => (
+					<>
+						<Th
+							classes={classes}
+							sorted={sortBy === "author"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "author") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("author");
+							}}
+							width="15%"
+						>
+							Author
+						</Th>
+						<Th
+							classes={classes}
+							sorted={sortBy === "content"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "content") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("content");
+							}}
+							width="40%"
+						>
+							Content
+						</Th>
+						<Th
+							classes={classes}
+							sorted={sortBy === "forum"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "forum") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("forum");
+							}}
+							width="18%"
+						>
+							Forum
+						</Th>
+						<Th
+							classes={classes}
+							sorted={sortBy === "createdAt"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "createdAt") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("createdAt");
+							}}
+							width="17%"
+						>
+							Created At
+						</Th>
+						<th className={classes.th} style={{ width: "10%" }}>
+							<UnstyledButton className={classes.control}>
+								<Group position="apart">
+									<Text weight={500} size="sm">
+										Action
+									</Text>
+								</Group>
+							</UnstyledButton>
+						</th>
+					</>
+				)}
+				tr_element={() => (
+					<>
+						{dataPage && dataPage.length > 0 && sortSearchData(sortBy, dataPage, dataAllPage).length > 0 ? (
+							sortSearchData(sortBy, dataPage, dataAllPage).map((row) => (
+								<tr key={row._id}>
+									<td>
+										<Link href={`user/${row._id}`}>
+											<a>
+												<Text variant="link">{row.author![0] ? row.author![0].username : "Deleted"}</Text>
+											</a>
+										</Link>
+									</td>
+									<td>{row.content}</td>
+									<td>
+										{row.forumId && row.forumId[0] ? (
+											<Link href={`forum/${row.forumId[0]._id}`}>
 												<a>
-													<Text variant="link">{row.author![0] ? row.author![0].username : "Deleted"}</Text>
+													<Text variant="link">{row.forumId![0] ? row.forumId![0].title : "Deleted"}</Text>
 												</a>
 											</Link>
-										</td>
-										<td>{row.content}</td>
-										<td>
-											{row.forumId && row.forumId[0] ? (
-												<Link href={`forum/${row.forumId[0]._id}`}>
-													<a>
-														<Text variant="link">{row.forumId![0] ? row.forumId![0].title : "Deleted"}</Text>
-													</a>
-												</Link>
-											) : (
-												"Deleted"
-											)}
-										</td>
-										<td>
-											{row.updatedAt !== row.createdAt ? (
-												<Tooltip withArrow label={`Last edited at: ${formatDateWithTz(row.updatedAt, tz)}`}>
-													<span>{formatDateWithTz(row.createdAt, tz)}</span>
-												</Tooltip>
-											) : (
-												<>{formatDateWithTz(row.createdAt, tz)}</>
-											)}
-										</td>
-										<td style={{ padding: "1rem .5rem" }}>
-											<div className="dash-flex">
-												<Link href={`/forum/${row.forumId[0].title}-${row.forumId[0]._id}#comment-${row._id}`}>
-													<a>
-														<ActionIcon>
-															<IconExternalLink size={14} stroke={1.5} />
-														</ActionIcon>
-													</a>
-												</Link>
-												<ActionIcon onClick={() => handleDelete(row._id)}>
-													<IconTrash size={14} stroke={1.5} />
-												</ActionIcon>
-											</div>
-										</td>
-									</tr>
-								))
-							) : (
-								<>
-									<tr>
-										<td colSpan={5}>
-											<Text weight={500} align="center">
-												Nothing found
-											</Text>
-										</td>
-									</tr>
-								</>
-							)}
-						</tbody>
-					</Table>
-				</ScrollArea>
-			</div>
-			<Center mt={16}>{!isSearching() && <Pagination total={pages} page={curPage} onChange={pageChange} />}</Center>
+										) : (
+											"Deleted"
+										)}
+									</td>
+									<td>
+										{row.updatedAt !== row.createdAt ? (
+											<Tooltip withArrow label={`Last edited at: ${formatDateWithTz(row.updatedAt, tz)}`}>
+												<span>{formatDateWithTz(row.createdAt, tz)}</span>
+											</Tooltip>
+										) : (
+											<>{formatDateWithTz(row.createdAt, tz)}</>
+										)}
+									</td>
+									<td style={{ padding: "1rem .5rem" }}>
+										<div className="dash-flex">
+											<Link href={`/forum/${row.forumId[0].title}-${row.forumId[0]._id}#comment-${row._id}`}>
+												<a>
+													<ActionIcon>
+														<IconExternalLink size={14} stroke={1.5} />
+													</ActionIcon>
+												</a>
+											</Link>
+											<ActionIcon onClick={() => handleDelete(row._id)}>
+												<IconTrash size={14} stroke={1.5} />
+											</ActionIcon>
+										</div>
+									</td>
+								</tr>
+							))
+						) : (
+							<>
+								<tr>
+									<td colSpan={5}>
+										<Text weight={500} align="center">
+											Nothing found
+										</Text>
+									</td>
+								</tr>
+							</>
+						)}
+					</>
+				)}
+			/>
 		</>
 	);
 };

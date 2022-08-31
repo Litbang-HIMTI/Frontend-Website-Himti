@@ -25,7 +25,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 
 	const [curPage, setCurPage] = useState(1);
 	const [pages, setPages] = useState(1);
-	const [perPage, setPerPage] = useLocalStorage({ key: "perPage-event", defaultValue: 25 });
+	const [perPage, setPerPage] = useLocalStorage({ key: `perPage-${props.revision ? "event-revision" : "event"}`, defaultValue: 25 });
 
 	const [searchAll, setSearchAll] = useState("");
 	const [searchTitle, setSearchTitle] = useState("");
