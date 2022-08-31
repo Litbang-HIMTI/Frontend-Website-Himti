@@ -215,65 +215,63 @@ export const User: NextPage<IDashboardProps> = (props) => {
 				// table
 				th_element={() => (
 					<>
-						<tr>
-							<Th
-								classes={classes}
-								sorted={sortBy === "username"}
-								reversed={reverseSortDirection}
-								onSort={() => {
-									if (sortBy === "username") setReverseSortDirection(!reverseSortDirection);
-									setSortBy("username");
-								}}
-								width="20%"
-							>
-								Username
-							</Th>
-							<Th
-								classes={classes}
-								sorted={sortBy === "role"}
-								reversed={reverseSortDirection}
-								onSort={() => {
-									if (sortBy === "role") setReverseSortDirection(!reverseSortDirection);
-									setSortBy("role");
-								}}
-								width="25%"
-							>
-								Role
-							</Th>
-							<Th
-								classes={classes}
-								sorted={sortBy === "group"}
-								reversed={reverseSortDirection}
-								onSort={() => {
-									if (sortBy === "group") setReverseSortDirection(!reverseSortDirection);
-									setSortBy("group");
-								}}
-								width="25%"
-							>
-								Group
-							</Th>
-							<Th
-								classes={classes}
-								sorted={sortBy === "createdAt"}
-								reversed={reverseSortDirection}
-								onSort={() => {
-									if (sortBy === "createdAt") setReverseSortDirection(!reverseSortDirection);
-									setSortBy("createdAt");
-								}}
-								width="20%"
-							>
-								Created At
-							</Th>
-							<th className={classes.th} style={{ width: "10%" }}>
-								<UnstyledButton className={classes.control}>
-									<Group position="apart">
-										<Text weight={500} size="sm">
-											Action
-										</Text>
-									</Group>
-								</UnstyledButton>
-							</th>
-						</tr>
+						<Th
+							classes={classes}
+							sorted={sortBy === "username"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "username") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("username");
+							}}
+							width="20%"
+						>
+							Username
+						</Th>
+						<Th
+							classes={classes}
+							sorted={sortBy === "role"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "role") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("role");
+							}}
+							width="25%"
+						>
+							Role
+						</Th>
+						<Th
+							classes={classes}
+							sorted={sortBy === "group"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "group") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("group");
+							}}
+							width="25%"
+						>
+							Group
+						</Th>
+						<Th
+							classes={classes}
+							sorted={sortBy === "createdAt"}
+							reversed={reverseSortDirection}
+							onSort={() => {
+								if (sortBy === "createdAt") setReverseSortDirection(!reverseSortDirection);
+								setSortBy("createdAt");
+							}}
+							width="20%"
+						>
+							Created At
+						</Th>
+						<th className={classes.th} style={{ width: "10%" }}>
+							<UnstyledButton className={classes.control}>
+								<Group position="apart">
+									<Text weight={500} size="sm">
+										Action
+									</Text>
+								</Group>
+							</UnstyledButton>
+						</th>
 					</>
 				)}
 				tr_element={() => (
