@@ -4,12 +4,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { UnstyledButton, Group, Text, TextInput, Tooltip, ActionIcon, Tabs, Collapse, Select, MultiSelect } from "@mantine/core";
 import { keys } from "@mantine/utils";
-import { openConfirmModal } from "@mantine/modals";
 import { useLocalStorage } from "@mantine/hooks";
 import { IconSearch, IconEdit, IconTrash, IconPin, IconPinnedOff, IconUser, IconLetterA, IconTags, IconDeviceWatch, IconEye, IconHome, IconHomeOff, IconHistory } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { IEventRevision, validEventSort, EventSort } from "../../../interfaces/db";
-import { deletePrompt, fillDataPage, fillDataAll, handleAdminTabChange, handleInputQueryChange, handleSelectQueryChange } from "../../../helper/admin";
+import { actionPrompt, fillDataPage, fillDataAll, handleAdminTabChange, handleInputQueryChange, handleSelectQueryChange } from "../../../helper/admin";
 import { formatDateWithTz } from "../../../helper/global";
 import { Th, useTableStyles } from "../../Utils/Dashboard";
 import { TableView } from "../Reusable/TableView";
@@ -52,7 +51,7 @@ export const Event: NextPage<IEventProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// handler
-	const handleDelete = (id: string) => deletePrompt(id, api_url, setDataPage, setDataAllPage, "event");
+	const handleDelete = (id: string) => actionPrompt({ context: `${props.revision ? "event revision" : "event"}`, _id: id, api_url, setDataPage, setDataAllPage });
 	// -----------------------------------------------------------
 	// display
 	const searchAllHelper = (item: IEventRevision, query: string) => {

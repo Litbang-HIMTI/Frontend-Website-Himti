@@ -6,20 +6,34 @@ import { SetStateAction } from "react";
 import { SERVER_V1 } from "../global/constants";
 import { randomBytes } from "crypto";
 
-export type IDeleteData = (_id: string, api_url: string, setDataPage: (value: SetStateAction<any[]>) => void, setDataAllPage: (value: SetStateAction<any[]>) => void) => Promise<void>;
-export type IDeletePrompt = (
+export type IDeleteData = (
 	_id: string,
 	api_url: string,
-	setDataPage: (value: SetStateAction<any[]>) => void,
-	setDataAllPage: (value: SetStateAction<any[]>) => void,
-	context: string
+	setDataPage?: (value: SetStateAction<any[]>) => void,
+	setDataAllPage?: (value: SetStateAction<any[]>) => void,
+	extraCallback?: (data?: any) => void
 ) => Promise<void>;
+
+interface IPromptParam {
+	isGeneric?: boolean;
+	genericMsg?: string;
+	customCallback?: (data?: any) => void;
+	_id?: string;
+	api_url?: string;
+	context?: string;
+	extraCallback?: (data?: any) => void;
+	setDataAllPage?: (value: SetStateAction<any[]>) => void;
+	setDataPage?: (value: SetStateAction<any[]>) => void;
+}
+export type IActionPrompt = (extraParam: IPromptParam) => Promise<void>;
+
 export type IFillDataAll = (
 	api_url: string,
 	setLoadingDataAll: (value: SetStateAction<boolean>) => void,
 	setDataAllPage: (value: SetStateAction<any[]>) => void,
-	extraCallback?: (data: any) => void
+	extraCallback?: (data?: any) => void
 ) => Promise<void>;
+
 export type IFillDataPage = (
 	api_url: string,
 	perPage: number,
@@ -28,32 +42,46 @@ export type IFillDataPage = (
 	setCurPage: (value: SetStateAction<number>) => void,
 	setPages: (value: SetStateAction<number>) => void,
 	setDataPage: (value: SetStateAction<any[]>) => void,
-	extraCallback?: (data: any) => void
+	extraCallback?: (data?: any) => void
 ) => Promise<void>;
-
-export const deletePrompt: IDeletePrompt = async (_id, api_url, setDataPage, setDataAllPage, context) => {
+/**
+ * @async
+ * Modal prompts
+ * @summary Specifically for deletion but now can be used for generic prompts
+ * @param  {IActionPrompt} actionPromptParam - Object named parameter
+ * @return {Promise<void>} void.
+ */
+export const actionPrompt: IActionPrompt = async ({ isGeneric, genericMsg, customCallback, _id, api_url, context, extraCallback, setDataAllPage, setDataPage }) => {
 	const random = randomBytes(8).toString("hex");
 	const validateInput = () => {
-		const inputVal = document.getElementById(`delete-input-${random}`) as HTMLInputElement;
+		const inputVal = document.getElementById(`action-input-${random}`) as HTMLInputElement;
 		if (inputVal.value === random.toString()) {
 			closeAllModals();
-			actuallyDeleteTheData(_id, api_url, setDataPage, setDataAllPage);
+			if (!customCallback) actuallyDeleteTheData(_id!, api_url!, setDataPage, setDataAllPage, extraCallback);
+			else customCallback();
 		} else {
 			showNotification({ message: "Invalid code inputted", color: "red", autoClose: 3000 });
 		}
 	};
 
 	openConfirmModal({
-		title: "Delete confirmation",
+		title: `${isGeneric ? "Action" : "Delete"} Confirmation`,
 		children: (
 			<Text size="sm">
 				<Text component="span" weight={700}>
 					Are you sure
 				</Text>{" "}
-				you want to delete this {context}? This action is <Code>irreversible</Code>, <Code>destructive</Code>, and <Code>there is no way to recover the deleted data</Code>.
+				{isGeneric ? (
+					`you want to ${genericMsg}`
+				) : (
+					<>
+						you want to delete this {context}? This action is <Code>irreversible</Code>, <Code>destructive</Code>, and <Code>there is no way to recover the deleted data</Code>
+					</>
+				)}
+				.
 			</Text>
 		),
-		labels: { confirm: `Yes, delete ${context}`, cancel: "No, cancel" },
+		labels: { confirm: `Yes, ${isGeneric ? "confirm action" : `delete ${context}`}`, cancel: "No, cancel" },
 		confirmProps: { color: "red" },
 		closeOnConfirm: false,
 		onCancel: () => {},
@@ -63,12 +91,12 @@ export const deletePrompt: IDeletePrompt = async (_id, api_url, setDataPage, set
 				children: (
 					<>
 						<Text size={"sm"}>
-							Please type <Code>{random}</Code> to confirm deletion.
+							Please type <Code>{random}</Code> to confirm {isGeneric ? "action" : "deletion"}.
 						</Text>
 
-						<TextInput mt={8} id={`delete-input-${random}`} placeholder="12345" data-autofocus />
+						<TextInput mt={8} id={`action-input-${random}`} data-autofocus />
 						<Button fullWidth onClick={() => validateInput()} mt="md" color={"red"}>
-							Submit Delete
+							Submit {isGeneric ? "Action" : "Delete"}
 						</Button>
 					</>
 				),
@@ -76,7 +104,7 @@ export const deletePrompt: IDeletePrompt = async (_id, api_url, setDataPage, set
 	});
 };
 
-const actuallyDeleteTheData: IDeleteData = async (_id, api_url, setDataPage, setDataAllPage) => {
+const actuallyDeleteTheData: IDeleteData = async (_id, api_url, setDataPage?, setDataAllPage?, extraCallback?) => {
 	showNotification({ id: "delete-notif", title: "Loading", message: "Deleting...", loading: true, disallowClose: true });
 	try {
 		const req = await fetch(`${SERVER_V1}/${api_url}/${_id}`, {
@@ -90,8 +118,9 @@ const actuallyDeleteTheData: IDeleteData = async (_id, api_url, setDataPage, set
 		const { success, message }: { success: boolean; message: string } = await req.json();
 		if (req.status === 200 && success) {
 			// slice data
-			setDataPage((prev) => prev.filter((item) => item._id !== _id));
-			setDataAllPage((prev) => prev.filter((item) => item._id !== _id));
+			if (setDataPage) setDataPage((prev) => prev.filter((item) => item._id !== _id));
+			if (setDataAllPage) setDataAllPage((prev) => prev.filter((item) => item._id !== _id));
+			if (extraCallback) extraCallback();
 			updateNotification({ id: "delete-notif", title: "Success", message, loading: false, disallowClose: false, icon: <IconCheck size={16} />, autoClose: 2500 });
 		} else {
 			updateNotification({ id: "delete-notif", title: "Error", message, color: "red", loading: false, disallowClose: false, icon: <IconX size={16} /> });

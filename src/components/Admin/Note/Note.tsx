@@ -4,12 +4,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { UnstyledButton, Group, Text, TextInput, Tooltip, ActionIcon, Tabs, Collapse, TypographyStylesProvider } from "@mantine/core";
 import { keys } from "@mantine/utils";
-import { openConfirmModal } from "@mantine/modals";
 import { useLocalStorage } from "@mantine/hooks";
 import { IconSearch, IconEdit, IconTrash, IconLego, IconLetterA, IconLicense, IconDeviceWatch } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { INote, validNoteSort, NoteSort } from "../../../interfaces/db";
-import { deletePrompt, fillDataPage, fillDataAll, handleAdminTabChange, handleInputQueryChange } from "../../../helper/admin";
+import { actionPrompt, fillDataPage, fillDataAll, handleAdminTabChange, handleInputQueryChange } from "../../../helper/admin";
 import { formatDateWithTz } from "../../../helper/global";
 import { Th, useTableStyles } from "../../Utils/Dashboard";
 import { MDPreview } from "../../Utils/Viewer/Markdown/MDPreview";
@@ -43,7 +42,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// handler
-	const handleDelete = (id: string) => deletePrompt(id, api_url, setDataPage, setDataAllPage, "note");
+	const handleDelete = (id: string) => actionPrompt({ context: "note", _id: id, api_url, setDataPage, setDataAllPage });
 	// -----------------------------------------------------------
 	// display
 	const searchAllHelper = (item: INote, query: string) => {

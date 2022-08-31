@@ -4,12 +4,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { UnstyledButton, Group, Text, TextInput, Tooltip, ActionIcon, Tabs, Collapse } from "@mantine/core";
 import { keys } from "@mantine/utils";
-import { openConfirmModal } from "@mantine/modals";
 import { useLocalStorage } from "@mantine/hooks";
 import { IconSearch, IconEdit, IconTrash, IconUsers, IconLetterA, IconBriefcase, IconDeviceWatch } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { IUser, validUserSort, UserSort } from "../../../interfaces/db";
-import { deletePrompt, fillDataPage, fillDataAll, handleAdminTabChange, handleInputQueryChange } from "../../../helper/admin";
+import { actionPrompt, fillDataPage, fillDataAll, handleAdminTabChange, handleInputQueryChange } from "../../../helper/admin";
 import { formatDateWithTz } from "../../../helper/global/format";
 import { Th, useTableStyles } from "../../Utils/Dashboard";
 import { TableView } from "../Reusable/TableView";
@@ -42,7 +41,7 @@ export const User: NextPage<IDashboardProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// handler
-	const handleDelete = (id: string) => deletePrompt(id, api_url, setDataPage, setDataAllPage, "user");
+	const handleDelete = (id: string) => actionPrompt({ context: "user", _id: id, api_url, setDataPage, setDataAllPage });
 	// -----------------------------------------------------------
 	// display
 	const searchAllHelper = (item: IUser, query: string) => {

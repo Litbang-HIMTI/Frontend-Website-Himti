@@ -8,7 +8,7 @@ import { useLocalStorage } from "@mantine/hooks";
 import { IconSearch, IconExternalLink, IconTrash, IconLego, IconMessage, IconLicense, IconDeviceWatch } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { IComment, validCommentSort, CommentSort } from "../../../interfaces/db";
-import { deletePrompt, fillDataPage, fillDataAll, handleAdminTabChange, handleInputQueryChange } from "../../../helper/admin";
+import { actionPrompt, fillDataPage, fillDataAll, handleAdminTabChange, handleInputQueryChange } from "../../../helper/admin";
 import { formatDateWithTz } from "../../../helper/global";
 import { Th, useTableStyles } from "../../Utils/Dashboard";
 import { TableView } from "../Reusable/TableView";
@@ -41,7 +41,7 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// handler
-	const handleDelete = (id: string) => deletePrompt(id, api_url, setDataPage, setDataAllPage, `comment`);
+	const handleDelete = (id: string) => actionPrompt({ context: "comment", _id: id, api_url, setDataPage, setDataAllPage });
 	// -----------------------------------------------------------
 	// display
 	const searchAllHelper = (item: IComment, query: string) => {

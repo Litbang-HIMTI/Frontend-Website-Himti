@@ -8,7 +8,7 @@ import { useLocalStorage } from "@mantine/hooks";
 import { IconSearch, IconEdit, IconTrash, IconPin, IconPinnedOff, IconUser, IconLetterA, IconTags, IconDeviceWatch, IconEye, IconHome, IconHomeOff, IconHistory } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
 import { IBlogRevision, validBlogSort, BlogSort } from "../../../interfaces/db";
-import { deletePrompt, fillDataPage, fillDataAll, handleAdminTabChange, handleInputQueryChange, handleSelectQueryChange } from "../../../helper/admin";
+import { actionPrompt, fillDataPage, fillDataAll, handleAdminTabChange, handleInputQueryChange, handleSelectQueryChange } from "../../../helper/admin";
 import { formatDateWithTz } from "../../../helper/global";
 import { Th, useTableStyles } from "../../Utils/Dashboard";
 import { TableView } from "../Reusable/TableView";
@@ -49,7 +49,7 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 
 	// -----------------------------------------------------------
 	// handler
-	const handleDelete = (id: string) => deletePrompt(id, api_url, setDataPage, setDataAllPage, `blog ${props.revision ? "revision" : "post"}`);
+	const handleDelete = (id: string) => actionPrompt({ context: `blog ${props.revision ? "revision" : "post"}`, _id: id, api_url, setDataPage, setDataAllPage });
 	// -----------------------------------------------------------
 	// display
 	const searchAllHelper = (item: IBlogRevision, query: string) => {
