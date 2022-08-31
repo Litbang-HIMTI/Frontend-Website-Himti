@@ -2,32 +2,15 @@ import { useState, useEffect } from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useForm } from "@mantine/form";
-import { showNotification } from "@mantine/notifications";
-import { Box, Button, createStyles, Group, LoadingOverlay, TextInput, Text, Select, Checkbox, MultiSelect, Textarea } from "@mantine/core";
+import { showNotification, updateNotification } from "@mantine/notifications";
+import { Box, Button, Group, LoadingOverlay, TextInput, Text, Select, Checkbox, MultiSelect, Textarea } from "@mantine/core";
 import { IconArrowLeft, IconHistory } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { imageUrlRegex, SERVER_V1, urlSafeRegex } from "../../../helper";
+import { useStyles_BtnOutline, handleSubmitForm, handleDeleteForm, handleResetForm, imageUrlRegex, urlSafeRegex, SERVER_V1 } from "../../../helper";
 import { IBlog, IDCountQRes } from "../../../interfaces/db";
 import { MDE, TitleDashboard } from "../../Utils/Dashboard";
-import { openConfirmModal } from "@mantine/modals";
 import { ISelect } from "../../../interfaces/input";
 import Link from "next/link";
-
-const useStyles = createStyles((theme) => ({
-	buttonCancel: {
-		"&:hover": {
-			// yellow
-			backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[5] : theme.colors.gray[0],
-		},
-	},
-
-	buttonSubmit: {
-		// only hover when not disabled
-		"&:not([disabled]):hover": {
-			backgroundColor: theme.colorScheme === "dark" ? "rgba(51, 154, 240, 0.25);" : "rgba(51, 154, 240, 0.1);",
-		},
-	},
-}));
 
 interface IBlogFormProps extends IDashboardProps {
 	blog?: IBlog;
@@ -44,7 +27,7 @@ interface blogForm {
 }
 
 export const BlogForm: NextPage<IBlogFormProps> = (props) => {
-	const { classes } = useStyles();
+	const { classes } = useStyles_BtnOutline();
 	const router = useRouter();
 	const [loading, setLoading] = useState<boolean>(false);
 	const [submitted, setSubmitted] = useState<boolean>(false);
@@ -82,66 +65,6 @@ export const BlogForm: NextPage<IBlogFormProps> = (props) => {
 
 	// ------------------------------------------------------------
 	// handler
-	const handleReset = () => {
-		openConfirmModal({
-			title: "Reset confirmation",
-			children: <Text size="sm">Are you sure you want to reset the form to its initial state? This action is irreversible.</Text>,
-			labels: { confirm: "Yes, reset form", cancel: "No, cancel" },
-			confirmProps: { color: "red" },
-			onCancel: () => {},
-			onConfirm: () => resetForm(),
-		});
-	};
-	const handleSubmit = () => {
-		openConfirmModal({
-			title: "Submit confirmation",
-			children: <Text size="sm">Are you sure you want to submit the form? This action is irreversible.</Text>,
-			labels: { confirm: "Yes, submit form", cancel: "No, cancel" },
-			confirmProps: { color: "red" },
-			onCancel: () => {},
-			onConfirm: () => submitForm(),
-		});
-	};
-	const handleDelete = () => {
-		openConfirmModal({
-			title: "Delete confirmation",
-			children: <Text size="sm">Are you sure you want to delete this post? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
-			labels: { confirm: "Yes, delete post", cancel: "No, cancel" },
-			confirmProps: { color: "red" },
-			onCancel: () => {},
-			onConfirm: () => deleteForm(),
-		});
-	};
-
-	const deleteForm = async () => {
-		setLoading(true);
-		setUnsavedChanges(false);
-		try {
-			const req = await fetch(`${SERVER_V1}/blog/${props.blog!._id}`, {
-				method: "DELETE",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				credentials: "include",
-			});
-			const { message } = await req.json();
-
-			if (req.status === 200) {
-				setSubmitted(true);
-				showNotification({ title: "Post deleted", message: message + ". Redirecting...", disallowClose: true });
-				setTimeout(() => router.push("../blog"), 1500);
-			} else {
-				setUnsavedChanges(true);
-				setLoading(false);
-				showNotification({ title: "Error", message, disallowClose: true, color: "red" });
-			}
-		} catch (error: any) {
-			setUnsavedChanges(true);
-			setLoading(false);
-			showNotification({ title: "Error", message: error.message, disallowClose: true, color: "red" });
-		}
-	};
-
 	const resetForm = () => {
 		setSubmitted(false);
 
@@ -207,7 +130,7 @@ export const BlogForm: NextPage<IBlogFormProps> = (props) => {
 	};
 
 	const fetchTags = async () => {
-		showNotification({ title: "Loading tags", message: "Please wait...", disallowClose: true, autoClose: 1000 });
+		showNotification({ id: "tag-load", title: "Loading tags", message: "Please wait...", disallowClose: true, autoClose: false, loading: true });
 		try {
 			const req = await fetch(`${SERVER_V1}/blog/tags`, {
 				method: "GET",
@@ -228,12 +151,12 @@ export const BlogForm: NextPage<IBlogFormProps> = (props) => {
 					return unique;
 				});
 
-				showNotification({ title: "Success", message, disallowClose: false, autoClose: 1000 });
+				updateNotification({ id: "tag-load", title: "Success", message, disallowClose: false, autoClose: 1500, loading: false });
 			} else {
-				showNotification({ title: "Error", message, disallowClose: true, color: "red" });
+				updateNotification({ id: "tag-load", title: "Error", message, disallowClose: true, color: "red", autoClose: 3500, loading: false });
 			}
 		} catch (error: any) {
-			showNotification({ title: "Error", message: error.message, disallowClose: true, color: "red" });
+			updateNotification({ id: "tag-load", title: "Error", message: error.message, disallowClose: true, color: "red", autoClose: 3500, loading: false });
 		}
 	};
 
@@ -291,7 +214,7 @@ export const BlogForm: NextPage<IBlogFormProps> = (props) => {
 
 			<Box component="div" sx={{ position: "relative" }}>
 				<LoadingOverlay visible={loading} overlayBlur={3} />
-				<form onSubmit={forms.onSubmit(handleSubmit)}>
+				<form onSubmit={forms.onSubmit(() => handleSubmitForm(submitForm))}>
 					<TextInput
 						mt="md"
 						required
@@ -398,7 +321,12 @@ export const BlogForm: NextPage<IBlogFormProps> = (props) => {
 						<Group position="right" mt="md" ml="auto">
 							{props.blog ? (
 								<>
-									<Button color="red" onClick={handleDelete}>
+									<Button
+										color="red"
+										onClick={() =>
+											handleDeleteForm("blog post", { api_url: "blog", redirect_url: "../blog", id: props.blog!._id, router: router, setLoading, setSubmitted, setUnsavedChanges })
+										}
+									>
 										Delete
 									</Button>
 									<Button
@@ -412,7 +340,7 @@ export const BlogForm: NextPage<IBlogFormProps> = (props) => {
 									>
 										{editable ? "Disable edit" : "Enable Edit"}
 									</Button>
-									<Button color="pink" onClick={handleReset} disabled={!editable}>
+									<Button color="pink" onClick={() => handleResetForm(resetForm)} disabled={!editable}>
 										Reset changes
 									</Button>
 									<Button variant="outline" className={classes.buttonSubmit} type="submit" disabled={!editable}>
@@ -421,7 +349,7 @@ export const BlogForm: NextPage<IBlogFormProps> = (props) => {
 								</>
 							) : (
 								<>
-									<Button color="pink" onClick={handleReset}>
+									<Button color="pink" onClick={() => handleResetForm(resetForm)}>
 										Reset
 									</Button>
 									<Button variant="outline" className={classes.buttonSubmit} type="submit">

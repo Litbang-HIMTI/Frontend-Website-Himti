@@ -5,10 +5,9 @@ import { showNotification } from "@mantine/notifications";
 import { Box, Button, Group, LoadingOverlay, Text, Select, useMantineColorScheme, Grid, List, Center } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { formatDateWithTz, SERVER_V1 } from "../../../helper";
+import { actionPrompt, formatDateWithTz, SERVER_V1 } from "../../../helper";
 import { IEvent, IEventRevision } from "../../../interfaces/db";
 import { TitleDashboard } from "../../Utils/Dashboard";
-import { openConfirmModal } from "@mantine/modals";
 import ReactDiffViewer from "react-diff-viewer";
 import Link from "next/link";
 
@@ -32,26 +31,13 @@ export const EventRevision: NextPage<IEventRevisionProps> = (props) => {
 
 	// ------------------------------------------------------------
 	// handler
-	const handleReplace = () => {
-		openConfirmModal({
-			title: "Submit confirmation",
-			children: <Text size="sm">Are you sure you want to restore this revision? This action is irreversible, but don't worry the current post will be available in post revision.</Text>,
-			labels: { confirm: "Yes, restore this revision", cancel: "No, cancel" },
-			confirmProps: { color: "red" },
-			onCancel: () => {},
-			onConfirm: () => restoreForm(),
+	const handleReplace = () =>
+		actionPrompt({
+			isGeneric: true,
+			genericMsg: "restore this revision? This action is irreversible, but don't worry the current post will be available in post revision.",
+			customCallback: restoreForm,
 		});
-	};
-	const handleDelete = () => {
-		openConfirmModal({
-			title: "Delete confirmation",
-			children: <Text size="sm">Are you sure you want to delete this revision? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
-			labels: { confirm: "Yes, delete revision", cancel: "No, cancel" },
-			confirmProps: { color: "red" },
-			onCancel: () => {},
-			onConfirm: () => deleteForm(),
-		});
-	};
+	const handleDelete = () => actionPrompt({ context: "revision", customCallback: deleteForm });
 
 	const deleteForm = async () => {
 		setLoading(true);

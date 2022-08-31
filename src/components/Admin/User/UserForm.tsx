@@ -3,37 +3,21 @@ import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
-import { Box, Button, createStyles, Group, LoadingOverlay, TextInput, Text, Textarea, Chip, Divider, MultiSelect, PasswordInput } from "@mantine/core";
+import { Box, Button, Group, LoadingOverlay, TextInput, Text, MultiSelect, PasswordInput } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
-import { emailRegex, SERVER_V1, urlSaferRegex, validatePassword } from "../../../helper";
+import { useStyles_BtnOutline, urlSaferRegex, emailRegex, SERVER_V1, handleSubmitForm, handleDeleteForm, handleResetForm, validatePassword } from "../../../helper";
 import { GroupQRes, IUser, IUserForm, validRoles } from "../../../interfaces/db";
 import { TitleDashboard } from "../../Utils/Dashboard";
 import { openConfirmModal } from "@mantine/modals";
 import { ISelect } from "../../../interfaces/input";
-
-const useStyles = createStyles((theme) => ({
-	buttonCancel: {
-		"&:hover": {
-			// yellow
-			backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[5] : theme.colors.gray[0],
-		},
-	},
-
-	buttonSubmit: {
-		// only hover when not disabled
-		"&:not([disabled]):hover": {
-			backgroundColor: theme.colorScheme === "dark" ? "rgba(51, 154, 240, 0.25);" : "rgba(51, 154, 240, 0.1);",
-		},
-	},
-}));
 
 interface IUserFormProps extends IDashboardProps {
 	userData?: IUser;
 }
 
 export const UserForm: NextPage<IUserFormProps> = (props) => {
-	const { classes } = useStyles();
+	const { classes } = useStyles_BtnOutline();
 	const router = useRouter();
 	const [loading, setLoading] = useState<boolean>(false);
 	const [submitted, setSubmitted] = useState<boolean>(false);
@@ -66,39 +50,8 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 	const userRoleData = validRoles.map((role) => ({ label: role, value: role }));
 
 	const [changingPassword, setChangingPassword] = useState<boolean>(false);
-
 	// ------------------------------------------------------------
 	// handler
-	const handleReset = () => {
-		openConfirmModal({
-			title: "Reset confirmation",
-			children: <Text size="sm">Are you sure you want to reset the form to its initial state? This action is irreversible.</Text>,
-			labels: { confirm: "Yes, reset form", cancel: "No, cancel" },
-			confirmProps: { color: "red" },
-			onCancel: () => {},
-			onConfirm: () => resetForm(),
-		});
-	};
-	const handleSubmit = () => {
-		openConfirmModal({
-			title: "Submit confirmation",
-			children: <Text size="sm">Are you sure you want to submit the form? This action is irreversible.</Text>,
-			labels: { confirm: "Yes, submit form", cancel: "No, cancel" },
-			confirmProps: { color: "red" },
-			onCancel: () => {},
-			onConfirm: () => submitForm(),
-		});
-	};
-	const handleDelete = () => {
-		openConfirmModal({
-			title: "Delete confirmation",
-			children: <Text size="sm">Are you sure you want to delete this user? This action is irreversible, destructive, and there is no way to recover the deleted data.</Text>,
-			labels: { confirm: "Yes, delete user", cancel: "No, cancel" },
-			confirmProps: { color: "red" },
-			onCancel: () => {},
-			onConfirm: () => deleteForm(),
-		});
-	};
 	const handleChangePassword = () => {
 		openConfirmModal({
 			title: "Change password confirmation",
@@ -108,36 +61,6 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 			onCancel: () => {},
 			onConfirm: () => changePassword(),
 		});
-	};
-
-	const deleteForm = async () => {
-		setLoading(true);
-		setUnsavedChanges(false);
-		try {
-			const req = await fetch(`${SERVER_V1}/user/${props.userData!._id}`, {
-				method: "DELETE",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				credentials: "include",
-			});
-			const { message } = await req.json();
-
-			if (req.status === 200) {
-				setSubmitted(true);
-				showNotification({ title: "User deleted", message: message + ". Redirecting...", disallowClose: true });
-
-				setTimeout(() => router.push("../user"), 1500);
-			} else {
-				setUnsavedChanges(true);
-				setLoading(false);
-				showNotification({ title: "Error", message, color: "red", disallowClose: true });
-			}
-		} catch (error: any) {
-			setUnsavedChanges(true);
-			setLoading(false);
-			showNotification({ title: "Error", message: error.message, disallowClose: true, color: "red" });
-		}
 	};
 
 	const resetForm = () => {
@@ -327,7 +250,7 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 
 			<Box component="div" sx={{ position: "relative" }}>
 				<LoadingOverlay visible={loading} overlayBlur={3} />
-				<form onSubmit={forms.onSubmit(handleSubmit)} autoComplete="off">
+				<form onSubmit={forms.onSubmit(() => handleSubmitForm(submitForm))} autoComplete="off">
 					<TextInput
 						mt="md"
 						required
@@ -478,7 +401,20 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 						<Group position="right" mt="md" ml="auto">
 							{props.userData ? (
 								<>
-									<Button color="red" onClick={handleDelete}>
+									<Button
+										color="red"
+										onClick={() =>
+											handleDeleteForm("user", {
+												api_url: "user",
+												redirect_url: "../user",
+												id: props.userData!._id,
+												router: router,
+												setLoading,
+												setSubmitted,
+												setUnsavedChanges,
+											})
+										}
+									>
 										Delete
 									</Button>
 									<Button
@@ -492,7 +428,7 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 									>
 										{editable ? "Disable edit" : "Enable Edit"}
 									</Button>
-									<Button color="pink" onClick={handleReset} disabled={!editable}>
+									<Button color="pink" onClick={() => handleResetForm(resetForm)} disabled={!editable}>
 										Reset changes
 									</Button>
 									<Button variant="outline" className={classes.buttonSubmit} type="submit" disabled={!editable}>
@@ -501,7 +437,7 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 								</>
 							) : (
 								<>
-									<Button color="pink" onClick={handleReset}>
+									<Button color="pink" onClick={() => handleResetForm(resetForm)}>
 										Reset
 									</Button>
 									<Button variant="outline" className={classes.buttonSubmit} type="submit">

@@ -17,7 +17,9 @@ export type IDeleteData = (
 interface IPromptParam {
 	isGeneric?: boolean;
 	genericMsg?: string;
+	genericTitle?: string;
 	customCallback?: (data?: any) => void;
+	customCallbackParams?: any;
 	_id?: string;
 	api_url?: string;
 	context?: string;
@@ -51,21 +53,36 @@ export type IFillDataPage = (
  * @param  {IActionPrompt} actionPromptParam - Object named parameter
  * @return {Promise<void>} void.
  */
-export const actionPrompt: IActionPrompt = async ({ isGeneric, genericMsg, customCallback, _id, api_url, context, extraCallback, setDataAllPage, setDataPage }) => {
+export const actionPrompt: IActionPrompt = async ({
+	isGeneric,
+	genericMsg,
+	genericTitle,
+	customCallback,
+	customCallbackParams,
+	_id,
+	api_url,
+	context,
+	extraCallback,
+	setDataAllPage,
+	setDataPage,
+}) => {
 	const random = randomBytes(8).toString("hex");
 	const validateInput = () => {
 		const inputVal = document.getElementById(`action-input-${random}`) as HTMLInputElement;
 		if (inputVal.value === random.toString()) {
 			closeAllModals();
 			if (!customCallback) actuallyDeleteTheData(_id!, api_url!, setDataPage, setDataAllPage, extraCallback);
-			else customCallback();
+			else {
+				if (customCallbackParams) customCallback(customCallbackParams);
+				else customCallback();
+			}
 		} else {
 			showNotification({ message: "Invalid code inputted", color: "red", autoClose: 3000 });
 		}
 	};
 
 	openConfirmModal({
-		title: `${isGeneric ? "Action" : "Delete"} Confirmation`,
+		title: `${isGeneric ? (genericTitle ? genericTitle : "Action") : "Delete"} Confirmation`,
 		children: (
 			<Text size="sm">
 				<Text component="span" weight={700}>
@@ -91,12 +108,12 @@ export const actionPrompt: IActionPrompt = async ({ isGeneric, genericMsg, custo
 				children: (
 					<>
 						<Text size={"sm"}>
-							Please type <Code>{random}</Code> to confirm {isGeneric ? "action" : "deletion"}.
+							Please type <Code>{random}</Code> to confirm {isGeneric ? (genericTitle ? genericTitle.toLowerCase() : "action") : "deletion"}.
 						</Text>
 
 						<TextInput mt={8} id={`action-input-${random}`} data-autofocus />
 						<Button fullWidth onClick={() => validateInput()} mt="md" color={"red"}>
-							Submit {isGeneric ? "Action" : "Delete"}
+							Submit {isGeneric ? (genericTitle ? genericTitle : "Action") : "Delete"}
 						</Button>
 					</>
 				),
