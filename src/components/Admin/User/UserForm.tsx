@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useForm } from "@mantine/form";
-import { showNotification } from "@mantine/notifications";
+import { showNotification, updateNotification } from "@mantine/notifications";
 import { Box, Button, Group, LoadingOverlay, TextInput, Text, MultiSelect, PasswordInput } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons";
 import { IDashboardProps } from "../../../interfaces/props/Dashboard";
@@ -167,7 +167,7 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 	};
 
 	const fetchGroups = async () => {
-		showNotification({ title: "Loading groups", message: "Please wait...", disallowClose: true, autoClose: 1000 });
+		showNotification({ id: "group-load", title: "Loading groups", message: "Please wait...", disallowClose: true, autoClose: false, loading: true });
 		try {
 			const req = await fetch(`${SERVER_V1}/group`, {
 				method: "GET",
@@ -188,12 +188,12 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 					return unique;
 				});
 
-				showNotification({ title: "Success", message, disallowClose: false, autoClose: 1000 });
+				updateNotification({ id: "group-load", title: "Success", message, disallowClose: false, autoClose: 1500, loading: false });
 			} else {
-				showNotification({ title: "Error", message, disallowClose: true, color: "red" });
+				updateNotification({ id: "group-load", title: "Error", message, disallowClose: true, color: "red", autoClose: 3500, loading: false });
 			}
 		} catch (error: any) {
-			showNotification({ title: "Error", message: error.message, disallowClose: true, color: "red" });
+			updateNotification({ id: "group-load", title: "Error", message: error.message, disallowClose: true, color: "red", autoClose: 3500, loading: false });
 		}
 	};
 
