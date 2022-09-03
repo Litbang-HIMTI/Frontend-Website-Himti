@@ -125,84 +125,81 @@ export const NoteDragDrop: NextPage<IDashboardProps> = (props) => {
 				</span>
 			</div>
 
-			<DragDropContext
-				onDragEnd={({ destination, source }) => {
-					setState_List.reorder({ from: source.index, to: destination?.index || 0 });
+			{state.length > 0 ? (
+				<>
+					<DragDropContext
+						onDragEnd={({ destination, source }) => {
+							setState_List.reorder({ from: source.index, to: destination?.index || 0 });
 
-					// only update db if data is not empty
-					if (localState.length > 0)
-						setLocalState((prev) => {
-							const newState = [...prev];
-							newState.splice(source.index, 1);
-							newState.splice(destination?.index || 0, 0, prev[source.index]);
-							newState.forEach((note, index) => {
-								newState[index].position = index;
-								updatePosToDB(index, note._id);
-							});
+							// only update db if data is not empty
+							if (localState.length > 0)
+								setLocalState((prev) => {
+									const newState = [...prev];
+									newState.splice(source.index, 1);
+									newState.splice(destination?.index || 0, 0, prev[source.index]);
+									newState.forEach((note, index) => {
+										newState[index].position = index;
+										updatePosToDB(index, note._id);
+									});
 
-							return newState;
-						});
-				}}
-			>
-				<Droppable droppableId="dnd-list" direction="vertical">
-					{(provided) => (
-						<div {...provided.droppableProps} ref={provided.innerRef}>
-							{state.length > 0 ? (
-								state.map((item, index) => (
-									<Draggable index={index} draggableId={item._id} key={item._id}>
-										{(provided, snapshot) => (
-											<>
-												<div className={cx(classes.item, { [classes.itemDragging]: snapshot.isDragging })} ref={provided.innerRef} {...provided.draggableProps}>
-													<div {...provided.dragHandleProps} className={classes.dragHandle}>
-														<IconGripVertical size={18} stroke={1.5} />
-													</div>
-													<div className="md-wrapper">
-														<Text>{item.title}</Text>
-														<TypographyStylesProvider>
-															<Text component="div" color="dimmed">
-																<MDPreview content={item.content} />
-															</Text>
-														</TypographyStylesProvider>
-													</div>
+									return newState;
+								});
+						}}
+					>
+						<Droppable droppableId="dnd-list" direction="vertical">
+							{(provided) => (
+								<div {...provided.droppableProps} ref={provided.innerRef}>
+									{state.map((item, index) => (
+										<Draggable index={index} draggableId={item._id} key={item._id}>
+											{(provided, snapshot) => (
+												<>
+													<div className={cx(classes.item, { [classes.itemDragging]: snapshot.isDragging })} ref={provided.innerRef} {...provided.draggableProps}>
+														<div {...provided.dragHandleProps} className={classes.dragHandle}>
+															<IconGripVertical size={18} stroke={1.5} />
+														</div>
+														<div className="md-wrapper">
+															<Text>{item.title}</Text>
+															<TypographyStylesProvider>
+																<Text component="div" color="dimmed">
+																	<MDPreview content={item.content} />
+																</Text>
+															</TypographyStylesProvider>
+														</div>
 
-													<div className={classes.editIcon}>
-														<Link href={`/${props.pathname?.split("/")[1]}/note/${item._id}?fromDashHome=true`}>
-															<ActionIcon>
-																<IconEdit />
-															</ActionIcon>
-														</Link>
+														<div className={classes.editIcon}>
+															<Link href={`/${props.pathname?.split("/")[1]}/note/${item._id}?fromDashHome=true`}>
+																<ActionIcon>
+																	<IconEdit />
+																</ActionIcon>
+															</Link>
+														</div>
 													</div>
-												</div>
-											</>
-										)}
-									</Draggable>
-								))
-							) : (
-								<>
-									<LoadingOverlay overlayBlur={4} visible={loading} zIndex={1} />
-									<Draggable index={0} draggableId={randId} key={randId}>
-										{(provided, snapshot) => (
-											<div className={cx(classes.item, { [classes.itemDragging]: snapshot.isDragging })} ref={provided.innerRef} {...provided.draggableProps}>
-												<div {...provided.dragHandleProps} className={classes.dragHandle}>
-													<IconGripVertical size={18} stroke={1.5} />
-												</div>
-												<div>
-													<Text>Note is empty</Text>
-													<Text color="dimmed" size="sm">
-														Add notes to get started
-													</Text>
-												</div>
-											</div>
-										)}
-									</Draggable>
-								</>
+												</>
+											)}
+										</Draggable>
+									))}
+									{provided.placeholder}
+								</div>
 							)}
-
-							{provided.placeholder}
+						</Droppable>
+					</DragDropContext>
+				</>
+			) : (
+				<>
+					<LoadingOverlay overlayBlur={4} visible={loading} zIndex={1} />
+					<div className={cx(classes.item, { [classes.itemDragging]: false })}>
+						<div className={classes.dragHandle}>
+							<IconGripVertical size={18} stroke={1.5} />
 						</div>
-					)}
-				</Droppable>
-			</DragDropContext>
+						<div>
+							<Text>Note is empty</Text>
+							<Text color="dimmed" size="sm">
+								Add notes to get started
+							</Text>
+						</div>
+					</div>
+				</>
+			)}
 		</div>
 	);
 };
