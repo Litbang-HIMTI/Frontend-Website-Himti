@@ -216,7 +216,7 @@ export const DashboardNav: NextPage<IDashboardProps> = (props) => {
 	}, []);
 
 	return (
-		<Navbar p="md" width={{ base: 80 }} position={{ left: 0, top: 0 }} fixed={true}>
+		<Navbar p="md" width={{ base: 80 }} sx={{ position: "sticky", top: "0" }}>
 			<Center>
 				<UserPopout {...props} theme={theme} />
 			</Center>
@@ -226,7 +226,7 @@ export const DashboardNav: NextPage<IDashboardProps> = (props) => {
 						{links}
 					</Stack>
 				) : (
-					<Skeleton visible={true} height={450}></Skeleton>
+					<Skeleton visible={true} height={450} />
 				)}
 			</Navbar.Section>
 			<Navbar.Section>

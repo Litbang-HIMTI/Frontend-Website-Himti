@@ -1,8 +1,7 @@
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
-import { AppShell } from "@mantine/core";
+import { Wrapper } from "../../../src/components/Admin/Nav/Wrapper";
 import { ShortlinkForm } from "../../../src/components/Admin/Shortlink";
-import { DashboardNav } from "../../../src/components/Admin/Nav";
 import { IDashboardProps } from "../../../src/interfaces/props/Dashboard";
 import { SERVER_V1, validateAdmin } from "../../../src/helper";
 
@@ -15,11 +14,9 @@ const edit: NextPage<IDashboardProps> = (props) => {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 				<title>Shortlink View/Edit | Himti UIN Jakarta</title>
 			</Head>
-			<AppShell header={<DashboardNav {...props} />}>
-				<main className="dashboard content-wrap">
-					<ShortlinkForm {...props} />
-				</main>
-			</AppShell>
+			<Wrapper {...props}>
+				<ShortlinkForm {...props} />
+			</Wrapper>
 		</>
 	);
 };

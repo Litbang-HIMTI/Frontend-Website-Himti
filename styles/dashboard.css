@@ -13,7 +13,9 @@
 }
 
 .dashboard.content-wrap {
-	padding: 0.5rem 2rem 2rem;
+	padding: 1.25rem 2.5rem 2rem;
+	/* full width */
+	width: 100%;
 }
 
 #logout-nav div svg.icon-tabler-logout {

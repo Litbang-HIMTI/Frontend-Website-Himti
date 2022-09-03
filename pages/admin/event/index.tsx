@@ -1,8 +1,7 @@
-import { AppShell } from "@mantine/core";
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
+import { Wrapper } from "../../../src/components/Admin/Nav/Wrapper";
 import { Event } from "../../../src/components/Admin/Event";
-import { DashboardNav } from "../../../src/components/Admin/Nav";
 import { IDashboardProps } from "../../../src/interfaces/props/Dashboard";
 import { SERVER_V1, validateEditor } from "../../../src/helper";
 
@@ -15,11 +14,9 @@ const event: NextPage<IDashboardProps> = (props) => {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 				<title>Event Dashboard | Himti UIN Jakarta</title>
 			</Head>
-			<AppShell header={<DashboardNav {...props} />}>
-				<main className="dashboard content-wrap">
-					<Event {...props} />
-				</main>
-			</AppShell>
+			<Wrapper {...props}>
+				<Event {...props} />
+			</Wrapper>
 		</>
 	);
 };
