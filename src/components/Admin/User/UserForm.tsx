@@ -69,7 +69,6 @@ export const UserForm: NextPage<IUserFormProps> = (props) => {
 		setPasswordConfirm("");
 		if (!props.userData) {
 			forms.reset();
-			setGroup([]);
 		} else {
 			forms.setValues({
 				username: props.userData.username,

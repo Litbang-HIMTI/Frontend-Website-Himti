@@ -282,7 +282,7 @@ export const User: NextPage<IDashboardProps> = (props) => {
 									<td>
 										<Link href={`${props.pathname?.split("?")[0]}/${row._id}`}>
 											<a>
-												<Tooltip label={`(${row.first_name} ${row.last_name})`}>
+												<Tooltip label={`(${row.first_name} ${row.last_name}) @ ${row.email}`}>
 													<Text component="span" variant="link">
 														{row.username}
 													</Text>

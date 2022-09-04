@@ -34,10 +34,12 @@ interface IdeleteForm {
 }
 
 export const handleDeleteForm = (context: string, customCallbackParams: IdeleteForm) => {
+	const cbCustom = { ...customCallbackParams, context };
+
 	actionPrompt({
 		context,
 		customCallback: deleteForm,
-		customCallbackParams,
+		customCallbackParams: cbCustom,
 	});
 };
 
