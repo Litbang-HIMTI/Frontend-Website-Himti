@@ -91,6 +91,10 @@ header {
 	margin: 2rem 1rem;
 }
 
+.pointer {
+	cursor: pointer;
+}
+
 .top-header {
 	display: flex;
 	justify-content: space-between;

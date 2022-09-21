@@ -323,7 +323,7 @@ export const Shortlink: NextPage<IDashboardProps> = (props) => {
 							sortSearchData(sortBy, dataPage, dataAllPage).map((row) => (
 								<tr key={row._id}>
 									<td>
-										<a href={`/s/${row.shorten}`} target="_blank">
+										<a href={`/s/${row.shorten}`} target="_blank" rel="noopener noreferrer">
 											<Text variant="link">{row.shorten}</Text>
 										</a>
 									</td>

@@ -11,7 +11,7 @@ import { INote, validNoteSort, NoteSort } from "../../../interfaces/db";
 import { actionPrompt, fillDataPage, fillDataAll, handleAdminTabChange, handleInputQueryChange } from "../../../helper/admin";
 import { formatDateWithTz } from "../../../helper/global";
 import { Th, useTableStyles } from "../../Utils/Dashboard";
-import { MDPreview } from "../../Utils/Viewer/Markdown/MDPreview";
+import { ReactMD  } from "../../Utils/Viewer/Markdown/ReactMD";
 import { TableView } from "../Reusable/TableView";
 
 export const Note: NextPage<IDashboardProps> = (props) => {
@@ -290,7 +290,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 									</td>
 									<td>
 										<TypographyStylesProvider>
-											<MDPreview content={row.content} />
+											<ReactMD  content={row.content} />
 										</TypographyStylesProvider>
 									</td>
 									<td>

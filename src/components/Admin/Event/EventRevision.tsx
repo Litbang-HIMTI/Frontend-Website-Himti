@@ -135,6 +135,7 @@ export const EventRevision: NextPage<IEventRevisionProps> = (props) => {
 				};
 			})
 		);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (

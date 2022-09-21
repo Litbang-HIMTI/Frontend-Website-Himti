@@ -15,7 +15,7 @@ type Data = {
 };
 
 // Local route to upload to Cloudinary
-export default async (req: NextApiRequest, res: NextApiResponse<Data>) => {
+const upload = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
 	// must be a post request
 	if (req.method !== "POST") {
 		res.status(405).json({ message: "Method not allowed", success: false });
@@ -45,3 +45,5 @@ export default async (req: NextApiRequest, res: NextApiResponse<Data>) => {
 
 	res.status(200).json({ message: "Success", success: true, data: uploadRes });
 };
+
+export default upload;
