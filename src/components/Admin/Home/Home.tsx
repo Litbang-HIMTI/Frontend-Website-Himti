@@ -54,7 +54,7 @@ export const DashboardHome: NextPage<IDashboardProps> = (props) => {
 				setStatsData((prev) => {
 					const newData = [...prev];
 					newData[index].loading = false;
-					newData[index].extraData = data ? `Total click : ${data}` : `Total click : 0`;
+					newData[index].extraData = data ? `Total click : ${data.clickCount}` : `Total click : 0`;
 					return newData;
 				});
 			}
