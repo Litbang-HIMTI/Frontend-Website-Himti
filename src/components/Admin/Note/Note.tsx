@@ -11,7 +11,7 @@ import { INote, validNoteSort, NoteSort } from "../../../interfaces/db";
 import { actionPrompt, fillDataPage, fillDataAll, handleAdminTabChange, handleInputQueryChange } from "../../../helper/admin";
 import { formatDateWithTz } from "../../../helper/global";
 import { Th, useTableStyles } from "../../Utils/Dashboard";
-import { ReactMD  } from "../../Utils/Viewer/Markdown/ReactMD";
+import { ReactMD } from "../../Utils/Viewer/Markdown/ReactMD";
 import { TableView } from "../Reusable/TableView";
 
 export const Note: NextPage<IDashboardProps> = (props) => {
@@ -111,8 +111,8 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 	useEffect(() => {
 		fetchUrlParams();
 		setTz(Intl.DateTimeFormat().resolvedOptions().timeZone);
-		fillDataPage(api_url, perPage, curPage, setLoadingDataPage, setCurPage, setPages, setDataPage);
-		fillDataAll(api_url, setLoadingDataAll, setDataAllPage);
+		fillDataPage({ api_url, perPage, curPageQ: curPage, setLoadingDataPage, setCurPage, setPages, setDataPage });
+		fillDataAll({ api_url, setLoadingDataAll, setDataAllPage });
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -290,7 +290,7 @@ export const Note: NextPage<IDashboardProps> = (props) => {
 									</td>
 									<td>
 										<TypographyStylesProvider>
-											<ReactMD  content={row.content} />
+											<ReactMD content={row.content} />
 										</TypographyStylesProvider>
 									</td>
 									<td>

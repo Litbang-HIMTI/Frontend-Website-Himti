@@ -93,8 +93,8 @@ export const UserGroup: NextPage<IDashboardProps> = (props) => {
 	useEffect(() => {
 		fetchUrlParams();
 		setTz(Intl.DateTimeFormat().resolvedOptions().timeZone);
-		fillDataPage(api_url, perPage, curPage, setLoadingDataPage, setCurPage, setPages, setDataPage);
-		fillDataAll(api_url, setLoadingDataAll, setDataAllPage);
+		fillDataPage({ api_url, perPage, curPageQ: curPage, setLoadingDataPage, setCurPage, setPages, setDataPage });
+		fillDataAll({ api_url, setLoadingDataAll, setDataAllPage });
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 

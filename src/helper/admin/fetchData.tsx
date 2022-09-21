@@ -29,23 +29,6 @@ interface IPromptParam {
 }
 export type IActionPrompt = (extraParam: IPromptParam) => Promise<void>;
 
-export type IFillDataAll = (
-	api_url: string,
-	setLoadingDataAll: (value: SetStateAction<boolean>) => void,
-	setDataAllPage: (value: SetStateAction<any[]>) => void,
-	extraCallback?: (data?: any) => void
-) => Promise<void>;
-
-export type IFillDataPage = (
-	api_url: string,
-	perPage: number,
-	curPageQ: number,
-	setLoadingDataPage: (value: SetStateAction<boolean>) => void,
-	setCurPage: (value: SetStateAction<number>) => void,
-	setPages: (value: SetStateAction<number>) => void,
-	setDataPage: (value: SetStateAction<any[]>) => void,
-	extraCallback?: (data?: any) => void
-) => Promise<void>;
 /**
  * @async
  * Modal prompts
@@ -147,10 +130,22 @@ const actuallyDeleteTheData: IDeleteData = async (_id, api_url, setDataPage?, se
 	}
 };
 
-export const fillDataAll: IFillDataAll = async (api_url, setLoadingDataAll, setDataAllPage, extraCallback) => {
+export const fillDataAll = async ({
+	api_url,
+	setLoadingDataAll,
+	setDataAllPage,
+	extraCallback,
+	extraQuery,
+}: {
+	api_url: string;
+	setLoadingDataAll: (value: SetStateAction<boolean>) => void;
+	setDataAllPage: (value: SetStateAction<any[]>) => void;
+	extraCallback?: (data?: any) => void;
+	extraQuery?: string;
+}) => {
 	try {
 		setLoadingDataAll(true);
-		const req = await fetch(SERVER_V1 + `/${api_url}`, {
+		const req = await fetch(SERVER_V1 + `/${api_url}${extraQuery ? extraQuery : ""}`, {
 			method: "GET",
 			headers: {
 				"Content-Type": "application/json",
@@ -173,10 +168,30 @@ export const fillDataAll: IFillDataAll = async (api_url, setLoadingDataAll, setD
 	}
 };
 
-export const fillDataPage: IFillDataPage = async (api_url, perPage, curPageQ, setLoadingDataPage, setCurPage, setPages, setDataPage, extraCallback) => {
+export const fillDataPage = async ({
+	api_url,
+	perPage,
+	curPageQ,
+	extraQuery,
+	setLoadingDataPage,
+	setCurPage,
+	setPages,
+	setDataPage,
+	extraCallback,
+}: {
+	api_url: string;
+	perPage: number;
+	curPageQ: number;
+	extraQuery?: string;
+	setLoadingDataPage: (value: SetStateAction<boolean>) => void;
+	setCurPage: (value: SetStateAction<number>) => void;
+	setPages: (value: SetStateAction<number>) => void;
+	setDataPage: (value: SetStateAction<any[]>) => void;
+	extraCallback?: (data?: any) => void;
+}) => {
 	try {
 		setLoadingDataPage(true);
-		const req = await fetch(SERVER_V1 + `/${api_url}?perPage=${perPage}&page=${curPageQ}`, {
+		const req = await fetch(SERVER_V1 + `/${api_url}?perPage=${perPage}&page=${curPageQ}${extraQuery ? extraQuery : ""}`, {
 			method: "GET",
 			headers: {
 				"Content-Type": "application/json",
@@ -186,6 +201,7 @@ export const fillDataPage: IFillDataPage = async (api_url, perPage, curPageQ, se
 
 		const { data, success, message, page, pages }: { data: any; success: boolean; message: string; page: number; pages: number } = await req.json();
 		if (req.status === 200 && success) {
+			console.log(data);
 			setCurPage(page);
 			setPages(pages ? pages : 1);
 			setDataPage(data);

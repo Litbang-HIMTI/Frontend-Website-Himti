@@ -25,7 +25,6 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 	const [searchAll, setSearchAll] = useState("");
 	const [searchAuthor, setSearchAuthor] = useState("");
 	const [searchContent, setSearchContent] = useState("");
-	const [searchForumTitle, setSearchForumTitle] = useState("");
 	const [searchCreatedAt, setSearchCreatedAt] = useState("");
 
 	const [dataAllPage, setDataAllPage] = useState<IComment[]>([]);
@@ -45,17 +44,14 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 	// -----------------------------------------------------------
 	// display
 	const searchAllHelper = (item: IComment, query: string) => {
-		return (
-			item.author![0]?.username.toLowerCase().includes(query.toLowerCase()) ||
-			item.content.toLowerCase().includes(query.toLowerCase()) ||
-			item.forumId![0]?.title.toLowerCase().includes(query.toLowerCase()) ||
-			formatDateWithTz(item.createdAt, tz).toLowerCase().includes(query.toLowerCase())
-		);
+		return item.author && item.author[0]
+			? item.author[0].username.toLowerCase().includes(query.toLowerCase())
+			: null || item.content.toLowerCase().includes(query.toLowerCase()) || formatDateWithTz(item.createdAt, tz).toLowerCase().includes(query.toLowerCase());
 	};
 
 	const isSearching = () => {
 		// not on setting page and is actually searching and data all is fetched
-		return tabIndex !== 2 && dataAllPage.length > 0 && (searchAll !== "" || searchAuthor !== "" || searchContent !== "" || searchForumTitle !== "" || searchCreatedAt !== "");
+		return tabIndex !== 2 && dataAllPage.length > 0 && (searchAll !== "" || searchAuthor !== "" || searchContent !== "" || searchCreatedAt !== "");
 	};
 
 	const searchData = (dataPage: IComment[], dataAll: IComment[]) => {
@@ -65,9 +61,8 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 		if (tabIndex === 0) {
 			if (searchAll !== "") dataPage = dataPage.filter((item) => keys(dataPage[0]).some(() => searchAllHelper(item, searchAll)));
 		} else if (tabIndex === 1) {
-			if (searchAuthor !== "") dataPage = dataPage.filter((item) => item.author![0]?.username.toLowerCase().includes(searchAuthor.toLowerCase()));
+			if (searchAuthor !== "") dataPage = dataPage.filter((item) => (item.author && item.author[0] ? item.author[0].username.toLowerCase().includes(searchAuthor.toLowerCase()) : null));
 			if (searchContent !== "") dataPage = dataPage.filter((item) => item.content.toLowerCase().includes(searchContent.toLowerCase()));
-			if (searchForumTitle !== "") dataPage = dataPage.filter((item) => item.forumId![0]?.title.toLowerCase().includes(searchForumTitle.toLowerCase()));
 			if (searchCreatedAt !== "") dataPage = dataPage.filter((item) => formatDateWithTz(item.createdAt, tz).toLowerCase().includes(searchCreatedAt.toLowerCase()));
 		}
 
@@ -81,7 +76,6 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 		const sortMap: CommentSort = {
 			author: (a: IComment, b: IComment) => a.author![0]?.username.localeCompare(b.author![0]?.username),
 			content: (a: IComment, b: IComment) => a.content.localeCompare(b.content),
-			forum: (a: IComment, b: IComment) => a.forumId![0]?.title.localeCompare(b.forumId![0]?.title),
 			createdAt: (a: IComment, b: IComment) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf(),
 		};
 
@@ -102,7 +96,6 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 		setSearchAll(params.get("qAll") || "");
 		setSearchAuthor(params.get("author") || "");
 		setSearchContent(params.get("content") || "");
-		setSearchForumTitle(params.get("forum") || "");
 		setSearchCreatedAt(params.get("createdAt") || "");
 		setTabIndex(parseInt(params.get("tab") || "0"));
 	};
@@ -110,8 +103,8 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 	useEffect(() => {
 		fetchUrlParams();
 		setTz(Intl.DateTimeFormat().resolvedOptions().timeZone);
-		fillDataPage(api_url, perPage, curPage, setLoadingDataPage, setCurPage, setPages, setDataPage);
-		fillDataAll(api_url, setLoadingDataAll, setDataAllPage);
+		fillDataPage({ api_url, perPage, curPageQ: curPage, extraQuery: "&content=1", setLoadingDataPage, setCurPage, setPages, setDataPage });
+		fillDataAll({ api_url, setLoadingDataAll, setDataAllPage, extraQuery: "?content=1" });
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -187,15 +180,6 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 									mt={8}
 								/>
 								<TextInput
-									placeholder="Search by forum field"
-									name="forum"
-									label="Forum"
-									icon={<IconMessage size={14} stroke={1.5} />}
-									value={searchForumTitle}
-									onChange={(e) => handleInputQueryChange(e, setSearchForumTitle, e.target.name, router)}
-									mt={8}
-								/>
-								<TextInput
 									placeholder="Search by createdAt field"
 									label="Created At"
 									name="createdAt"
@@ -235,18 +219,15 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 						>
 							Content
 						</Th>
-						<Th
-							classes={classes}
-							sorted={sortBy === "forum"}
-							reversed={reverseSortDirection}
-							onSort={() => {
-								if (sortBy === "forum") setReverseSortDirection(!reverseSortDirection);
-								setSortBy("forum");
-							}}
-							width="18%"
-						>
-							Forum
-						</Th>
+						<th className={classes.th} style={{ width: "18%" }}>
+							<UnstyledButton className={classes.control}>
+								<Group position="apart">
+									<Text weight={500} size="sm">
+										Parent
+									</Text>
+								</Group>
+							</UnstyledButton>
+						</th>
 						<Th
 							classes={classes}
 							sorted={sortBy === "createdAt"}
@@ -276,22 +257,40 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 							sortSearchData(sortBy, dataPage, dataAllPage).map((row) => (
 								<tr key={row._id}>
 									<td>
-										<Link href={`user/${row._id}`}>
-											<a>
-												<Text variant="link">{row.author![0] ? row.author![0].username : "Deleted"}</Text>
-											</a>
-										</Link>
-									</td>
-									<td>{row.content}</td>
-									<td>
-										{row.forumId && row.forumId[0] ? (
-											<Link href={`forum/${row.forumId[0]._id}`}>
+										{row.author && row.author[0] ? (
+											<Link href={`user/${row.author![0]._id}`}>
 												<a>
-													<Text variant="link">{row.forumId![0] ? row.forumId![0].title : "Deleted"}</Text>
+													<Text variant="link">{row.author![0] ? row.author![0].username : "Deleted"}</Text>
 												</a>
 											</Link>
 										) : (
-											"Deleted"
+											"No Author/Deleted"
+										)}
+									</td>
+									<td>{row.content}</td>
+									<td>
+										{row.forumId && row.forumId[0] && (
+											<Link href={`forum/${row.forumId[0]._id}`}>
+												<a>
+													<Text variant="link">{row.forumId![0] ? row.forumId![0].title : "Deleted forum"}</Text>
+												</a>
+											</Link>
+										)}
+
+										{row.blogId && row.blogId[0] && (
+											<Link href={`blog/${row.blogId[0]._id}`}>
+												<a>
+													<Text variant="link">{row.blogId![0] ? row.blogId![0].title : "Deleted blog post"}</Text>
+												</a>
+											</Link>
+										)}
+
+										{row.eventId && row.eventId[0] && (
+											<Link href={`event/${row.eventId[0]._id}`}>
+												<a>
+													<Text variant="link">{row.eventId![0] ? row.eventId![0].title : "Deleted event"}</Text>
+												</a>
+											</Link>
 										)}
 									</td>
 									<td>
@@ -305,13 +304,33 @@ export const Comment: NextPage<IDashboardProps> = (props) => {
 									</td>
 									<td style={{ padding: "1rem .5rem" }}>
 										<div className="dash-flex">
-											<Link href={`/forum/${row.forumId[0].title}-${row.forumId[0]._id}#comment-${row._id}`}>
-												<a>
-													<ActionIcon>
-														<IconExternalLink size={14} stroke={1.5} />
-													</ActionIcon>
-												</a>
-											</Link>
+											{row.forumId && row.forumId[0] && (
+												<Link href={`/forum/${row.forumId[0].title}-${row.forumId[0]._id}#comment-${row._id}`}>
+													<a>
+														<ActionIcon>
+															<IconExternalLink size={14} stroke={1.5} />
+														</ActionIcon>
+													</a>
+												</Link>
+											)}
+											{row.blogId && row.blogId[0] && (
+												<Link href={`/blog/${row.blogId[0].title}-${row.blogId[0]._id}#comment-${row._id}`}>
+													<a>
+														<ActionIcon>
+															<IconExternalLink size={14} stroke={1.5} />
+														</ActionIcon>
+													</a>
+												</Link>
+											)}
+											{row.eventId && row.eventId[0] && (
+												<Link href={`/event/${row.eventId[0].title}-${row.eventId[0]._id}#comment-${row._id}`}>
+													<a>
+														<ActionIcon>
+															<IconExternalLink size={14} stroke={1.5} />
+														</ActionIcon>
+													</a>
+												</Link>
+											)}
 											<ActionIcon onClick={() => handleDelete(row._id)}>
 												<IconTrash size={14} stroke={1.5} />
 											</ActionIcon>

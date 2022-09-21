@@ -1,3 +1,5 @@
+import { IBlog } from "./Blog";
+import { IEvent } from "./Event";
 import { IForum } from "./Forum";
 import { IUser } from "./User";
 
@@ -7,15 +9,16 @@ export interface IComment {
 	author?: IUser[];
 	content: string;
 	forumId: IForum[];
+	blogId: IBlog[];
+	eventId: IEvent[];
 	createdAt: Date;
 	updatedAt: Date;
 }
 
-export type validCommentSort = "author" | "content" | "forum" | "createdAt";
+export type validCommentSort = "author" | "content" | "createdAt";
 export interface CommentSort {
 	author: (a: IComment, b: IComment) => number;
 	content: (a: IComment, b: IComment) => number;
-	forum: (a: IComment, b: IComment) => number;
 	createdAt: (a: IComment, b: IComment) => number;
 }
 
