@@ -96,7 +96,7 @@ export const actionPrompt: IActionPrompt = async ({
 
 						<TextInput mt={8} id={`action-input-${random}`} data-autofocus />
 						<Button fullWidth onClick={() => validateInput()} mt="md" color={"red"}>
-							Submit {isGeneric ? (genericTitle ? genericTitle : "Action") : "Delete"}
+							{isGeneric ? (genericTitle ? genericTitle : "Action") : "Delete"}
 						</Button>
 					</>
 				),
