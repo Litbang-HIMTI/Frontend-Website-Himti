@@ -2,7 +2,6 @@ import { TabsValue } from "@mantine/core/lib/Tabs/Tabs.types";
 import { NextRouter } from "next/router";
 import { SetStateAction } from "react";
 import { addQueryParam } from "../global/router";
-import { IFillDataPage } from "./fetchData";
 
 export const handleAdminTabChange = (index: TabsValue, setTabIndex: (val: number) => void, router: NextRouter) => {
 	setTabIndex(index ? parseInt(index) : 0);
@@ -12,7 +11,7 @@ export const handleAdminTabChange = (index: TabsValue, setTabIndex: (val: number
 export const handleAdminPageChange = (
 	page: number,
 	perPage: number,
-	fillDataPage: IFillDataPage,
+	fillDataPage: any,
 	router: NextRouter,
 	api_url: string,
 	setLoadingDataPage: (value: SetStateAction<boolean>) => void,
@@ -22,5 +21,5 @@ export const handleAdminPageChange = (
 ) => {
 	setCurPage(page);
 	addQueryParam(router, "page", page.toString());
-	fillDataPage(api_url, perPage, page, setLoadingDataPage, setCurPage, setPages, setDataPage);
+	fillDataPage({ api_url, perPage, curPageQ: page, setLoadingDataPage, setCurPage, setPages, setDataPage });
 };
