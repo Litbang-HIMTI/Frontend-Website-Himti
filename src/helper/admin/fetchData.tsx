@@ -91,12 +91,12 @@ export const actionPrompt: IActionPrompt = async ({
 				children: (
 					<>
 						<Text size={"sm"}>
-							Please type <Code>{random}</Code> to confirm {isGeneric ? (genericTitle ? genericTitle.toLowerCase() : "action") : "deletion"}.
+							Please type <Code>{random}</Code> to confirm {isGeneric ? (genericTitle ? genericTitle.toLowerCase() : "confirm action") : "confirm deletion"}.
 						</Text>
 
 						<TextInput mt={8} id={`action-input-${random}`} data-autofocus />
 						<Button fullWidth onClick={() => validateInput()} mt="md" color={"red"}>
-							{isGeneric ? (genericTitle ? genericTitle : "Action") : "Delete"}
+							{isGeneric ? (genericTitle ? genericTitle : "Confirm") : "Delete"}
 						</Button>
 					</>
 				),

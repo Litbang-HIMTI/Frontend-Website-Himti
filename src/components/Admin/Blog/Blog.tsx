@@ -140,8 +140,8 @@ export const Blog: NextPage<IBlogProps> = (props) => {
 	useEffect(() => {
 		fetchUrlParams();
 		setTz(Intl.DateTimeFormat().resolvedOptions().timeZone);
-		fillDataPage({ api_url, perPage, curPageQ: curPage, setLoadingDataPage, setCurPage, setPages, setDataPage });
-		fillDataAll({ api_url, setLoadingDataAll, setDataAllPage, extraCallback: fillExtraData });
+		fillDataPage({ api_url: api_url + "/admin", perPage, curPageQ: curPage, setLoadingDataPage, setCurPage, setPages, setDataPage });
+		fillDataAll({ api_url: api_url + "/admin", setLoadingDataAll, setDataAllPage, extraCallback: fillExtraData });
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
