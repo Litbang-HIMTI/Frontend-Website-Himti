@@ -43,6 +43,7 @@
 		"rehype-autolink-headings": "^6.1.1",
 		"rehype-raw": "^6.1.1",
 		"rehype-sanitize": "^5.0.1",
+		"short-crypt": "^1.0.25",
 		"validator": "^13.7.0"
 	},
 	"devDependencies": {

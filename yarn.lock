@@ -834,6 +834,11 @@
   resolved "https://registry.yarnpkg.com/@types/json5/-/json5-0.0.29.tgz#ee28707ae94e11d2b827bcbe5270bcea7f3e71ee"
   integrity sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==
 
+"@types/long@^4.0.2":
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/@types/long/-/long-4.0.2.tgz#b74129719fc8d11c01868010082d483b7545591a"
+  integrity sha512-MqTGEo5bj5t157U6fA/BiDynNkn0YknVdh48CMPkTSpFTVmvao5UQmm7uEF6xBEo7qIMAlY/JSleYaE6VOdpaA==
+
 "@types/mdast@^3.0.0":
   version "3.0.10"
   resolved "https://registry.yarnpkg.com/@types/mdast/-/mdast-3.0.10.tgz#4724244a82a4598884cbbe9bcfd73dff927ee8af"
@@ -2682,6 +2687,16 @@ hastscript@^7.0.0:
     property-information "^6.0.0"
     space-separated-tokens "^2.0.0"
 
+hi-base32@^0.5.0:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/hi-base32/-/hi-base32-0.5.1.tgz#1279f2ddae2673219ea5870c2121d2a33132857e"
+  integrity sha512-EmBBpvdYh/4XxsnUybsPag6VikPYnN30td+vQk+GI3qpahVEG9+gTkG0aXVxTjBqQ5T6ijbWIu77O+C5WFWsnA==
+
+hi-base64@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/hi-base64/-/hi-base64-0.2.1.tgz#29efa016e6896199e609d1984f4ceb426a5b6650"
+  integrity sha512-qNNwcztb8B9krbWBtYVH8motgSCBLhbCXE6xOSjFFxeP5Z4gd9RLYs6bv1qd4Y17z3v7+h1fn8RQmAi60AMvQQ==
+
 hoist-non-react-statics@^3.3.0, hoist-non-react-statics@^3.3.1, hoist-non-react-statics@^3.3.2:
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-3.3.2.tgz#ece0acaf71d62c2969c2ec59feff42a4b1a85b45"
@@ -3190,6 +3205,11 @@ lodash@^4.17.21, lodash@^4.17.4:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
+
+long@^5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/long/-/long-5.2.0.tgz#2696dadf4b4da2ce3f6f6b89186085d94d52fd61"
+  integrity sha512-9RTUNjK60eJbx3uz+TEGF7fUr29ZDxR5QzXcyDpeSfeH28S9ycINflOgOlppit5U+4kNTe83KQnMEerw7GmE8w==
 
 longest-streak@^3.0.0:
   version "3.0.1"
@@ -4613,6 +4633,16 @@ shebang-regex@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/shebang-regex/-/shebang-regex-3.0.0.tgz#ae16f1644d873ecad843b0307b143362d4c42172"
   integrity sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==
+
+short-crypt@^1.0.25:
+  version "1.0.25"
+  resolved "https://registry.yarnpkg.com/short-crypt/-/short-crypt-1.0.25.tgz#8698853d268f08615c9da2af9ece371f80c862a7"
+  integrity sha512-K9NBNQFVWue53MdSknU4bComwQ3gpHhfe7CLPPuGW79/XRjQL5a8abYfsEHbYbA8UgPDOt/E1UOSWuAtdq5e2A==
+  dependencies:
+    "@types/long" "^4.0.2"
+    hi-base32 "^0.5.0"
+    hi-base64 "^0.2.1"
+    long "^5.2.0"
 
 side-channel@^1.0.4:
   version "1.0.4"

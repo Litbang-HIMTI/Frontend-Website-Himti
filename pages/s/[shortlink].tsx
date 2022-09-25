@@ -4,6 +4,7 @@ import Head from "next/head";
 import { IShortlink } from "../../src/interfaces/db/Shortlink";
 import { SERVER_V1 } from "../../src/helper/global/constants";
 import extractSiteMetadata, { PageData } from "extract-site-metadata";
+import { decryptUrl } from "../../src/helper/global/shortlink";
 
 const indexShortlink: NextPage<PageData> = (props) => {
 	return (
@@ -57,8 +58,8 @@ const processSite = async (url: string) => {
 export const getServerSideProps: GetServerSideProps = async (context) => {
 	const { shortlink } = context.params!;
 	if (!shortlink || shortlink === "") return { notFound: true };
+	let url;
 
-	// TODO: shortlink berdasarkan rumus algoritma
 	const checkShortLink = await fetch(`${SERVER_V1}/shortlink/${shortlink}?updateClick=1`, {
 		method: "GET",
 		headers: {
@@ -66,20 +67,38 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 		},
 	});
 
-	if (checkShortLink.status !== 200) return { notFound: true };
+	// if (checkShortLink.status !== 200) return { notFound: true };
+	if (checkShortLink.status === 200) {
+		const shortlinkData = await checkShortLink.json();
+		const { data }: { data: IShortlink } = shortlinkData;
 
-	const shortlinkData = await checkShortLink.json();
-	const { data }: { data: IShortlink } = shortlinkData;
+		url = data.url;
+	} else {
+		// verify if param is a valid url by decoding it
+		const decrypted = decryptUrl(shortlink as string);
+		if (!decrypted) return { notFound: true };
+
+		url = String.fromCharCode(...decrypted);
+
+		// check if url is valid
+		try {
+			const isValidUrl = await fetch(url, {
+				method: "HEAD",
+			});
+			if (isValidUrl.status !== 200) return { notFound: true };
+		} catch (error) {
+			return { notFound: true };
+		}
+	}
 
 	try {
-		const siteData = await processSite(data.url);
-		const siteMetadata = extractSiteMetadata(siteData?.body, data.url);
+		const siteData = await processSite(url);
+		const siteMetadata = extractSiteMetadata(siteData?.body, url);
 
-		// TODO: CEK METADATANYA KALO DAH DI DEPLOY
 		return {
 			redirect: {
 				permanent: false,
-				destination: data.url,
+				destination: url,
 			},
 			props: siteMetadata,
 		};
