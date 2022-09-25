@@ -1,8 +1,9 @@
 import type { GetServerSideProps, NextPage } from "next";
-import { Home } from "../src/components/Home/Home";
+import { Home } from "@components/Home/Home";
+import Layout from "@components/Template/Layout";
 
 const index: NextPage = (props) => {
-	return <Home {...props} />;
+	return <Home />;
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

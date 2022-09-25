@@ -29,6 +29,7 @@
 		"@types/validator": "^13.7.5",
 		"@uiw/react-md-editor": "^3.17.2",
 		"axios": "^0.27.2",
+		"bootstrap": "^5.2.1",
 		"cloudinary": "^1.30.1",
 		"cookies-next": "^2.1.1",
 		"dayjs": "^1.11.4",
@@ -46,6 +47,7 @@
 		"validator": "^13.7.0"
 	},
 	"devDependencies": {
+		"@types/bootstrap": "^5.2.4",
 		"@types/node": "18.6.1",
 		"@types/react": "18.0.15",
 		"@types/react-dom": "18.0.6",

@@ -1,0 +1,87 @@
+/* ===== Jumbotron Section ===== */
+.jumbotron__content {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	column-gap: 8%;
+	row-gap: 44px;
+}
+
+.tagline img {
+	max-width: 45px;
+	top: 0;
+	right: -1rem;
+	cursor: pointer;
+}
+
+.jumbotron__title {
+	margin-bottom: 0;
+	font-size: 38px;
+	font-weight: 700;
+	color: inherit;
+	/* color: var(--color-app-white); */
+}
+
+.jumbotron__content p {
+	max-width: 270px;
+}
+
+.text__green {
+	color: var(--color-app-green);
+}
+
+/* ===== Information Section ===== */
+
+#important-information {
+	margin-top: 50px;
+}
+
+.section__title {
+	font-weight: 800;
+}
+
+/* ===== Gallery ===== */
+.border__gallery {
+	border: 15px solid;
+}
+
+/* ===== Vision and Mission */
+#vision-mission > .content > p {
+	margin-top: 30px;
+}
+
+@media screen and (min-width: 768px) {
+	.jumbotron__content {
+		display: flex;
+		flex-wrap: nowrap;
+	}
+
+	.jumbotron__title {
+		font-size: 48px;
+	}
+
+	#short-about > .content > p {
+		margin-top: 56px;
+	}
+
+	#vision-mission > .content > p {
+		margin-top: 56px;
+	}
+}
+
+@media screen and (min-width: 992px) {
+	.jumbotron__title {
+		font-size: 6vw;
+	}
+
+	.tagline img {
+		max-width: 29px;
+		top: unset;
+		bottom: 1rem;
+		right: 3rem;
+	}
+
+	#important-information {
+		margin-top: 165px;
+	}
+}

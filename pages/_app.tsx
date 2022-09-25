@@ -1,12 +1,16 @@
+import "bootstrap/dist/css/bootstrap.css";
 import "../styles/globals.css";
 import "../styles/dashboard.css";
 import "../styles/markdown.css";
 import { AppProps } from "next/app";
+import { useEffect } from "react";
 import { MantineProvider, ColorScheme, ColorSchemeProvider } from "@mantine/core";
 import { NotificationsProvider } from "@mantine/notifications";
-import { RouterTransition } from "../src/components/Utils/Looks/RouterTransition";
 import { ModalsProvider } from "@mantine/modals";
 import { useLocalStorage } from "@mantine/hooks";
+import { RouterTransition } from "@components/Utils/Looks/RouterTransition";
+import { NavigationProvider } from "@context/Navigation.context";
+import Layout from "@components/Template/Layout";
 
 export default function App(props: AppProps & { colorScheme: ColorScheme }) {
 	const { Component, pageProps } = props;
@@ -16,6 +20,10 @@ export default function App(props: AppProps & { colorScheme: ColorScheme }) {
 		const nextColorScheme = value || (colorScheme === "dark" ? "light" : "dark");
 		setColorScheme(nextColorScheme);
 	};
+
+	useEffect(() => {
+		require("bootstrap/dist/js/bootstrap.bundle.min.js");
+	}, []);
 
 	return (
 		<>
@@ -35,7 +43,11 @@ export default function App(props: AppProps & { colorScheme: ColorScheme }) {
 					<ModalsProvider>
 						<NotificationsProvider position="top-right">
 							<RouterTransition />
-							<Component {...pageProps} />
+							<NavigationProvider>
+								<Layout>
+									<Component {...pageProps} />
+								</Layout>
+							</NavigationProvider>
 						</NotificationsProvider>
 					</ModalsProvider>
 				</MantineProvider>

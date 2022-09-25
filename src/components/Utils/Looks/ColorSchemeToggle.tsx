@@ -7,6 +7,8 @@ export function ColorSchemeToggle() {
 	return (
 		<Group position="center" mt="xl">
 			<ActionIcon
+				className="toggleColorTheme position-fixed"
+				style={{ right: "24px", bottom: "48px" }}
 				onClick={() => toggleColorScheme()}
 				size="xl"
 				sx={(theme) => ({
