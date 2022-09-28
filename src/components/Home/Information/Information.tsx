@@ -1,4 +1,3 @@
-import { NextPage } from "next";
 import styles from "../Home.module.css";
 
 const Information = () => {
@@ -10,7 +9,7 @@ const Information = () => {
 						Informasi Penting
 					</p>
 					<div className="row row-cols-1 row-cols-md-2 g-4">
-						<div className="information__card col">
+						<div className="col">
 							<a href="#" className="card border-0 position-relative start-0">
 								<div className="card__arrow"></div>
 								<div className="card__overlay"></div>
@@ -25,7 +24,7 @@ const Information = () => {
 								</div>
 							</a>
 						</div>
-						<div className="information__card col">
+						<div className="col">
 							<a href="#" className="card border-0 position-relative start-0">
 								<div className="card__arrow"></div>
 								<div className="card__overlay"></div>

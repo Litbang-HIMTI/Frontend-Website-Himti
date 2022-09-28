@@ -6,9 +6,11 @@ import styles from "./Home.module.css";
 import Information from "./Information/Information";
 import Blog from "./Blog/Blog";
 import Gallery from "./Gallery/Gallery";
+import { useToggleNavbar } from "@context/Navigation.context";
 
 export const Home: NextPage = () => {
 	const [blogs, setBlogs] = useState<IBlog[] | null>(null);
+	const { closeNavigation } = useToggleNavbar();
 
 	const fetchBlogs = (controller: AbortController) => {
 		fetch("http://localhost:42069/v1/blog", {
@@ -52,7 +54,7 @@ export const Home: NextPage = () => {
 				<a>login </a>
 			</Link> */}
 
-			<div id="main__container">
+			<div onClick={closeNavigation} id="main__container">
 				{/* <!-- Tagline --> */}
 				<section id="jumbotron" className="container">
 					<div className={styles.jumbotron__content}>
@@ -86,7 +88,7 @@ export const Home: NextPage = () => {
 				{/* <!-- Short About Us --> */}
 				<section id="short-about" className="container">
 					<div className={`${styles.content} border_top thick`}>
-						<p tabIndex={0} className="mt-3 mt-md-4 fs-title text-center">
+						<p tabIndex={0} className="mt-3 mt	-md-4 fs-title text-center">
 							Apa itu HIMTI UIN Jakarta?
 						</p>
 						<div className="mt-4 mt-md-5">

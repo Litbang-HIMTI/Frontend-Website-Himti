@@ -1,7 +1,6 @@
-import { NextPage } from "next";
 import styles from "../Home.module.css";
 
-const Gallery: NextPage = () => {
+const Gallery = () => {
 	return (
 		<section id="gallery" className="container">
 			<div className="content border_top thick">

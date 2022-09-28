@@ -5,19 +5,20 @@ import Aside from "./Aside";
 import Footer from "./Footer";
 import { useToggleNavbar } from "@context/Navigation.context";
 import { ColorSchemeToggle } from "../Utils/Looks/ColorSchemeToggle";
+import AsideIcon from "./AsideIcon";
 
 type LayoutProps = {
 	children?: React.ReactNode;
 };
 
-const Layout = (props: LayoutProps) => {
+const LayoutDetail = (props: LayoutProps) => {
 	const { closeNavigation } = useToggleNavbar();
 
 	return (
 		<>
 			<Header />
-			<main>
-				<Aside />
+			<main onClick={closeNavigation}>
+				<AsideIcon />
 
 				{props.children}
 
@@ -28,4 +29,4 @@ const Layout = (props: LayoutProps) => {
 	);
 };
 
-export default Layout;
+export default LayoutDetail;
