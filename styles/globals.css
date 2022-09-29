@@ -11,6 +11,10 @@
 	--width-aside: 215px;
 	--width-icon: 16px;
 	--size-icon-24: 24px;
+	--width-aside_icon: 160px;
+
+	--padding-70: 0px;
+	--padding-48: 0px;
 
 	/* ======= Color ======= */
 	--color-app-black: #000000;
@@ -46,6 +50,9 @@
 
 		--title-font: 2rem;
 		--content-font: 1.25rem;
+
+		--padding-70: 70px;
+		--padding-48: 48px;
 	}
 }
 
@@ -140,6 +147,14 @@ img {
 	font-weight: 400;
 }
 
+.fs-12 {
+	font-size: 12px;
+}
+
+.fc-white {
+	color: var(--color-app-white);
+}
+
 .text_12 {
 	font-size: 12px;
 }
@@ -162,6 +177,26 @@ img {
 	height: 40px;
 }
 
+.w-20 {
+	width: 20px;
+	height: 20px;
+}
+
+.w-38 {
+	width: 38px;
+	height: 38px;
+}
+
+.w-64 {
+	width: 64px;
+	height: 64px;
+}
+
+.w-80 {
+	width: 80px;
+	height: 80px;
+}
+
 .divider {
 	height: 29px;
 	border-bottom: 4px solid;
@@ -170,6 +205,15 @@ img {
 
 .toggleColorTheme {
 	z-index: calc(var(--z-fixed));
+}
+
+.link {
+	cursor: pointer;
+}
+
+.link:hover {
+	text-decoration: underline;
+	color: #d1d1d1;
 }
 
 /* ======= Card ======= */
@@ -412,7 +456,7 @@ img {
 /* ======= Aside Icon Style ======= */
 
 .aside_icon {
-	background-color: var(--color-app-black);
+	/* background-color: var(--color-app-black); */
 	position: fixed;
 	bottom: 0;
 	left: 0;

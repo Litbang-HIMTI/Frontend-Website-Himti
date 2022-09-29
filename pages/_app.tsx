@@ -11,10 +11,13 @@ import { useLocalStorage } from "@mantine/hooks";
 import { RouterTransition } from "@components/Utils/Looks/RouterTransition";
 import { NavigationProvider } from "@context/Navigation.context";
 import Layout from "@components/Template/Layout";
+import LayoutDetail from "@components/Template/LayoutDetail";
+import { useRouter } from "next/router";
 
 export default function App(props: AppProps & { colorScheme: ColorScheme }) {
 	const { Component, pageProps } = props;
 	const [colorScheme, setColorScheme] = useLocalStorage<ColorScheme>({ key: "mantine-color-scheme", defaultValue: "dark" });
+	const router = useRouter();
 
 	const toggleColorScheme = (value?: ColorScheme) => {
 		const nextColorScheme = value || (colorScheme === "dark" ? "light" : "dark");
@@ -24,7 +27,7 @@ export default function App(props: AppProps & { colorScheme: ColorScheme }) {
 	useEffect(() => {
 		require("bootstrap/dist/js/bootstrap.bundle.min.js");
 	}, []);
-
+	console.log(router.pathname);
 	return (
 		<>
 			<ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
@@ -44,9 +47,19 @@ export default function App(props: AppProps & { colorScheme: ColorScheme }) {
 						<NotificationsProvider position="top-right">
 							<RouterTransition />
 							<NavigationProvider>
-								<Layout>
-									<Component {...pageProps} />
-								</Layout>
+								{
+									// if path /blog/[id] then render Layout
+									router.pathname.includes("/blogs/[_id") ? (
+										<LayoutDetail>
+											{" "}
+											<Component {...pageProps} />{" "}
+										</LayoutDetail>
+									) : (
+										<Layout>
+											<Component {...pageProps} />
+										</Layout>
+									)
+								}
 							</NavigationProvider>
 						</NotificationsProvider>
 					</ModalsProvider>

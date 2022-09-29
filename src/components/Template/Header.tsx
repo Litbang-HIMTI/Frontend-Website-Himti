@@ -48,7 +48,7 @@ const Header: NextPage = () => {
 					</ul>
 
 					<div className="navigation__action col-4 col-lg-1 order-2 order-lg-3 d-flex flex-row justify-content-end align-items-center gap-2 gap-sm-3 gap-md-4 pb-0 pb-lg-5 pt-3 pt-lg-4">
-						<img tabIndex={0} src="assets/icons/icon-logo.svg" alt="logo" />
+						<img tabIndex={0} src="/assets/icons/icon-logo.svg" alt="logo" />
 
 						{/* Toggler Navbar  */}
 						<div onClick={toggleNavigation} className="navigation__toggler d-flex d-lg-none">
